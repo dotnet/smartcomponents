@@ -4,3 +4,4 @@ obj/
 *.suo
 *.vs
 node_modules/
+artifacts/
