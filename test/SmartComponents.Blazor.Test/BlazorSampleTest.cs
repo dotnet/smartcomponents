@@ -1,4 +1,4 @@
-using ExampleBlazorApp;
+using TestBlazorApp;
 
 namespace SmartComponents.Blazor.Test;
 

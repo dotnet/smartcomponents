@@ -8,8 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\samples\ExampleBlazorApp\ExampleBlazorApp.csproj" />
         <ProjectReference Include="..\SmartComponents.WebUI.Test\SmartComponents.WebUI.Test.csproj" />
+        <ProjectReference Include="..\testassets\TestBlazorApp\TestBlazorApp.csproj" />
 
 		<PackageReference Include="Microsoft.NET.Test.Sdk" />
     </ItemGroup>
