@@ -1,7 +1,9 @@
 ﻿
+using Microsoft.Playwright;
 using System.Diagnostics;
+using Xunit;
 
-namespace SmartComponents.Test.Infrastructure;
+namespace SmartComponents.WebUI.Test.Infrastructure;
 
 public abstract class ServerTestBase<TStartup>
     : IAsyncLifetime, IClassFixture<CustomWebApplicationFactory<TStartup>> where TStartup : class

@@ -1,8 +1,8 @@
 namespace SmartComponents.Blazor.Test;
 
-public class SampleTest : ServerTestBase<ExampleBlazorApp.Program>
+public abstract class SampleTest<TStartup> : ServerTestBase<TStartup> where TStartup: class
 {
-    public SampleTest(CustomWebApplicationFactory<ExampleBlazorApp.Program> server) : base(server)
+    public SampleTest(CustomWebApplicationFactory<TStartup> server) : base(server)
     {   
     }
 
