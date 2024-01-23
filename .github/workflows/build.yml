@@ -24,6 +24,8 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore /p:BuildNumber=${{ github.run_number }}
+    - name: Ensure Playwright browsers are installed
+      run: pwsh test/SmartComponents.Blazor.Test/bin/Debug/net8.0/playwright.ps1 install chromium --with-deps
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - name: Pack
