@@ -1,4 +1,4 @@
-using ExampleBlazorApp;
+using ExampleMvcRazorPagesApp;
 
 namespace SmartComponents.Blazor.Test;
 
