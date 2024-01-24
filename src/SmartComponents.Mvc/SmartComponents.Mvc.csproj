@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
@@ -10,6 +10,23 @@
 
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
+
+        <CssToAttach Include="css\*.css" />
     </ItemGroup>
+
+    <!-- Causes @(CssToAttach) to be included in the bundle of scoped CSS, even though it's not scoped -->
+    <Target Name="AttachCssAsScoped" BeforeTargets="ComputeCssScope">
+        <ItemGroup>
+            <_CssToAttachWithIntermediatePath Include="@(CssToAttach)">
+                <IntermediatePath>$(IntermediateOutputPath)scopedcss\%(Identity).rz.scp.css</IntermediatePath>
+            </_CssToAttachWithIntermediatePath>
+        </ItemGroup>
+        <Copy SourceFiles="@(_CssToAttachWithIntermediatePath)" DestinationFiles="@(_CssToAttachWithIntermediatePath->'%(IntermediatePath)')" />
+        <ItemGroup>
+            <_ScopedCssCandidateFile Include="@(_CssToAttachWithIntermediatePath->'%(IntermediatePath)')"
+                                     RelativePath="@(_CssToAttachWithIntermediatePath->'%(Identity).rz.scp.css')"
+                                     OriginalItemSpec="@(_CssToAttachWithIntermediatePath->'%(Identity)')" />
+        </ItemGroup>
+    </Target>
 
 </Project>
