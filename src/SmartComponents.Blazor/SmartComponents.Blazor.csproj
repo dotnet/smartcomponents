@@ -1,4 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+    <Import Project="..\SmartComponents.WebUI\AttachCss.targets" />
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
@@ -6,6 +8,10 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <IsPackable>true</IsPackable>
     </PropertyGroup>
+
+    <ItemGroup>
+      <CssToAttach Remove="css\Ignored.razor.css" />
+    </ItemGroup>
 
     <ItemGroup>
         <SupportedPlatform Include="browser" />
