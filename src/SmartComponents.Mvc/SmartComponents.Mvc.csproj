@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
-    <Import Project="..\SmartComponents.WebUI\AttachCss.targets"/>
+    <Import Project="..\SmartComponents.WebUI\AttachCss.targets" />
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
@@ -12,6 +12,10 @@
 
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\SmartComponents.WebUI\SmartComponents.WebUI.csproj" />
     </ItemGroup>
 
 </Project>

@@ -10,15 +10,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <CssToAttach Remove="css\Ignored.razor.css" />
-    </ItemGroup>
-
-    <ItemGroup>
         <SupportedPlatform Include="browser" />
-    </ItemGroup>
 
-    <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Components.Web" />
+
+        <ProjectReference Include="..\SmartComponents.WebUI\SmartComponents.WebUI.csproj" />
     </ItemGroup>
 
 </Project>

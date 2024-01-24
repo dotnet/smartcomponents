@@ -1,10 +1,35 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsPackable>true</IsPackable>
+        <ModuleJsFile>wwwroot\SmartComponents.WebUI.lib.module.js</ModuleJsFile>
     </PropertyGroup>
+
+    <ItemGroup>
+        <UpToDateCheckInput Include="typescript\**\*.ts" />
+        <UpToDateCheckInput Include="css\**\*.css" />
+        <UpToDateCheckInput Include="rollup.config.js" />
+        <UpToDateCheckInput Include="tsconfig.json" />
+    </ItemGroup>
+
+    <Target Name="NpmRestore" BeforeTargets="Build" Condition="!Exists('node_modules')">
+        <Exec Command="npm i" />
+    </Target>
+
+    <Target Name="RollupBuild" DependsOnTargets="PrepareRollupBuild" BeforeTargets="Build" Inputs="@(RollupBuildInputs)" Outputs="$(ModuleJsFile)">
+        <Exec Command="./node_modules/.bin/rollup -c -o $(ModuleJsFile) --environment BUILD:$(Configuration)" />
+    </Target>
+
+    <Target Name="PrepareRollupBuild">
+        <ItemGroup>
+            <RollupBuildInputs Include="typescript\**" />
+            <RollupBuildInputs Include="package-lock.json" />
+            <RollupBuildInputs Include="rollup.config.js" />
+            <RollupBuildInputs Include="tsconfig.json" />
+        </ItemGroup>
+    </Target>
 
 </Project>
