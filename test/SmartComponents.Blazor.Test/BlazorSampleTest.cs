@@ -1,3 +1,4 @@
+using SmartComponents.WebUI.Test;
 using TestBlazorApp;
 
 namespace SmartComponents.Blazor.Test;

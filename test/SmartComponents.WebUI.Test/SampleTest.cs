@@ -1,4 +1,4 @@
-namespace SmartComponents.Blazor.Test;
+namespace SmartComponents.WebUI.Test;
 
 public abstract class SampleTest<TStartup> : ServerTestBase<TStartup> where TStartup: class
 {
