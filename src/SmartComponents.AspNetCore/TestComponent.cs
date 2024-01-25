@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using System.Text.Encodings.Web;
 
-namespace SmartComponents.Mvc;
+namespace SmartComponents.AspNetCore;
 
 [HtmlTargetElement("test-component", TagStructure = TagStructure.NormalOrSelfClosing)]
 public class TestComponent : TagHelper

@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace SmartComponents.Mvc;
+namespace SmartComponents.AspNetCore;
 
 [HtmlTargetElement("smart-components-script", TagStructure = TagStructure.NormalOrSelfClosing)]
 public class SmartComponentsScript : TagHelper
