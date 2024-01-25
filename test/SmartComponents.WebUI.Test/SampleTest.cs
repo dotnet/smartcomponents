@@ -22,4 +22,15 @@ public abstract class SampleTest<TStartup> : ServerTestBase<TStartup> where TSta
         await Expect(componentLocator).ToContainTextAsync("This is a test component");
         await Expect(componentLocator).ToHaveCSSAsync("border-color", "rgb(255, 0, 0)");
     }
+
+    [Fact]
+    public async Task CanMakeRequestToServer()
+    {
+        await Page.GotoAsync(Server.Address);
+
+        var componentLocator = Page.Locator(".my-component");
+
+        await componentLocator.ClickAsync();
+        await Expect(componentLocator).ToContainTextAsync("Hello, this is /_example");
+    }
 }

@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\src\SmartComponents.AspNetCore\SmartComponents.AspNetCore.csproj" />
     <ProjectReference Include="..\..\..\src\SmartComponents.Blazor\SmartComponents.Blazor.csproj" />
   </ItemGroup>
 

@@ -68,6 +68,9 @@ public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStar
             .Select(x => new Uri(x))
             .Last();
 
+        // We use a nonempty pathbase to show it works with this
+        ClientOptions.BaseAddress = new Uri(ClientOptions.BaseAddress, "/subdir");
+
         // Return the host that uses TestServer, rather than the real one.  
         // Otherwise the internals will complain about the host's server    
         // not being an instance of the concrete type TestServer.    
