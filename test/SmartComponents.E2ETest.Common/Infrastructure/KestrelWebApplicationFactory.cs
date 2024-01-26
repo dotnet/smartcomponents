@@ -35,6 +35,8 @@ public class KestrelWebApplicationFactory<TStartup> : WebApplicationFactory<TSta
 
     protected override IHost CreateHost(IHostBuilder builder)
     {
+        Environment.SetEnvironmentVariable("SMARTCOMPONENTS_E2E_TEST", "true");
+
         // Create the host for TestServer now before we  
         // modify the builder to use Kestrel instead.    
         var testHost = builder.Build();

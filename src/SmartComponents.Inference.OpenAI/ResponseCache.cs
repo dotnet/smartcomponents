@@ -17,6 +17,8 @@ namespace SmartComponents.Inference.OpenAI;
 
 internal static class ResponseCache
 {
+    static bool IsEnabled = Environment.GetEnvironmentVariable("SMARTCOMPONENTS_E2E_TEST") == "true";
+
     readonly static Lazy<string> CacheDir = new(() =>
     {
         var dir = Path.Combine(GetSolutionDirectory(), "test", "CachedResponses");
@@ -26,6 +28,12 @@ internal static class ResponseCache
 
     public static bool TryGetCachedResponse(ChatOptions request, out string? response)
     {
+        if (!IsEnabled)
+        {
+            response = null;
+            return false;
+        }
+
         var filePath = GetCacheFilePath(request, request.UserMessage);
         if (File.Exists(filePath))
         {
@@ -41,8 +49,11 @@ internal static class ResponseCache
 
     public static void SetCachedResponse(ChatOptions request, string response)
     {
-        var filePath = GetCacheFilePath(request, request.UserMessage);
-        File.WriteAllText(filePath, response);
+        if (IsEnabled)
+        {
+            var filePath = GetCacheFilePath(request, request.UserMessage);
+            File.WriteAllText(filePath, response);
+        }
     }
 
     private static string GetCacheFilePath<T>(T request, string summary)
