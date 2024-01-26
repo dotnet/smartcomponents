@@ -36,7 +36,6 @@ jobs:
         name: nuget-packages
         path: artifacts/*.nupkg
         if-no-files-found: error
-# NuGet package publishing works but is disabled until closer to release
-#    - name: Publish to NuGet.org
-#      if: github.ref == 'refs/heads/main'
-#      run:  dotnet nuget push artifacts/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_API_KEY}}
+    - name: Publish to NuGet.org
+      if: github.ref == 'refs/heads/main'
+      run:  dotnet nuget push artifacts/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_API_KEY}}
