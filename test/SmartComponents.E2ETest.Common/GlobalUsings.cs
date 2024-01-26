@@ -1,3 +1,3 @@
 global using Xunit;
 global using static Microsoft.Playwright.Assertions;
-global using SmartComponents.WebUI.Test.Infrastructure;
+global using SmartComponents.E2ETest.Common.Infrastructure;

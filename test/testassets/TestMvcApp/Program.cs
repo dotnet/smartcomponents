@@ -1,3 +1,5 @@
+using SmartComponents.OpenAI;
+
 namespace TestMvcApp;
 
 public class Program
@@ -8,7 +10,8 @@ public class Program
 
         // Add services to the container.
         builder.Services.AddControllersWithViews();
-        builder.Services.AddSmartComponents();
+        builder.Services.AddSmartComponents()
+            .WithInferenceBackend<OpenAIInferenceBackend>();
 
         var app = builder.Build();
 

@@ -1,9 +1,9 @@
-namespace SmartComponents.WebUI.Test;
+namespace SmartComponents.E2ETest.Common;
 
-public abstract class SampleTest<TStartup> : ServerTestBase<TStartup> where TStartup: class
+public class SampleTest<TStartup> : PlaywrightTestBase<TStartup> where TStartup: class
 {
-    public SampleTest(CustomWebApplicationFactory<TStartup> server) : base(server)
-    {   
+    public SampleTest(KestrelWebApplicationFactory<TStartup> server) : base(server)
+    {
     }
 
     [Fact]
@@ -31,6 +31,6 @@ public abstract class SampleTest<TStartup> : ServerTestBase<TStartup> where TSta
         var componentLocator = Page.Locator(".my-component");
 
         await componentLocator.ClickAsync();
-        await Expect(componentLocator).ToContainTextAsync("Hello, this is /_example");
+        await Expect(componentLocator).ToContainTextAsync("TODO: Actually call OpenAI");
     }
 }

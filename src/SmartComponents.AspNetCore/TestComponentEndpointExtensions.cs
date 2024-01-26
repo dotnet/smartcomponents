@@ -1,14 +1,15 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using SmartComponents.StaticAssets.Inference;
 
 namespace Microsoft.AspNetCore.Builder;
 
 public static class TestComponentEndpointExtensions
 {
-    public static IServiceCollection AddSmartComponents(this IServiceCollection services)
+    public static ISmartComponentsBuilder AddSmartComponents(this IServiceCollection services)
     {
         services.AddTransient<IStartupFilter, StartupEnhancementStartupFilter>();
-        return services;
+        return new DefaultSmartComponentsBuilder(services);
     }
 
     private class StartupEnhancementStartupFilter : IStartupFilter
@@ -21,9 +22,11 @@ public static class TestComponentEndpointExtensions
 
                 builder.UseEndpoints(app =>
                 {
-                    app.MapGet("/_example", () =>
+                    app.MapGet("/_example", async (IInferenceBackend inference) =>
                     {
-                        return "Hello, this is /_example";
+                        var prompt = "The capital of France is: ";
+                        var response = await inference.GetChatResponseAsync(new ChatOptions(prompt));
+                        return response;
                     });
                 });
             };

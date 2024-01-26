@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\SmartComponents.WebUI.Test\SmartComponents.WebUI.Test.csproj" />
+		<ProjectReference Include="..\SmartComponents.E2ETest.Common\SmartComponents.E2ETest.Common.csproj" />
         <ProjectReference Include="..\testassets\TestMvcApp\TestMvcApp.csproj" />
 
         <PackageReference Include="Microsoft.NET.Test.Sdk" />

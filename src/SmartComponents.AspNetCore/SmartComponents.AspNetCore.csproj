@@ -1,7 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
-    <Import Project="..\SmartComponents.WebUI\AttachCss.targets" />
-
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
@@ -12,8 +10,8 @@
 
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
-
-        <ProjectReference Include="..\SmartComponents.WebUI\SmartComponents.WebUI.csproj" />
+        <ProjectReference Include="..\SmartComponents.AspNetCore.Components\SmartComponents.AspNetCore.Components.csproj" />
+        <ProjectReference Include="..\SmartComponents.Inference\SmartComponents.Inference.csproj" />
     </ItemGroup>
 
 </Project>

@@ -6,12 +6,12 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 
-namespace SmartComponents.WebUI.Test.Infrastructure;
+namespace SmartComponents.E2ETest.Common.Infrastructure;
 
 // Credit: https://danieldonbavand.com/2022/06/13/using-playwright-with-the-webapplicationfactory-to-test-a-blazor-application/
 // which is based on work from https://github.com/martincostello/dotnet-minimal-api-integration-testing/blob/main/tests/TodoApp.Tests/HttpServerFixture.cs#L54
 
-public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStartup> where TStartup: class
+public class KestrelWebApplicationFactory<TStartup> : WebApplicationFactory<TStartup> where TStartup: class
 {
     IHost? _host;
 

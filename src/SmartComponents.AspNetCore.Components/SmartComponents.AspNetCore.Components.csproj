@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <IsPackable>true</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <SupportedPlatform Include="browser" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web" />
+        <ProjectReference Include="..\SmartComponents.StaticAssets\SmartComponents.StaticAssets.csproj" ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+	<!-- Causes JS files to be loaded automatically as initializers -->
+	<Target Name="CopyStaticFilesFromWebUI" BeforeTargets="ResolveProjectStaticWebAssets">
+        <PropertyGroup>
+            <_LibModulePath>wwwroot\$(ProjectName).lib.module.js</_LibModulePath>
+        </PropertyGroup>
+		<Copy SourceFiles="..\SmartComponents.StaticAssets\dist\SmartComponents.StaticAssets.lib.module.js"
+              DestinationFiles="$(_LibModulePath)"
+              SkipUnchangedFiles="true" />
+        <ItemGroup>
+            <!-- Ensure it's in <Content> exactly once -->
+            <Content Remove="$(_LibModulePath)" />
+            <Content Include="$(_LibModulePath)" />
+        </ItemGroup>
+	</Target>
+
+	<!-- Causes CSS files to be included in the bundle of scoped CSS, even though it's not scoped -->
+	<Target Name="AttachCssAsScoped" BeforeTargets="ComputeCssScope">
+		<ItemGroup>
+			<_CssToAttach Include="..\SmartComponents.StaticAssets\css\*.css" />
+			<_CssToAttachWithIntermediatePath Include="@(_CssToAttach)">
+				<IntermediatePath>$(IntermediateOutputPath)scopedcss\%(Filename).rz.scp.css</IntermediatePath>
+			</_CssToAttachWithIntermediatePath>
+		</ItemGroup>
+		<Copy SourceFiles="@(_CssToAttachWithIntermediatePath)" DestinationFiles="@(_CssToAttachWithIntermediatePath->'%(IntermediatePath)')" />
+		<ItemGroup>
+			<_ScopedCssCandidateFile Include="@(_CssToAttachWithIntermediatePath->'%(IntermediatePath)')"
+                                     RelativePath="@(_CssToAttachWithIntermediatePath->'%(Filename).rz.scp.css')"
+                                     OriginalItemSpec="@(_CssToAttachWithIntermediatePath->'%(Filename)')" />
+		</ItemGroup>
+	</Target>
+
+</Project>

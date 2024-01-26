@@ -1,11 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>netstandard2.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
+        <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
         <IsPackable>true</IsPackable>
-        <ModuleJsFile>wwwroot\SmartComponents.WebUI.lib.module.js</ModuleJsFile>
+        <ModuleJsFile>dist\SmartComponents.StaticAssets.lib.module.js</ModuleJsFile>
     </PropertyGroup>
 
     <ItemGroup>

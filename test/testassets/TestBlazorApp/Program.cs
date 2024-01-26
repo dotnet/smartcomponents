@@ -1,3 +1,4 @@
+using SmartComponents.OpenAI;
 using TestBlazorApp.Components;
 
 namespace TestBlazorApp;
@@ -11,7 +12,8 @@ public class Program
         // Add services to the container.
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
-        builder.Services.AddSmartComponents();
+        builder.Services.AddSmartComponents()
+            .WithInferenceBackend<OpenAIInferenceBackend>();
 
         var app = builder.Build();
         

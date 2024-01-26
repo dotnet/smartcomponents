@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\SmartComponents.AspNetCore\SmartComponents.AspNetCore.csproj" />
+      <ProjectReference Include="..\..\src\SmartComponents.Inference.OpenAI\SmartComponents.Inference.OpenAI.csproj" />
     </ItemGroup>
 
 </Project>

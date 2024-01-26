@@ -19,7 +19,7 @@ public class SmartComponentsScript : TagHelper
         var pathBase = httpContext.Request.PathBase;
         var relativeSrc = UriHelper.BuildRelative(
             pathBase: pathBase,
-            "/_content/SmartComponents.WebUI/SmartComponents.WebUI.lib.module.js");
+            "/_content/SmartComponents.AspNetCore.Components/SmartComponents.AspNetCore.Components.lib.module.js");
         var srcWithFileVersion = fileVersionProvider.AddFileVersionToPath(pathBase, relativeSrc);
 
         output.TagName = "script";
