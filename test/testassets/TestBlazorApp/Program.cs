@@ -11,12 +11,12 @@ public class Program
 
         // Add services to the container.
         builder.Services.AddRazorComponents()
-            .AddInteractiveServerComponents();
+            .AddInteractiveWebAssemblyComponents();
         builder.Services.AddSmartComponents()
             .WithInferenceBackend<OpenAIInferenceBackend>();
 
         var app = builder.Build();
-        
+
         // Show we can work with pathbase by enforcing its use
         app.UsePathBase("/subdir");
         app.Use(async (ctx, next) =>
@@ -33,7 +33,11 @@ public class Program
         });
 
         // Configure the HTTP request pipeline.
-        if (!app.Environment.IsDevelopment())
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseWebAssemblyDebugging();
+        }
+        else
         {
             app.UseExceptionHandler("/Error", createScopeForErrors: true);
             // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
@@ -46,7 +50,8 @@ public class Program
         app.UseAntiforgery();
 
         app.MapRazorComponents<App>()
-            .AddInteractiveServerRenderMode();
+            .AddInteractiveWebAssemblyRenderMode()
+            .AddAdditionalAssemblies(typeof(TestBlazorApp.Client._Imports).Assembly);
 
         app.Run();
     }
