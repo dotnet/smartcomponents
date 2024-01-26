@@ -13,4 +13,8 @@
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" />
     </ItemGroup>
 
+    <ItemGroup>
+        <Compile Include="$(SharedSrcRoot)RepoSharedConfigUtil.cs" />
+    </ItemGroup>
+
 </Project>

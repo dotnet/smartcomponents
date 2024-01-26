@@ -1,4 +1,4 @@
-using SmartComponents.OpenAI;
+using SmartComponents.Inference.OpenAI;
 
 namespace TestMvcApp;
 
@@ -7,6 +7,7 @@ public class Program
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        builder.AddRepoSharedConfig();
 
         // Add services to the container.
         builder.Services.AddControllersWithViews();

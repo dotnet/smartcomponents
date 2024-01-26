@@ -3,9 +3,11 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="8.0.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.1" />
+    <PackageVersion Include="Azure.AI.OpenAI" Version="1.0.0-beta.11" />
     <!-- Tests -->
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />

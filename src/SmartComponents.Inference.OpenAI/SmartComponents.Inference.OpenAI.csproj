@@ -4,10 +4,13 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <LangVersion>latest</LangVersion>
         <IsPackable>true</IsPackable>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\SmartComponents.Inference\SmartComponents.Inference.csproj" />
+        <PackageReference Include="Azure.AI.OpenAI" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
     </ItemGroup>
 
 </Project>

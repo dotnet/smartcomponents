@@ -1,7 +1,8 @@
 using ExampleBlazorApp.Components;
-using SmartComponents.OpenAI;
+using SmartComponents.Inference.OpenAI;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.AddRepoSharedConfig();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

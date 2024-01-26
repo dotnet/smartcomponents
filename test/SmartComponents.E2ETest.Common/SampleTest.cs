@@ -31,6 +31,6 @@ public class SampleTest<TStartup> : PlaywrightTestBase<TStartup> where TStartup:
         var componentLocator = Page.Locator(".my-component");
 
         await componentLocator.ClickAsync();
-        await Expect(componentLocator).ToContainTextAsync("TODO: Actually call OpenAI");
+        await Expect(componentLocator).ToContainTextAsync("Paris");
     }
 }
