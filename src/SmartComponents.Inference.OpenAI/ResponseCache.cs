@@ -19,7 +19,7 @@ internal static class ResponseCache
 {
     readonly static Lazy<string> CacheDir = new(() =>
     {
-        var dir = Path.Combine(GetSolutionDirectory(), "CachedResponses");
+        var dir = Path.Combine(GetSolutionDirectory(), "test", "CachedResponses");
         Directory.CreateDirectory(dir);
         return dir;
     });
