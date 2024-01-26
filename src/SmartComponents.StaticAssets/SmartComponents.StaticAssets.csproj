@@ -5,7 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
-        <IsPackable>true</IsPackable>
+        <IsPackable>false</IsPackable>
         <ModuleJsFile>dist\SmartComponents.StaticAssets.lib.module.js</ModuleJsFile>
     </PropertyGroup>
 
