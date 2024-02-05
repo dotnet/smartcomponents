@@ -6,3 +6,4 @@ obj/
 node_modules/
 artifacts/
 *.lib.module.js
+.tailwind/

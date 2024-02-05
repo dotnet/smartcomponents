@@ -35,7 +35,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartComponents.E2ETest.Mvc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartComponents.E2ETest.Blazor", "test\SmartComponents.E2ETest.Blazor\SmartComponents.E2ETest.Blazor.csproj", "{86CB7231-2401-4286-BDD2-778F2F0EBB6C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestBlazorApp.Client", "test\testassets\TestBlazorApp.Client\TestBlazorApp.Client.csproj", "{C09F2AF7-1AB8-4FA4-8522-BF896A867493}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBlazorApp.Client", "test\testassets\TestBlazorApp.Client\TestBlazorApp.Client.csproj", "{C09F2AF7-1AB8-4FA4-8522-BF896A867493}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
