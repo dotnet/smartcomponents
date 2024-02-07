@@ -5,8 +5,10 @@ builder.AddRepoSharedConfig();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
 builder.Services.AddSmartComponents()
     .WithInferenceBackend<OpenAIInferenceBackend>();
+builder.Services.AddAntiforgery();
 
 var app = builder.Build();
 
@@ -23,10 +25,14 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAntiforgery();
+
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapRazorPages();
 
 app.Run();

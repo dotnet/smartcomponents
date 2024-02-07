@@ -1,4 +1,6 @@
-﻿namespace SmartComponents.StaticAssets.Inference;
+﻿using System.Collections.Generic;
+
+namespace SmartComponents.StaticAssets.Inference;
 
 public class ChatOptions(string userMessage)
 {
@@ -9,4 +11,5 @@ public class ChatOptions(string userMessage)
     public int? MaxTokens { get; set; }
     public float? FrequencyPenalty { get; set; }
     public float? PresencePenalty { get; set; }
+    public ICollection<string>? StopSequences { get; set; }
 }

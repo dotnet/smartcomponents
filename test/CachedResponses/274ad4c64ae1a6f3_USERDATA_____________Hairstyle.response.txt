@@ -1,0 +1,5 @@
+FIELD explicitly-annotated^^^Cairns
+FIELD labelled-field^^^Sad Iron
+FIELD inferred-from-nearby-text^^^Tonsure
+FIELD shoe-size^^^55
+FIELD philosophy^^^Nihilism

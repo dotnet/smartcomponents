@@ -1,0 +1,19 @@
+﻿.smart-paste-icon {
+    width: 1.2rem;
+    height: 1.3rem;
+    display: inline;
+    vertical-align: text-bottom;
+    margin-inline-end: .1rem;
+}
+
+.smart-paste-icon-running {
+    display: none;
+}
+
+button:disabled > .smart-paste-icon-running {
+    display: inline;
+}
+
+button:disabled > .smart-paste-icon-normal {
+    display: none;
+}

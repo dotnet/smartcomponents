@@ -1,0 +1,83 @@
+﻿@page "/smartpaste"
+@using SmartComponents
+
+<h1>SmartPaste testcases</h1>
+
+<h2>Simple</h2>
+<form id="simple-case">
+    <input name="firstname" />
+    <input name="lastname" />
+    <input name="unrelated" value="Unrelated value should be left alone" style="width:300px" />
+    <SmartPasteButton />
+</form>
+
+<h2>Appearance</h2>
+<p>Default: <SmartPasteButton id="default-params" /></p>
+<p>Custom CSS class: <SmartPasteButton id="custom-css-class" class="my-custom-class" /></p>
+<p>Custom tooltip: <SmartPasteButton id="custom-tooltip" title="This is the tooltip" /></p>
+<p>With icon: <SmartPasteButton id="with-icon" DefaultIcon /></p>
+<p>With child content: <SmartPasteButton id="with-child-content">This is my <strong>custom</strong> content</SmartPasteButton></p>
+<p>With icon and child content: <SmartPasteButton id="with-icon-and-child-content" DefaultIcon>This is my <strong>custom</strong> content</SmartPasteButton></p>
+
+<h2>Element types</h2>
+<fieldset>
+    <legend>Movie</legend>
+
+    <form id="element-types">
+        <p>Title: <input name="movie.title" /></p>
+        <p>Release year: <input name="movie.release_year" type="number" /></p>
+        <p>Description: <textarea name="movie.description"></textarea></p>
+        <p>
+            Genre:
+            <select name="movie_genre">
+                <option value="act">Action</option>
+                <option value="com">Comedy</option>
+                <option value="sci">Sci-fi</option>
+                <option value="dra">Drama</option>
+            </select>
+        </p>
+        <p><input type="checkbox" name="movie.for_kids" /> Recommended for kids</p>
+        <p><input type="checkbox" name="movie.can_stream" /> Available for streaming</p>
+        <p>
+            Starring:
+            <div><input type="radio" name="movie.starring" value="jp" />Joaquin Phoenix</div>
+            <div><input type="radio" name="movie.starring" value="hjo" />Haley Joel Osment</div>
+            <div><input type="radio" name="movie.starring" value="av" />Alicia Vikander</div>
+            <div><input type="radio" name="movie.starring" value="as" />Arnold Schwarzenegger</div>
+        </p>
+
+        <SmartPasteButton />
+    </form>
+</fieldset>
+
+<h2>Inferring field descriptions</h2>
+
+<form id="inferring-descriptions">
+    <!-- Shows we can give a description explicitly -->
+
+    <p>Explicitly annotated field: <input name="explicitly-annotated" data-smartpaste-description="City" /></p>
+
+    <!-- Shows we can use a matching label, independently of DOM hierarchy -->
+    <p><label for="labelled-field">Metal band</label> (note that this label is not in the same DOM subtree as the field itself)</p>
+    <p>
+        <input id="labelled-field" />
+    </p>
+
+    <!-- Shows we can use nearby text -->
+    <p>
+        Hairstyle
+        <input name="inferred-from-nearby-text" />
+    </p>
+
+    <!-- Shows we can use name attribute -->
+    <p>
+        <input name="shoe-size" />
+    </p>
+
+    <!-- Shows we can use id attribute -->
+    <p>
+        <input id="philosophy" />
+    </p>
+
+    <SmartPasteButton />
+</form>

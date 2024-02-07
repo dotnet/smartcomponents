@@ -1,0 +1,7 @@
+FIELD movie.title^^^AI: Artificial Intelligence
+FIELD movie.release_year^^^2001
+FIELD movie.description^^^A sci-fi movie about a robot boy who desperately wants to be human. The tragedy at the heart of the film, though, is star Haley Joel Osment’s immortality. He was designed as a child, but outlives everyone he ever loves.
+FIELD movie_genre^^^Sci-fi
+FIELD movie.for_kids^^^NO_DATA
+FIELD movie.can_stream^^^true
+FIELD movie.starring^^^Haley Joel Osment

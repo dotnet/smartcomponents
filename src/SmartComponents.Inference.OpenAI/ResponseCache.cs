@@ -53,11 +53,12 @@ internal static class ResponseCache
         {
             var filePath = GetCacheFilePath(request, request.UserMessage);
             File.WriteAllText(filePath, response);
+            File.WriteAllText(filePath.Replace(".response.txt", ".request.json"), GetCacheKeyInput(request));
         }
     }
 
     private static string GetCacheFilePath<T>(T request, string summary)
-        => Path.Combine(CacheDir.Value, $"{GetCacheKey(request, summary)}.txt");
+        => Path.Combine(CacheDir.Value, $"{GetCacheKey(request, summary)}.response.txt");
 
     private static string GetSolutionDirectory()
     {
@@ -76,9 +77,14 @@ internal static class ResponseCache
         throw new InvalidOperationException($"Could not find directory containing {filename}");
     }
 
+    private static string GetCacheKeyInput<T>(T request)
+    {
+        return JsonSerializer.Serialize(request).Replace("\\r", "");
+    }
+
     private static string GetCacheKey<T>(T request, string summary)
     {
-        var json = JsonSerializer.Serialize(request);
+        var json = GetCacheKeyInput(request);
         var sha256 = SHA256.Create();
         var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(json));
         

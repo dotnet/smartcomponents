@@ -13,6 +13,7 @@ public class Program
         builder.Services.AddControllersWithViews();
         builder.Services.AddSmartComponents()
             .WithInferenceBackend<OpenAIInferenceBackend>();
+        builder.Services.AddAntiforgery();
 
         var app = builder.Build();
 
@@ -43,6 +44,8 @@ public class Program
         app.UseStaticFiles();
 
         app.UseRouting();
+
+        app.UseAntiforgery();
 
         app.UseAuthorization();
 

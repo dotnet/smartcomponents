@@ -25,6 +25,7 @@ public abstract class PlaywrightTestBase<TStartup>
         });
 
         Page = await Browser.NewPageAsync();
+        await OnBrowserReadyAsync();
     }
 
     public async Task DisposeAsync()
@@ -32,4 +33,7 @@ public abstract class PlaywrightTestBase<TStartup>
         await Browser.DisposeAsync();
         Playwright.Dispose();
     }
+
+    protected virtual Task OnBrowserReadyAsync()
+        => Task.CompletedTask;
 }
