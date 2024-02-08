@@ -1,5 +1,6 @@
 ﻿@inject NavigationManager Nav
 @typeparam TComponent
+@implements IDisposable
 
 <li class="me-2">
     <a href="@Url" class="transition-colors inline-block p-4 border-b-2 @CssClasses" aria-current="@AriaCurrent">@Text</a>
@@ -20,16 +21,34 @@
     string? AriaCurrent => isCurrent ? "page" : null;
 
     protected override void OnInitialized()
+        => Nav.LocationChanged += RefreshContentVisibility;
+
+    protected override void OnParametersSet()
+        => RefreshContentVisibility(this, new LocationChangedEventArgs(Nav.Uri, false));
+
+    public void Dispose()
+        => Nav.LocationChanged -= RefreshContentVisibility;
+
+    private void RefreshContentVisibility(object? sender, LocationChangedEventArgs args)
     {
         if (Owner is null)
         {
             throw new InvalidOperationException($"{nameof(Tab<TComponent>)} must be placed inside a {nameof(TabSet)}");
         }
 
-        isCurrent = Url == Nav.ToBaseRelativePath(Nav.Uri);
-        if (isCurrent)
+        var wasCurrent = isCurrent;
+        isCurrent = Url == Nav.ToBaseRelativePath(args.Location);
+        if (isCurrent != wasCurrent)
         {
-            Owner.SetCurrentTabContent(typeof(TComponent));
+            if (isCurrent)
+            {
+                Owner.SetCurrentTabContent(typeof(TComponent));
+            }
+
+            if (sender == Nav) // False when triggered from OnParametersSet, when we don't need to call StateHasChanged manually anyway
+            {
+                StateHasChanged();
+            }
         }
     }
 }
