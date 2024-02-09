@@ -1,0 +1,12 @@
+﻿@page "/localembedding/{*Path}"
+@using ExampleBlazorApp.Components.TabSet
+
+<PageTitle>Local Embedding</PageTitle>
+
+<TabSet>
+    <Tab TComponent="BasicLocalEmbedding" Url="localembedding" Text="Basics" />
+</TabSet>
+
+@code {
+    [Parameter] public string? Path { get; set; }
+}

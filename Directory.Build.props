@@ -7,6 +7,7 @@
         <PackageOutputPath>$(MSBuildThisFileDirectory)artifacts\</PackageOutputPath>
         <IsPackable>false</IsPackable>
         <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
+        <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
         <SharedSrcRoot>$(MSBuildThisFileDirectory)src\shared\</SharedSrcRoot>
     </PropertyGroup>
 </Project>

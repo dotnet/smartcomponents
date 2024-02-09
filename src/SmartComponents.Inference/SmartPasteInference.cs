@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
@@ -11,6 +12,9 @@ public static class SmartPasteInference
 {
     private readonly static JsonSerializerOptions jsonSerializerOptions
         = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static DateTime? OverrideDateForTesting { get; set; }
 
     public class SmartPasteRequestData
     {
@@ -40,8 +44,9 @@ public static class SmartPasteInference
             return new SmartPasteResponseData { BadRequest = true };
         }
 
+        var currentDate = OverrideDateForTesting ?? DateTime.Today;
         var systemMessage = @$"
-Current date: {DateTime.Today.ToString("D", CultureInfo.InvariantCulture)}
+Current date: {currentDate.ToString("D", CultureInfo.InvariantCulture)}
 
 Each response line matches the following format:
 FIELD identifier^^^value

@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <!--
+            Can't support netstandard2.0 because FastBertTokenizer currently requires net6.0 or newer.
+            See https://github.com/georg-jung/FastBertTokenizer/issues/23
+        -->
+        <TargetFramework>net8.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <IsPackable>true</IsPackable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FastBertTokenizer" />
+        <PackageReference Include="Microsoft.Extensions.ObjectPool" />
+        <PackageReference Include="Microsoft.ML.OnnxRuntime" />
+        <PackageReference Include="System.Numerics.Tensors" />
+    </ItemGroup>
+
+    <Target Name="PackTaskDependencies" BeforeTargets="GenerateNuspec">
+        <ItemGroup>
+            <_PackageFiles Include="build\**" BuildAction="Content" PackagePath="build" />
+        </ItemGroup>
+    </Target>
+
+</Project>

@@ -1,0 +1,137 @@
+﻿using FastBertTokenizer;
+using Microsoft.Extensions.ObjectPool;
+using Microsoft.ML.OnnxRuntime;
+using System;
+using System.Buffers;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Numerics.Tensors;
+using System.Reflection;
+using System.Runtime.InteropServices;
+
+namespace SmartComponents.LocalEmbedding;
+
+public partial class LocalEmbedding : IDisposable
+{
+    private static readonly ArrayPool<float> _outputBufferPool = ArrayPool<float>.Create();
+
+    private readonly ObjectPool<BertTokenizer> _tokenizersPool;
+    private readonly InferenceSession _onnxSession;
+    private readonly RunOptions _runOptions = new RunOptions();
+
+    public int OutputLength { get; }
+
+    public LocalEmbedding(string modelName = "default", bool caseSensitive = false)
+    {
+        _onnxSession = new InferenceSession(GetFullPathToModelFile(modelName, "model.onnx"));
+        _tokenizersPool = new DefaultObjectPool<BertTokenizer>(new BertTokenizerPoolPolicy(modelName, caseSensitive), maximumRetained: 32);
+        OutputLength = _onnxSession.OutputMetadata.First().Value.Dimensions.Last(); // 384 for the supported models
+    }
+
+    private static string GetFullPathToModelFile(string modelName, string fileName)
+    {
+        var assembly = Assembly.GetEntryAssembly()!;
+        var baseDir = Path.GetDirectoryName(assembly.Location)!;
+        var fullPath = Path.Combine(baseDir, "LocalEmbeddingModel", modelName, fileName);
+        if (!File.Exists(fullPath))
+        {
+            throw new InvalidOperationException($"Required file {fullPath} does not exist");
+        }
+
+        return fullPath;
+    }
+
+    public ByteEmbeddingData EmbedAsBytes(string inputText, Memory<sbyte>? outputBuffer = null, int maximumTokens = 512)
+        => ComputeForType<ByteEmbeddingData, sbyte>(inputText, outputBuffer ?? new sbyte[OutputLength], maximumTokens);
+
+    public FloatEmbeddingData EmbedAsFloats(string inputText, Memory<float>? outputBuffer = null, int maximumTokens = 512)
+        => ComputeForType<FloatEmbeddingData, float>(inputText, outputBuffer ?? new float[OutputLength], maximumTokens);
+
+    public static float Similarity(ByteEmbeddingData a, ByteEmbeddingData b)
+        => ByteEmbeddingData.Similarity(a, b);
+
+    public static float Similarity(FloatEmbeddingData a, FloatEmbeddingData b)
+        => FloatEmbeddingData.Similarity(a, b);
+
+    private TEmbeddingData ComputeForType<TEmbeddingData, TValue>(string inputText, Memory<TValue> resultBuffer, int maximumTokens)
+        where TEmbeddingData: IEmbeddingData<TEmbeddingData, TValue>
+    {
+        if (resultBuffer.Length != OutputLength)
+        {
+            throw new InvalidOperationException($"Result buffer length must be {OutputLength} for this model, but the supplied buffer is of length {resultBuffer.Length}");
+        }
+
+        var tokenizer = _tokenizersPool.Get();
+        try
+        {
+            // While you might think you could return the tokenizer to the pool immediately after getting the tokens,
+            // you actually can't because it reuses the same memory for the tokens each time. So we have to keep it until
+            // we've finished getting the final result
+            var tokens = tokenizer.Encode(inputText, maximumTokens: maximumTokens);
+
+            var inputIdsOrtValue = OrtValue.CreateTensorValueFromMemory(
+                OrtMemoryInfo.DefaultInstance,
+                MemoryMarshal.AsMemory(tokens.InputIds),
+                [1L, tokens.InputIds.Length]);
+            var attMaskOrtValue = OrtValue.CreateTensorValueFromMemory(
+                OrtMemoryInfo.DefaultInstance,
+                MemoryMarshal.AsMemory(tokens.AttentionMask),
+                [1, tokens.AttentionMask.Length]);
+            var typeIdsOrtValue = OrtValue.CreateTensorValueFromMemory(
+                OrtMemoryInfo.DefaultInstance,
+                MemoryMarshal.AsMemory(tokens.TokenTypeIds),
+                [1, tokens.TokenTypeIds.Length]);
+
+            var inputs = new Dictionary<string, OrtValue>
+            {
+                { "input_ids", inputIdsOrtValue },
+                { "attention_mask", attMaskOrtValue },
+                { "token_type_ids", typeIdsOrtValue }
+            };
+
+            // InferenceSession.Run is thread-safe as per https://github.com/microsoft/onnxruntime/issues/114
+            // so there's no need to maintain some kind of pool of sessions
+            using var outputs = _onnxSession.Run(_runOptions, inputs, _onnxSession.OutputNames);
+
+            return PoolSum<TEmbeddingData, TValue>(outputs[0].GetTensorDataAsSpan<float>(), resultBuffer);
+        }
+        finally
+        {
+            _tokenizersPool.Return(tokenizer);
+        }
+    }
+
+    private static TEmbeddingData PoolSum<TEmbeddingData, TValue>(ReadOnlySpan<float> input, Memory<TValue> resultBuffer)
+        where TEmbeddingData: IEmbeddingData<TEmbeddingData, TValue>
+    {
+        var outputLength = resultBuffer.Length;
+        if (input.Length % outputLength != 0)
+        {
+            throw new ArgumentException($"Input length ({input.Length}) must be a multiple of output length ({outputLength}), but is not", nameof(input));
+        }
+
+        var floatBuffer = _outputBufferPool.Rent(outputLength);
+        try
+        {
+            var floatBufferSpan = floatBuffer.AsSpan(0, outputLength);
+            for (var pos = 0; pos < input.Length; pos += outputLength)
+            {
+                var tokenEmbedding = input.Slice(pos, outputLength);
+                TensorPrimitives.Add(floatBufferSpan, tokenEmbedding, floatBufferSpan);
+            }
+
+            return TEmbeddingData.FromFloats(floatBufferSpan, resultBuffer);
+        }
+        finally
+        {
+            _outputBufferPool.Return(floatBuffer, clearArray: true);
+        }
+    }
+
+    public void Dispose()
+    {
+        _runOptions?.Dispose();
+        _onnxSession?.Dispose();
+    }
+}
