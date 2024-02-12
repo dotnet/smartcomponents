@@ -23,10 +23,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\SmartComponents.LocalEmbedding\SmartComponents.LocalEmbedding.csproj" />
+        <ProjectReference Include="..\..\src\SmartComponents.LocalEmbeddings\SmartComponents.LocalEmbeddings.csproj" />
     </ItemGroup>
 
     <!-- Only needed when referencing the dependencies as projects. For package references, these are imported automatically. -->
-    <Import Project="$(RepoRoot)src\SmartComponents.LocalEmbedding\build\SmartComponents.LocalEmbedding.targets" />
+    <Import Project="$(RepoRoot)src\SmartComponents.LocalEmbeddings\build\SmartComponents.LocalEmbeddings.targets" />
 
 </Project>

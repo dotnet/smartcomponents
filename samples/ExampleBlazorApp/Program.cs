@@ -1,6 +1,6 @@
 using ExampleBlazorApp.Components;
 using SmartComponents.Inference.OpenAI;
-using SmartComponents.LocalEmbedding;
+using SmartComponents.LocalEmbeddings;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.AddRepoSharedConfig();
@@ -11,7 +11,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddSmartComponents()
     .WithInferenceBackend<OpenAIInferenceBackend>();
 
-builder.Services.AddSingleton<LocalEmbedding>();
+builder.Services.AddSingleton<LocalEmbeddings>();
 
 var app = builder.Build();
 

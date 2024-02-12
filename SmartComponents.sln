@@ -37,9 +37,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartComponents.E2ETest.Bla
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBlazorApp.Client", "test\testassets\TestBlazorApp.Client\TestBlazorApp.Client.csproj", "{C09F2AF7-1AB8-4FA4-8522-BF896A867493}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartComponents.LocalEmbedding", "src\SmartComponents.LocalEmbedding\SmartComponents.LocalEmbedding.csproj", "{6735929E-D7C5-4E1B-A0A1-D5D832C2679C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartComponents.LocalEmbeddings", "src\SmartComponents.LocalEmbeddings\SmartComponents.LocalEmbeddings.csproj", "{6735929E-D7C5-4E1B-A0A1-D5D832C2679C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartComponents.LocalEmbedding.Test", "test\SmartComponents.LocalEmbedding.Test\SmartComponents.LocalEmbedding.Test.csproj", "{235EB914-B103-4AEA-B770-45FCF770F61A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartComponents.LocalEmbeddings.Test", "test\SmartComponents.LocalEmbeddings.Test\SmartComponents.LocalEmbeddings.Test.csproj", "{235EB914-B103-4AEA-B770-45FCF770F61A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -2,9 +2,9 @@
 using Microsoft.Extensions.ObjectPool;
 using System.IO;
 
-namespace SmartComponents.LocalEmbedding;
+namespace SmartComponents.LocalEmbeddings;
 
-public partial class LocalEmbedding
+public partial class LocalEmbeddings
 {
     private class BertTokenizerPoolPolicy : DefaultPooledObjectPolicy<BertTokenizer>
     {

@@ -1,7 +1,7 @@
 ﻿using System.Numerics.Tensors;
 using System.Text.Json;
 
-namespace SmartComponents.LocalEmbedding.Test;
+namespace SmartComponents.LocalEmbeddings.Test;
 
 public class EmbedAsBytesTest
 {
@@ -12,10 +12,10 @@ public class EmbedAsBytesTest
     [Fact]
     public void ByteRepresentationIsSameAsFloatExceptScaled()
     {
-        var embedding = new LocalEmbedding();
+        using var embeddings = new LocalEmbeddings();
         var testSentence = "This is my test sentence";
-        var floats = embedding.EmbedAsFloats(testSentence);
-        var bytes = embedding.EmbedAsBytes(testSentence);
+        var floats = embeddings.EmbedAsFloats(testSentence);
+        var bytes = embeddings.EmbedAsBytes(testSentence);
 
         // Check it's the same length
         Assert.Equal(floats.Values.Length, bytes.Values.Length);
@@ -38,29 +38,29 @@ public class EmbedAsBytesTest
     [Fact]
     public void Similarity_ItemsAreExactlyRelatedToThemselves()
     {
-        var embedding = new LocalEmbedding();
+        using var embeddings = new LocalEmbeddings();
         var testSentence = "This is my test sentence";
-        var values = embedding.EmbedAsBytes(testSentence);
-        Assert.Equal(1, LocalEmbedding.Similarity(values, values));
+        var values = embeddings.EmbedAsBytes(testSentence);
+        Assert.Equal(1, LocalEmbeddings.Similarity(values, values));
     }
 
     [Fact]
     public void Similarity_CanSwapInputOrderAndGetSameResults()
     {
-        var embedding = new LocalEmbedding();
-        var cat = embedding.EmbedAsBytes("cat");
-        var dog = embedding.EmbedAsBytes("dog");
+        using var embeddings = new LocalEmbeddings();
+        var cat = embeddings.EmbedAsBytes("cat");
+        var dog = embeddings.EmbedAsBytes("dog");
         Assert.Equal(
-            LocalEmbedding.Similarity(cat, dog),
-            LocalEmbedding.Similarity(dog, cat));
+            LocalEmbeddings.Similarity(cat, dog),
+            LocalEmbeddings.Similarity(dog, cat));
     }
 
     [Fact]
     public void Similarity_ProducesExpectedResults()
     {
-        var embedding = new LocalEmbedding();
+        using var embeddings = new LocalEmbeddings();
 
-        var cat = embedding.EmbedAsBytes("cat");
+        var cat = embeddings.EmbedAsBytes("cat");
         string[] sentences = [
             "dog",
             "kitten!",
@@ -72,7 +72,7 @@ public class EmbedAsBytesTest
             "Elephants are here",
         ];
         var sentencesRankedBySimilarity = sentences.OrderByDescending(
-            s => LocalEmbedding.Similarity(cat, embedding.EmbedAsBytes(s))).ToArray();
+            s => LocalEmbeddings.Similarity(cat, embeddings.EmbedAsBytes(s))).ToArray();
 
         Assert.Equal([
             "Cats are good",
@@ -89,12 +89,12 @@ public class EmbedAsBytesTest
     [Fact]
     public void CanRoundTripThroughJson()
     {
-        var embedding = new LocalEmbedding();
-        var cat = embedding.EmbedAsBytes("cat");
+        using var embeddings = new LocalEmbeddings();
+        var cat = embeddings.EmbedAsBytes("cat");
         var json = JsonSerializer.Serialize(cat);
-        var deserializedCat = JsonSerializer.Deserialize<ByteEmbeddingData>(json);
+        var deserializedCat = JsonSerializer.Deserialize<ByteEmbedding>(json);
 
         Assert.Equal(cat.Values.ToArray(), deserializedCat.Values.ToArray());
-        Assert.Equal(1, MathF.Round(LocalEmbedding.Similarity(cat, deserializedCat), 3));
+        Assert.Equal(1, MathF.Round(LocalEmbeddings.Similarity(cat, deserializedCat), 3));
     }
 }

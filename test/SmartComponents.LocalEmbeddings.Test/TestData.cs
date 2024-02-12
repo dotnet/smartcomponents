@@ -1,4 +1,4 @@
-﻿namespace SmartComponents.LocalEmbedding.Test;
+﻿namespace SmartComponents.LocalEmbeddings.Test;
 
 internal static class TestData
 {
@@ -26,11 +26,11 @@ internal static class TestData
       However, the numbers will be different from .NET's output for two reasons:
 
       [1] .NET is using the *quantized* version of the model, and Python here is not. The easiest way to
-          make this consistent it to change .NET to use the non-quantized model by setting <LocalEmbeddingModelUrl>
+          make this consistent it to change .NET to use the non-quantized model by setting <LocalEmbeddingsModelUrl>
           to https://huggingface.co/TaylorAI/bge-micro-v2/resolve/main/onnx/model.onnx
 
       [2] Python uses mean pooling, but .NET uses sum pooling (because it's faster to compute, and the magnitude
-          of the output vector is irrelevant for cosine similarity). You could amend the .NET logic in LocalEmbedding's
+          of the output vector is irrelevant for cosine similarity). You could amend the .NET logic in LocalEmbeddings's
           PoolSum() to divide the output by the number of input tokens, then the numbers should match Python's output.
     */
 

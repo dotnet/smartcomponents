@@ -6,19 +6,19 @@ using System;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace SmartComponents.LocalEmbedding;
+namespace SmartComponents.LocalEmbeddings;
 
 [JsonConverter(typeof(FloatEmbeddingJsonConverter))]
-public readonly struct FloatEmbeddingData : IEmbeddingData<FloatEmbeddingData, float>
+public readonly struct FloatEmbedding : IEmbedding<FloatEmbedding, float>
 {
     private readonly ReadOnlyMemory<float> values;
 
-    private FloatEmbeddingData(ReadOnlyMemory<float> values)
+    private FloatEmbedding(ReadOnlyMemory<float> values)
     {
         this.values = values;
     }
 
-    public static FloatEmbeddingData FromFloats(ReadOnlySpan<float> input, Memory<float> buffer)
+    public static FloatEmbedding FromFloats(ReadOnlySpan<float> input, Memory<float> buffer)
     {
         if (input.Length != buffer.Length)
         {
@@ -26,10 +26,10 @@ public readonly struct FloatEmbeddingData : IEmbeddingData<FloatEmbeddingData, f
         }
 
         input.CopyTo(buffer.Span);
-        return new FloatEmbeddingData(buffer);
+        return new FloatEmbedding(buffer);
     }
 
-    public static float Similarity(FloatEmbeddingData lhs, FloatEmbeddingData rhs)
+    public static float Similarity(FloatEmbedding lhs, FloatEmbedding rhs)
         => TensorPrimitives.CosineSimilarity(lhs.values.Span, rhs.values.Span);
 
     public int ByteLength => values.Length * sizeof(float);
@@ -55,16 +55,16 @@ public readonly struct FloatEmbeddingData : IEmbeddingData<FloatEmbeddingData, f
         source.CopyTo(destinationAsFloats);
     }
 
-    class FloatEmbeddingJsonConverter : JsonConverter<FloatEmbeddingData>
+    class FloatEmbeddingJsonConverter : JsonConverter<FloatEmbedding>
     {
-        public override FloatEmbeddingData Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override FloatEmbedding Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             var bytes = reader.GetBytesFromBase64().AsMemory();
             var floats = MemoryMarshal.Cast<byte, float>(bytes.Span).ToArray();
-            return new FloatEmbeddingData(floats);
+            return new FloatEmbedding(floats);
         }
 
-        public override void Write(Utf8JsonWriter writer, FloatEmbeddingData value, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, FloatEmbedding value, JsonSerializerOptions options)
         {
             var bytes = MemoryMarshal.AsBytes(value.values.Span);
             writer.WriteBase64StringValue(bytes);

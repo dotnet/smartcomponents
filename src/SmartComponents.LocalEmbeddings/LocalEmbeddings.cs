@@ -10,9 +10,9 @@ using System.Numerics.Tensors;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace SmartComponents.LocalEmbedding;
+namespace SmartComponents.LocalEmbeddings;
 
-public partial class LocalEmbedding : IDisposable
+public partial class LocalEmbeddings : IDisposable
 {
     private static readonly ArrayPool<float> _outputBufferPool = ArrayPool<float>.Create();
 
@@ -22,7 +22,7 @@ public partial class LocalEmbedding : IDisposable
 
     public int OutputLength { get; }
 
-    public LocalEmbedding(string modelName = "default", bool caseSensitive = false)
+    public LocalEmbeddings(string modelName = "default", bool caseSensitive = false)
     {
         _onnxSession = new InferenceSession(GetFullPathToModelFile(modelName, "model.onnx"));
         _tokenizersPool = new DefaultObjectPool<BertTokenizer>(new BertTokenizerPoolPolicy(modelName, caseSensitive), maximumRetained: 32);
@@ -33,7 +33,7 @@ public partial class LocalEmbedding : IDisposable
     {
         var assembly = Assembly.GetEntryAssembly()!;
         var baseDir = Path.GetDirectoryName(assembly.Location)!;
-        var fullPath = Path.Combine(baseDir, "LocalEmbeddingModel", modelName, fileName);
+        var fullPath = Path.Combine(baseDir, "LocalEmbeddingsModel", modelName, fileName);
         if (!File.Exists(fullPath))
         {
             throw new InvalidOperationException($"Required file {fullPath} does not exist");
@@ -42,20 +42,20 @@ public partial class LocalEmbedding : IDisposable
         return fullPath;
     }
 
-    public ByteEmbeddingData EmbedAsBytes(string inputText, Memory<sbyte>? outputBuffer = null, int maximumTokens = 512)
-        => ComputeForType<ByteEmbeddingData, sbyte>(inputText, outputBuffer ?? new sbyte[OutputLength], maximumTokens);
+    public ByteEmbedding EmbedAsBytes(string inputText, Memory<sbyte>? outputBuffer = null, int maximumTokens = 512)
+        => ComputeForType<ByteEmbedding, sbyte>(inputText, outputBuffer ?? new sbyte[OutputLength], maximumTokens);
 
-    public FloatEmbeddingData EmbedAsFloats(string inputText, Memory<float>? outputBuffer = null, int maximumTokens = 512)
-        => ComputeForType<FloatEmbeddingData, float>(inputText, outputBuffer ?? new float[OutputLength], maximumTokens);
+    public FloatEmbedding EmbedAsFloats(string inputText, Memory<float>? outputBuffer = null, int maximumTokens = 512)
+        => ComputeForType<FloatEmbedding, float>(inputText, outputBuffer ?? new float[OutputLength], maximumTokens);
 
-    public static float Similarity(ByteEmbeddingData a, ByteEmbeddingData b)
-        => ByteEmbeddingData.Similarity(a, b);
+    public static float Similarity(ByteEmbedding a, ByteEmbedding b)
+        => ByteEmbedding.Similarity(a, b);
 
-    public static float Similarity(FloatEmbeddingData a, FloatEmbeddingData b)
-        => FloatEmbeddingData.Similarity(a, b);
+    public static float Similarity(FloatEmbedding a, FloatEmbedding b)
+        => FloatEmbedding.Similarity(a, b);
 
-    private TEmbeddingData ComputeForType<TEmbeddingData, TValue>(string inputText, Memory<TValue> resultBuffer, int maximumTokens)
-        where TEmbeddingData: IEmbeddingData<TEmbeddingData, TValue>
+    private TEmbedding ComputeForType<TEmbedding, TData>(string inputText, Memory<TData> resultBuffer, int maximumTokens)
+        where TEmbedding: IEmbedding<TEmbedding, TData>
     {
         if (resultBuffer.Length != OutputLength)
         {
@@ -94,7 +94,7 @@ public partial class LocalEmbedding : IDisposable
             // so there's no need to maintain some kind of pool of sessions
             using var outputs = _onnxSession.Run(_runOptions, inputs, _onnxSession.OutputNames);
 
-            return PoolSum<TEmbeddingData, TValue>(outputs[0].GetTensorDataAsSpan<float>(), resultBuffer);
+            return PoolSum<TEmbedding, TData>(outputs[0].GetTensorDataAsSpan<float>(), resultBuffer);
         }
         finally
         {
@@ -102,8 +102,8 @@ public partial class LocalEmbedding : IDisposable
         }
     }
 
-    private static TEmbeddingData PoolSum<TEmbeddingData, TValue>(ReadOnlySpan<float> input, Memory<TValue> resultBuffer)
-        where TEmbeddingData: IEmbeddingData<TEmbeddingData, TValue>
+    private static TEmbedding PoolSum<TEmbedding, TData>(ReadOnlySpan<float> input, Memory<TData> resultBuffer)
+        where TEmbedding: IEmbedding<TEmbedding, TData>
     {
         var outputLength = resultBuffer.Length;
         if (input.Length % outputLength != 0)
@@ -121,7 +121,7 @@ public partial class LocalEmbedding : IDisposable
                 TensorPrimitives.Add(floatBufferSpan, tokenEmbedding, floatBufferSpan);
             }
 
-            return TEmbeddingData.FromFloats(floatBufferSpan, resultBuffer);
+            return TEmbedding.FromFloats(floatBufferSpan, resultBuffer);
         }
         finally
         {

@@ -9,21 +9,21 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace SmartComponents.LocalEmbedding;
+namespace SmartComponents.LocalEmbeddings;
 
 [JsonConverter(typeof(ByteEmbeddingJsonConverter))]
-public readonly struct ByteEmbeddingData : IEmbeddingData<ByteEmbeddingData, sbyte>
+public readonly struct ByteEmbedding : IEmbedding<ByteEmbedding, sbyte>
 {
     private readonly ReadOnlyMemory<sbyte> values;
     private readonly float magnitude;
 
-    private ByteEmbeddingData(ReadOnlyMemory<sbyte> values, float magnitude)
+    private ByteEmbedding(ReadOnlyMemory<sbyte> values, float magnitude)
     {
         this.values = values;
         this.magnitude = magnitude;
     }
 
-    public static unsafe ByteEmbeddingData FromFloats(ReadOnlySpan<float> input, Memory<sbyte> buffer)
+    public static unsafe ByteEmbedding FromFloats(ReadOnlySpan<float> input, Memory<sbyte> buffer)
     {
         var length = input.Length;
         var blockLength = Vector256<float>.Count;
@@ -57,13 +57,13 @@ public readonly struct ByteEmbeddingData : IEmbeddingData<ByteEmbeddingData, sby
             }
 
             var magnitudeSquared = Vector256.Sum(magnitudeSquareds);
-            return new ByteEmbeddingData(buffer, MathF.Sqrt(magnitudeSquared));
+            return new ByteEmbedding(buffer, MathF.Sqrt(magnitudeSquared));
         }
     }
 
     private const int Vec256ByteLength = 32; // Vector256<sbyte>.Count;
 
-    public static unsafe float Similarity(ByteEmbeddingData lhs, ByteEmbeddingData rhs)
+    public static unsafe float Similarity(ByteEmbedding lhs, ByteEmbedding rhs)
     {
         var length = lhs.values.Length;
         if (rhs.values.Length != length)
@@ -114,9 +114,9 @@ public readonly struct ByteEmbeddingData : IEmbeddingData<ByteEmbeddingData, sby
         await destination.WriteAsync(data);
     }
 
-    class ByteEmbeddingJsonConverter : JsonConverter<ByteEmbeddingData>
+    class ByteEmbeddingJsonConverter : JsonConverter<ByteEmbedding>
     {
-        public override ByteEmbeddingData Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override ByteEmbedding Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             reader.Read();
             var magnitude = reader.GetSingle();
@@ -125,10 +125,10 @@ public readonly struct ByteEmbeddingData : IEmbeddingData<ByteEmbeddingData, sby
             reader.Read();
 
             var values = Unsafe.BitCast<Memory<byte>, Memory<sbyte>>(bytes); // Because sbyte length is same as byte
-            return new ByteEmbeddingData(values, magnitude);
+            return new ByteEmbedding(values, magnitude);
         }
 
-        public override void Write(Utf8JsonWriter writer, ByteEmbeddingData value, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, ByteEmbedding value, JsonSerializerOptions options)
         {
             writer.WriteStartArray();
             writer.WriteNumberValue(value.magnitude);
