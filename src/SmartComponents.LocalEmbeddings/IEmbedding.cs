@@ -4,12 +4,16 @@ using System.Threading.Tasks;
 
 namespace SmartComponents.LocalEmbeddings;
 
-internal interface IEmbedding<TEmbedding, TData> where TEmbedding: IEmbedding<TEmbedding, TData>
+public interface IEmbedding<TEmbedding> where TEmbedding : IEmbedding<TEmbedding>
+{
+    static abstract float Similarity(TEmbedding lhs, TEmbedding rhs);
+}
+
+internal interface IEmbedding<TEmbedding, TData> : IEmbedding<TEmbedding>
+    where TEmbedding: IEmbedding<TEmbedding, TData>
 {
     static abstract TEmbedding FromFloats(ReadOnlySpan<float> input, Memory<TData> buffer);
-    static abstract float Similarity(TEmbedding lhs, TEmbedding rhs);
-
-    int ByteLength { get; }
     ReadOnlyMemory<TData> Values { get; }
+    int ByteLength { get; }
     ValueTask WriteToAsync(Stream destination);
 }
