@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace ExampleMvcRazorPagesApp.Pages.SmartPaste
+namespace ExampleMvcRazorPagesApp.Pages.SmartComboBox
 {
     public class IndexModel : PageModel
     {
         public void OnGet()
         {
-            ViewData["Title"] = "Smart Paste";
+            ViewData["Title"] = "Smart ComboBox";
         }
     }
 }

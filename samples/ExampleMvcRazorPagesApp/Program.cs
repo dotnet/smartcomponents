@@ -1,4 +1,5 @@
 using SmartComponents.Inference.OpenAI;
+using SmartComponents.LocalEmbeddings;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.AddRepoSharedConfig();
@@ -34,5 +35,10 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages();
+
+app.MapSmartComboBox<LocalEmbeddingsCache>("/api/suggestions/accounting-categories", _ =>
+{
+    return ["Groceries", "Utilities", "Rent", "Mortgage", "Car Payment", "Car Insurance", "Health Insurance", "Life Insurance", "Home Insurance", "Gas", "Public Transportation", "Dining Out", "Entertainment", "Travel", "Clothing", "Electronics", "Home Improvement", "Gifts", "Charity", "Education", "Childcare", "Pet Care", "Other"];
+});
 
 app.Run();

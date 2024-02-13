@@ -48,11 +48,8 @@ public partial class LocalEmbeddings : IDisposable
     public FloatEmbedding EmbedAsFloats(string inputText, Memory<float>? outputBuffer = null, int maximumTokens = 512)
         => ComputeForType<FloatEmbedding, float>(inputText, outputBuffer ?? new float[OutputLength], maximumTokens);
 
-    public static float Similarity(ByteEmbedding a, ByteEmbedding b)
-        => ByteEmbedding.Similarity(a, b);
-
-    public static float Similarity(FloatEmbedding a, FloatEmbedding b)
-        => FloatEmbedding.Similarity(a, b);
+    public static float Similarity<T>(T a, T b) where T: IEmbedding<T>
+        => a.Similarity(b);
 
     private TEmbedding ComputeForType<TEmbedding, TData>(string inputText, Memory<TData> resultBuffer, int maximumTokens)
         where TEmbedding: IEmbedding<TEmbedding, TData>

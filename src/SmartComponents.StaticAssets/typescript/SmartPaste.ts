@@ -1,5 +1,4 @@
 import { isComboBox, setFormElementValueWithEvents } from './FormUtil';
-import { resolveUrl } from './UrlResolution';
 
 export function registerSmartPasteClickHandler() {
     document.addEventListener('click', (evt) => {
@@ -213,9 +212,12 @@ function inferFieldDescription(form: HTMLFormElement, element: HTMLElement): str
     return element.getAttribute('name') || element.id;
 }
 
-async function getSmartPasteResponse(button, formConfig, clipboardContents): Promise<Response> {
+async function getSmartPasteResponse(button: HTMLButtonElement, formConfig, clipboardContents): Promise<Response> {
     const formFields = formConfig.map(entry => restrictProperties(entry, ['identifier', 'description', 'allowedValues', 'type']));
-    const url = resolveUrl(button, '_smartcomponents/smartpaste');
+
+    // We rely on the URL being pathbase-relative for Blazor, or a ~/... URL that would already
+    // be resolved on the server for MVC
+    const url = button.getAttribute('data-url');
     return fetch(url, {
         method: 'post',
         headers: {

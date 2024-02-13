@@ -63,12 +63,12 @@ public readonly struct ByteEmbedding : IEmbedding<ByteEmbedding, sbyte>
 
     private const int Vec256ByteLength = 32; // Vector256<sbyte>.Count;
 
-    public static unsafe float Similarity(ByteEmbedding lhs, ByteEmbedding rhs)
+    public unsafe float Similarity(ByteEmbedding other)
     {
-        var length = lhs.values.Length;
-        if (rhs.values.Length != length)
+        var length = values.Length;
+        if (other.values.Length != length)
         {
-            throw new InvalidOperationException($"LHS is of length {lhs.values.Length}, whereas RHS is of length {rhs.values.Length}. They must be equal length.");
+            throw new InvalidOperationException($"This is of length {values.Length}, whereas {nameof(other)} is of length {other.values.Length}. They must be equal length.");
         }
 
         if (length % Vec256ByteLength != 0)
@@ -80,28 +80,30 @@ public readonly struct ByteEmbedding : IEmbedding<ByteEmbedding, sbyte>
 
         Vector256<int> sumsOfProducts = default;
 
-        fixed (sbyte* lhsPtr = lhs.values.Span)
-        fixed (sbyte* rhsPtr = rhs.values.Span)
+        fixed (sbyte* thisPtr = values.Span)
+        fixed (sbyte* otherPtr = other.values.Span)
+        {
             for (var pos = 0; pos < length; pos += Vec256ByteLength)
             {
-                var lhsVecSByte = Avx.LoadVector256(lhsPtr + pos);
-                var rhsVecSByte = Avx.LoadVector256(rhsPtr + pos);
+                var thisVecSByte = Avx.LoadVector256(thisPtr + pos);
+                var otherVecSByte = Avx.LoadVector256(otherPtr + pos);
 
                 // Multiply the lower halves
-                var lhsVecShort = Avx2.ConvertToVector256Int16(lhsVecSByte.GetLower());
-                var rhsVecShort = Avx2.ConvertToVector256Int16(rhsVecSByte.GetLower());
-                var products = Avx2.MultiplyAddAdjacent(lhsVecShort, rhsVecShort);
+                var thisVecShort = Avx2.ConvertToVector256Int16(thisVecSByte.GetLower());
+                var otherVecShort = Avx2.ConvertToVector256Int16(otherVecSByte.GetLower());
+                var products = Avx2.MultiplyAddAdjacent(thisVecShort, otherVecShort);
                 sumsOfProducts += products;
 
                 // Multiply the upper halves
-                lhsVecShort = Avx2.ConvertToVector256Int16(lhsVecSByte.GetUpper());
-                rhsVecShort = Avx2.ConvertToVector256Int16(rhsVecSByte.GetUpper());
-                products = Avx2.MultiplyAddAdjacent(lhsVecShort, rhsVecShort);
+                thisVecShort = Avx2.ConvertToVector256Int16(thisVecSByte.GetUpper());
+                otherVecShort = Avx2.ConvertToVector256Int16(otherVecSByte.GetUpper());
+                products = Avx2.MultiplyAddAdjacent(thisVecShort, otherVecShort);
                 sumsOfProducts += products;
             }
+        }
 
         var totalsFloats = Avx.ConvertToVector256Single(sumsOfProducts);
-        return Vector256.Sum(totalsFloats) / (lhs.magnitude * rhs.magnitude);
+        return Vector256.Sum(totalsFloats) / (magnitude * other.magnitude);
     }
 
     public int ByteLength => values.Length;

@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 
 namespace SmartComponents.LocalEmbeddings;
 
-public interface IEmbedding<TEmbedding> where TEmbedding : IEmbedding<TEmbedding>
+public interface IEmbedding<TEmbedding>
 {
-    static abstract float Similarity(TEmbedding lhs, TEmbedding rhs);
+    float Similarity(TEmbedding other);
 }
 
 internal interface IEmbedding<TEmbedding, TData> : IEmbedding<TEmbedding>

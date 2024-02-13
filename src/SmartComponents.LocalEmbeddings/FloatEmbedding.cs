@@ -29,8 +29,8 @@ public readonly struct FloatEmbedding : IEmbedding<FloatEmbedding, float>
         return new FloatEmbedding(buffer);
     }
 
-    public static float Similarity(FloatEmbedding lhs, FloatEmbedding rhs)
-        => TensorPrimitives.CosineSimilarity(lhs.values.Span, rhs.values.Span);
+    public float Similarity(FloatEmbedding other)
+        => TensorPrimitives.CosineSimilarity(values.Span, other.values.Span);
 
     public int ByteLength => values.Length * sizeof(float);
 

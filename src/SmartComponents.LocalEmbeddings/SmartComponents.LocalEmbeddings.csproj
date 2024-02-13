@@ -17,6 +17,11 @@
         <PackageReference Include="Microsoft.Extensions.ObjectPool" />
         <PackageReference Include="Microsoft.ML.OnnxRuntime" />
         <PackageReference Include="System.Numerics.Tensors" />
+        <PackageReference Include="System.Runtime.Caching" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\SmartComponents.Inference\SmartComponents.Inference.csproj" />
     </ItemGroup>
 
     <Target Name="PackTaskDependencies" BeforeTargets="GenerateNuspec">

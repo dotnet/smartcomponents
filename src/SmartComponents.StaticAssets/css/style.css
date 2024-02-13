@@ -17,3 +17,35 @@ button:disabled > .smart-paste-icon-running {
 button:disabled > .smart-paste-icon-normal {
     display: none;
 }
+
+input:focus + .smartcombobox-suggestions {
+    display: block;
+}
+
+.smartcombobox-suggestions {
+    display: none;
+    position: absolute;
+    z-index: 1;
+    border: 1px solid silver;
+    background: white;
+    max-height: 15rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.smartcombobox-suggestion {
+    cursor: pointer;
+    padding: 0.5rem 0.6rem;
+    font-size: 0.9rem;
+    user-select: none;
+    white-space: nowrap;
+}
+
+    .smartcombobox-suggestion:hover {
+        background-color: #eee;
+    }
+
+    .smartcombobox-suggestion.selected {
+        background-color: #224a96;
+        color: white;
+    }

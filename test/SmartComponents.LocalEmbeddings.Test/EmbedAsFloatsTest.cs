@@ -125,10 +125,12 @@ public class EmbedAsFloatsTest
         Assert.Equal(expectedValues.Length, actualValues.Length);
         for (var i = 0; i < actualValues.Length; i++)
         {
-            // Compare to 2 signficant digits, since the test data was only output to a certain precision.
-            var actual = actualValues.Span[i].ToString("G2");
-            var expected = expectedValues.Span[i].ToString("G2");
-            Assert.Equal(expected, actual);
+            // Allow up to 1% variance in the values, since the computation is inherently subject to
+            // floating point imprecision and may vary across platforms.
+            var actual = actualValues.Span[i];
+            var expected = expectedValues.Span[i];
+            var (rangeStart, rangeEnd) = (expected * 0.99f, expected * 1.01f);
+            Assert.InRange(actual, Math.Min(rangeStart, rangeEnd), Math.Max(rangeStart, rangeEnd));
         }
     }
 }

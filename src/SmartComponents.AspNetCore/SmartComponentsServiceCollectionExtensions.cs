@@ -24,13 +24,6 @@ public static class SmartComponentsServiceCollectionExtensions
 
             builder.UseEndpoints(app =>
             {
-                app.MapGet("/_example", async (IInferenceBackend inference) =>
-                {
-                    var prompt = "The capital of France is: ";
-                    var response = await inference.GetChatResponseAsync(new ChatOptions(prompt));
-                    return response;
-                });
-
                 app.MapPost("/_smartcomponents/smartpaste", async (IInferenceBackend inference, HttpContext httpContext, IAntiforgery antiforgery, [FromForm] string dataJson) =>
                 {
                     await antiforgery.ValidateRequestAsync(httpContext);

@@ -1,0 +1,47 @@
+﻿@namespace SmartComponents
+@using System.Text.Json
+@using Microsoft.AspNetCore.Components.Forms
+@inherits InputText
+@inject AntiforgeryStateProvider AntiforgeryState
+<input
+    role="combobox"
+    aria-expanded="false"
+    aria-autocomplete="list"
+    @attributes="@AdditionalAttributes"
+    name="@NameAttributeValue"
+    class="@CssClass"
+    @bind="@CurrentValueAsString"
+    @ref="@Element" />
+<smart-combobox
+    role="listbox"
+    title="@AttributeOrNull("title")"
+    aria-label="@AttributeOrNull("id")"
+    data-suggestions-url="@Url"
+    data-max-suggestions="@MaxSuggestions"
+    data-similarity-threshold="@SimilarityThreshold"
+    data-antiforgery-name="@antiforgeryToken?.FormFieldName"
+    data-antiforgery-value="@antiforgeryToken?.Value"></smart-combobox>
+@code {
+    // For accessibility guidance, see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/combobox_role
+    // The developer should supply either a "title", or an "id" that corresponds to a <label for="that_id">, or both.
+
+    AntiforgeryRequestToken? antiforgeryToken;
+
+    [Parameter, EditorRequired]
+    public string? Url { get; set; }
+
+    [Parameter]
+    public int MaxSuggestions { get; set; } = 10;
+
+    [Parameter]
+    public float SimilarityThreshold { get; set; } = 0.5f;
+
+    private object? AttributeOrNull(string key) => AdditionalAttributes?.TryGetValue(key, out var result) == true
+        ? result
+        : null;
+
+    protected override void OnInitialized()
+    {
+        antiforgeryToken = AntiforgeryState.GetAntiforgeryToken();
+    }
+}

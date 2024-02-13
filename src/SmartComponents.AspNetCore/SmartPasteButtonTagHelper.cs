@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Text.Encodings.Web;
 
 namespace SmartComponents.AspNetCore;
@@ -23,12 +25,11 @@ public class SmartPasteButtonTagHelper : TagHelper
         output.Attributes.Add("title", "Use content on the clipboard to fill out the form");
         output.Attributes.Add("data-smart-paste-trigger", "true");
 
-        if (ViewContext.HttpContext.Request.PathBase is { HasValue: true } pathBase)
-        {
-            output.Attributes.Add("data-pathbase", pathBase);
-        }
+        var services = ViewContext.HttpContext.RequestServices;
+        var urlHelper = services.GetRequiredService<IUrlHelperFactory>().GetUrlHelper(ViewContext);
+        output.Attributes.Add("data-url", urlHelper.Content("~/_smartcomponents/smartpaste"));
 
-        var antiforgery = ViewContext.HttpContext.RequestServices.GetRequiredService<IAntiforgery>();
+        var antiforgery = services.GetRequiredService<IAntiforgery>();
         if (antiforgery is not null)
         {
             var tokens = antiforgery.GetAndStoreTokens(ViewContext.HttpContext);

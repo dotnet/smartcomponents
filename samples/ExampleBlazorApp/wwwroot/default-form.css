@@ -59,6 +59,10 @@ button.secondary {
 }
 
 form.default-form .floating-placeholder {
+    position: relative;
+}
+
+form.default-form .floating-placeholder input {
     background: none;
     padding: 1.5rem 0 0.5rem 0;
     border: none;
@@ -68,12 +72,12 @@ form.default-form .floating-placeholder {
     line-height: 1.25rem;
 }
 
-    form.default-form .floating-placeholder:focus-visible {
+    form.default-form .floating-placeholder input:focus-visible {
         outline: none;
         border-color: #3b82f6;
     }
 
-    form.default-form .floating-placeholder + label {
+    form.default-form .floating-placeholder label {
         position: absolute;
         bottom: 0.625rem;
         font-size: .875rem;
@@ -87,31 +91,31 @@ form.default-form .floating-placeholder {
         pointer-events: none;
     }
 
-    form.default-form .floating-placeholder:focus-visible + label {
+    form.default-form .floating-placeholder:focus-visible label {
         color: rgb(37 99 235);
     }
 
-    form.default-form .floating-placeholder:focus-visible + label, form.default-form .floating-placeholder:not(:placeholder-shown) + label {
+    form.default-form .floating-placeholder:focus-visible label, form.default-form .floating-placeholder:not(:has(input:placeholder-shown)) label {
         transform: translateY(-1.5rem) scale(0.8);
         font-weight: 500;
     }
 
 
-    form.default-form .floating-placeholder.valid.modified {
+    form.default-form .floating-placeholder input.valid.modified {
         outline: none;
         border-color: green;
     }
 
-        form.default-form .floating-placeholder.valid.modified + label {
+        form.default-form .floating-placeholder:has(input.valid.modified) label {
             color: green;
         }
 
-    form.default-form .floating-placeholder.invalid {
+    form.default-form .floating-placeholder input.invalid {
         outline: none;
         border-color: red;
     }
 
-        form.default-form .floating-placeholder.invalid + label {
+        form.default-form .floating-placeholder:has(input.invalid) label {
             color: red;
         }
 
@@ -170,4 +174,10 @@ form.default-form .bool-list label:has(input[type=checkbox]:checked) {
 
 form.default-form .bool-list input[type=checkbox] {
     accent-color: white;
+}
+
+form.default-form .smartcombobox-suggestions {
+    border-radius: 0.3rem;
+    box-shadow: 0 2px 11px rgba(0,0,0,0.2);
+    margin-top: 1px;
 }
