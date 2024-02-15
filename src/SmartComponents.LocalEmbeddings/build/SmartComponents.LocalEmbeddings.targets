@@ -6,9 +6,15 @@
         <!-- (likewise with LocalEmbeddingsVocabUrl or LocalEmbeddingsVocabPath) -->
         <!-- Then at runtime, pass the model name to the LocalEmbeddings constructor, and it will use the corresponding model+vocab pair. -->
         <LocalEmbeddingsModelName Condition="'$(LocalEmbeddingsModelName)' == ''">default</LocalEmbeddingsModelName>
-        
-        <LocalEmbeddingsModelUrl Condition="'$(LocalEmbeddingsModelUrl)' == ''">https://huggingface.co/TaylorAI/bge-micro-v2/resolve/main/onnx/model_quantized.onnx</LocalEmbeddingsModelUrl>
-        <LocalEmbeddingsVocabUrl Condition="'$(LocalEmbeddingsVocabUrl)' == ''">https://huggingface.co/TaylorAI/bge-micro-v2/resolve/main/vocab.txt</LocalEmbeddingsVocabUrl>
+
+        <!--
+            bge-micro-v2 comes from https://huggingface.co/TaylorAI/bge-micro-v2, which is forked to
+            https://huggingface.co/SmartComponents/bge-micro-v2 purely to ensure it remains available.
+            The license for the model remains MIT, but it's not redistributed in this repo or the NuGet
+            package anyway, since it's downloaded at build time.
+        -->
+        <LocalEmbeddingsModelUrl Condition="'$(LocalEmbeddingsModelUrl)' == ''">https://huggingface.co/SmartComponents/bge-micro-v2/resolve/72908b7/onnx/model_quantized.onnx</LocalEmbeddingsModelUrl>
+        <LocalEmbeddingsVocabUrl Condition="'$(LocalEmbeddingsVocabUrl)' == ''">https://huggingface.co/SmartComponents/bge-micro-v2/resolve/72908b7/vocab.txt</LocalEmbeddingsVocabUrl>
 
         <!-- Or, forget the URLs and just give paths to files on disk -->
         <LocalEmbeddingsModelPath Condition="'$(LocalEmbeddingsModelPath)' == ''">$(LocalEmbeddingsModelCacheDir)$([System.Text.RegularExpressions.Regex]::Replace($(LocalEmbeddingsModelUrl), "[^a-zA-Z0-9\.]", "_"))</LocalEmbeddingsModelPath>
