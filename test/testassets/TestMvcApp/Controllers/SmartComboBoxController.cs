@@ -2,7 +2,7 @@
 
 namespace TestMvcApp.Controllers;
 
-public class SmartPasteController : Controller
+public class SmartComboBoxController : Controller
 {
     public IActionResult Index()
     {

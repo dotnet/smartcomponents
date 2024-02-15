@@ -1,0 +1,25 @@
+﻿@page "/smartcombobox"
+@using SmartComponents
+
+<h1>SmartComboBox testcases (SSR)</h1>
+
+<p id="default-params">
+    Accounting category:
+    <SmartComboBox Url="api/accounting-categories" @bind-Value="@accountingCategory" />
+</p>
+
+<p id="with-similarity-threshold">
+    Accounting category:
+    <SmartComboBox Url="api/accounting-categories" @bind-Value="@accountingCategory" SimilarityThreshold="0.7f" />
+    (similarity threshold 0.7)
+</p>
+
+<p id="with-max-suggestions">
+    Accounting category:
+    <SmartComboBox Url="api/accounting-categories" @bind-Value="@accountingCategory" MaxSuggestions="2" />
+    (max suggestions 2)
+</p>
+
+@code {
+    string accountingCategory = "Initial value";
+}

@@ -1,0 +1,25 @@
+﻿@page "/smartpaste/webassembly"
+@using SmartComponents
+@rendermode InteractiveWebAssembly
+
+<h1>SmartPaste testcases (WebAssembly)</h1>
+
+<IsInteractiveIndicator />
+
+<form id="simple-case">
+    <input name="firstname" @bind="@firstname" />
+    <input name="lastname" @bind="@lastname" />
+    <input name="unrelated" />
+    <SmartPasteButton />
+</form>
+
+<p>
+    Bound values:
+    <strong id="bound-firstname">@firstname</strong>
+    <strong id="bound-lastname">@lastname</strong>
+</p>
+
+@code {
+    string? firstname;
+    string? lastname;
+}

@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Numerics.Tensors;
 using System.Text.Json;
 
 namespace SmartComponents.LocalEmbeddings.Test;
@@ -19,7 +20,7 @@ public class EmbedAsFloatsTest
         foreach (var (text, expectedEmbedding) in TestData.BgeMicroV2Samples)
         {
             var actualEmbedding = embeddings.EmbedAsFloats(text);
-            AssertEqualEmbeddings(expectedEmbedding, actualEmbedding.Values);
+            AssertCosineEqual(expectedEmbedding, actualEmbedding.Values);
             Assert.Equal(actualEmbedding.Values.Length * 4, actualEmbedding.ByteLength); // 4 bytes per value
         }
     }
@@ -54,7 +55,7 @@ public class EmbedAsFloatsTest
         foreach (var (input, actualEmbedding) in allResults)
         {
             var expectedEmbedding = TestData.BgeMicroV2Samples[input];
-            AssertEqualEmbeddings(expectedEmbedding, actualEmbedding);
+            AssertCosineEqual(expectedEmbedding, actualEmbedding);
         }
     }
 
@@ -120,17 +121,17 @@ public class EmbedAsFloatsTest
         Assert.Equal(1, MathF.Round(LocalEmbeddings.Similarity(cat, deserializedCat), 3));
     }
 
-    private static void AssertEqualEmbeddings(ReadOnlyMemory<float> expectedValues, ReadOnlyMemory<float> actualValues)
+    private static void AssertCosineEqual(ReadOnlyMemory<float> expectedValues, ReadOnlyMemory<float> actualValues)
     {
         Assert.Equal(expectedValues.Length, actualValues.Length);
-        for (var i = 0; i < actualValues.Length; i++)
-        {
-            // Allow up to 1% variance in the values, since the computation is inherently subject to
-            // floating point imprecision and may vary across platforms.
-            var actual = actualValues.Span[i];
-            var expected = expectedValues.Span[i];
-            var (rangeStart, rangeEnd) = (expected * 0.99f, expected * 1.01f);
-            Assert.InRange(actual, Math.Min(rangeStart, rangeEnd), Math.Max(rangeStart, rangeEnd));
-        }
+
+        // We're not looking for exact equality, since there are floating point imprecisions, and calculations
+        // may vary across platforms or even runs on the same platform. However the cosine similarity should be
+        // high to count as "equal" for the purpose of the tests.
+        var cosineSimilarity = TensorPrimitives.CosineSimilarity(expectedValues.Span, actualValues.Span);
+        Assert.InRange(MathF.Min(cosineSimilarity, 1f), 0.99f, 1f);
+
+        // We don't make assertions about the exact values of individual vector components because in practice
+        // they vary a lot between runs (e.g., by over 30% in some cases)
     }
 }

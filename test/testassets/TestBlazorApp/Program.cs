@@ -1,4 +1,5 @@
 using SmartComponents.Inference.OpenAI;
+using SmartComponents.LocalEmbeddings;
 using TestBlazorApp.Components;
 
 namespace TestBlazorApp;
@@ -12,6 +13,7 @@ public class Program
 
         // Add services to the container.
         builder.Services.AddRazorComponents()
+            .AddInteractiveServerComponents()
             .AddInteractiveWebAssemblyComponents();
         builder.Services.AddSmartComponents()
             .WithInferenceBackend<OpenAIInferenceBackend>();
@@ -50,8 +52,12 @@ public class Program
         app.UseStaticFiles();
         app.UseAntiforgery();
 
+        app.MapSmartComboBox<LocalEmbeddingsCache>("/api/accounting-categories",
+            _ => E2ETests.TestData.AccountingCategories);
+
         app.MapRazorComponents<App>()
             .AddInteractiveWebAssemblyRenderMode()
+            .AddInteractiveServerRenderMode()
             .AddAdditionalAssemblies(typeof(TestBlazorApp.Client._Imports).Assembly);
 
         app.Run();

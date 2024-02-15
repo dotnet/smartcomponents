@@ -1,0 +1,20 @@
+﻿@page "/smartcombobox/server"
+@using SmartComponents
+@rendermode InteractiveServer
+
+<h1>SmartComboBox testcases (Blazor Server)</h1>
+
+<IsInteractiveIndicator />
+
+<p id="default-params">
+    Accounting category:
+    <SmartComboBox Url="api/accounting-categories" @bind-Value="@accountingCategory" />
+</p>
+<p>
+    Bound value:
+    <strong id="default-params-bound-value">@accountingCategory</strong>
+</p>
+
+@code {
+    string accountingCategory = "Initial value";
+}

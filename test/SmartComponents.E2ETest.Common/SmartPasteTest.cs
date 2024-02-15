@@ -135,6 +135,6 @@ public class SmartPasteTest<TStartup> : PlaywrightTestBase<TStartup> where TStar
         await Expect(form.Locator("#philosophy")).ToHaveValueAsync("Nihilism");
     }
 
-    private Task SetClipboardContentsAsync(string text)
+    protected Task SetClipboardContentsAsync(string text)
         => Page.Locator("html").EvaluateAsync("(ignored, value) => navigator.clipboard.writeText(value)", text);
 }

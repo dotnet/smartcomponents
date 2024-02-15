@@ -12,9 +12,7 @@ class SmartComboBox extends HTMLElement {
     selectedIndex = 0;
     static nextSuggestionsElemId = 0;
 
-    constructor() {
-        super();
-
+    connectedCallback() {
         this.inputElem = this.previousElementSibling as HTMLInputElement;
         if (!(this.inputElem instanceof HTMLInputElement)) {
             throw new Error('smart-combobox must be placed immediately after an input element');

@@ -1,0 +1,23 @@
+﻿@{
+    ViewData["Title"] = "Smart ComboBox";
+    string accountingCategory = "Initial value";
+}
+
+<h1>SmartComboBox testcases (MVC)</h1>
+
+<p id="default-params">
+    Accounting category:
+    <smart-combobox url="api/accounting-categories" value="@accountingCategory" />
+</p>
+
+<p id="with-similarity-threshold">
+    Accounting category:
+    <smart-combobox url="api/accounting-categories" value="@accountingCategory" similarity-threshold="0.7f" />
+    (similarity threshold 0.7)
+</p>
+
+<p id="with-max-suggestions">
+    Accounting category:
+    <smart-combobox url="api/accounting-categories" value="@accountingCategory" max-suggestions="2" />
+    (max suggestions 2)
+</p>

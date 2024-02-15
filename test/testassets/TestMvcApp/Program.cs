@@ -1,4 +1,5 @@
 using SmartComponents.Inference.OpenAI;
+using SmartComponents.LocalEmbeddings;
 
 namespace TestMvcApp;
 
@@ -48,6 +49,9 @@ public class Program
         app.UseAntiforgery();
 
         app.UseAuthorization();
+
+        app.MapSmartComboBox<LocalEmbeddingsCache>("/api/accounting-categories",
+            _ => E2ETests.TestData.AccountingCategories);
 
         app.MapControllerRoute(
             name: "default",

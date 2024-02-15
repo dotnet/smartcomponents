@@ -1,0 +1,20 @@
+﻿@page "/smartcombobox/webassembly"
+@using SmartComponents
+@rendermode InteractiveWebAssembly
+
+<h1>SmartComboBox testcases (WebAssembly)</h1>
+
+<IsInteractiveIndicator />
+
+<p id="default-params">
+    Accounting category:
+    <SmartComboBox Url="api/accounting-categories" @bind-Value="@accountingCategory" />
+</p>
+<p>
+    Bound value:
+    <strong id="default-params-bound-value">@accountingCategory</strong>
+</p>
+
+@code {
+    string accountingCategory = "Initial value";
+}
