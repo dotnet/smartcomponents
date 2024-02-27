@@ -17,7 +17,7 @@ public class SmartTextAreaTagHelper : TagHelper
 
     public string UserRole { get; set; } = default!;
 
-    public string[]? Phrases { get; set; }
+    public string[]? UserPhrases { get; set; }
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
@@ -39,7 +39,7 @@ public class SmartTextAreaTagHelper : TagHelper
         output.PostElement.SetHtmlContent("<smart-textarea");
         AddPostElementAttribute(output, " data-url", urlHelper.Content("~/_smartcomponents/smarttextarea"));
 
-        var config = new SmartTextAreaConfig { UserRole = UserRole, UserPhrases = Phrases };
+        var config = new SmartTextAreaConfig { UserRole = UserRole, UserPhrases = UserPhrases };
         AddPostElementAttribute(output, " data-config", JsonSerializer.Serialize(config));
 
         var antiforgery = services.GetRequiredService<IAntiforgery>();
