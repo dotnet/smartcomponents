@@ -34,7 +34,7 @@ internal static class ResponseCache
             return false;
         }
 
-        var filePath = GetCacheFilePath(request, request.UserMessage);
+        var filePath = GetCacheFilePath(request);
         if (File.Exists(filePath))
         {
             response = File.ReadAllText(filePath);
@@ -51,11 +51,14 @@ internal static class ResponseCache
     {
         if (IsEnabled)
         {
-            var filePath = GetCacheFilePath(request, request.UserMessage);
+            var filePath = GetCacheFilePath(request);
             File.WriteAllText(filePath, response);
             File.WriteAllText(filePath.Replace(".response.txt", ".request.json"), GetCacheKeyInput(request));
         }
     }
+
+    private static string GetCacheFilePath(ChatOptions request)
+        => GetCacheFilePath(request, request.Messages.LastOrDefault()?.Text ?? "no_messages");
 
     private static string GetCacheFilePath<T>(T request, string summary)
         => Path.Combine(CacheDir.Value, $"{GetCacheKey(request, summary)}.response.txt");

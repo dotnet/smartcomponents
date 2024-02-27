@@ -62,9 +62,12 @@ For fields without any corresponding information in USER_DATA, use value value N
 USER_DATA: {data.ClipboardContents}
 ";
 
-        var completionsResponse = await inferenceBackend.GetChatResponseAsync(new ChatOptions(prompt)
+        var completionsResponse = await inferenceBackend.GetChatResponseAsync(new ChatOptions
         {
-            SystemMessage = systemMessage,
+            Messages = [
+                new (ChatMessageRole.System, systemMessage),
+                new (ChatMessageRole.User, prompt),
+            ],
             Temperature = 0,
             TopP = 1,
             MaxTokens = 2000,

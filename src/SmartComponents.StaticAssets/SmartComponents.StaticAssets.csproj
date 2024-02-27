@@ -22,6 +22,10 @@
 
     <Target Name="RollupBuild" DependsOnTargets="PrepareRollupBuild" BeforeTargets="Build" Inputs="@(RollupBuildInputs)" Outputs="$(ModuleJsFile)">
         <Exec Command="./node_modules/.bin/rollup -c -o $(ModuleJsFile) --environment BUILD:$(Configuration)" />
+
+        <!-- We need to touch the primary output file (.dll) so build incrementalism works properly -->
+        <!-- Without doing so, projects that reference this one won't update their own build and pick up changes from this project -->
+        <Touch Files="$(TargetPath)" />
     </Target>
 
     <Target Name="PrepareRollupBuild">

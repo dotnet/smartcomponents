@@ -5,6 +5,7 @@ using Azure.AI.OpenAI;
 using Azure;
 using Microsoft.Extensions.Configuration;
 using SmartComponents.StaticAssets.Inference;
+using System.Collections.Generic;
 
 namespace SmartComponents.Inference.OpenAI;
 
@@ -28,16 +29,23 @@ public class OpenAIInferenceBackend(IConfiguration configuration)
         var chatCompletionsOptions = new ChatCompletionsOptions
         {
             DeploymentName = apiConfig.DeploymentName,
-            Messages = {
-                new ChatRequestSystemMessage(options.SystemMessage ?? "You are a helpful AI assistant"),
-                new ChatRequestUserMessage(options.UserMessage),
-            },
             Temperature = options.Temperature ?? 0f,
             NucleusSamplingFactor = options.TopP ?? 1,
             MaxTokens = options.MaxTokens ?? 200,
             FrequencyPenalty = options.FrequencyPenalty ?? 0,
             PresencePenalty = options.PresencePenalty ?? 0,
         };
+
+        foreach (var message in options.Messages ?? Enumerable.Empty<ChatMessage>())
+        {
+            chatCompletionsOptions.Messages.Add(message.Role switch
+            {
+                ChatMessageRole.System => new ChatRequestSystemMessage(message.Text),
+                ChatMessageRole.User => new ChatRequestUserMessage(message.Text),
+                ChatMessageRole.Assistant => new ChatRequestAssistantMessage(message.Text),
+                _ => throw new InvalidOperationException($"Unknown chat message role: {message.Role}")
+            });
+        }
 
         if (options.StopSequences is { } stopSequences)
         {

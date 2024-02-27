@@ -1,12 +1,10 @@
 ﻿using Microsoft.AspNetCore.Antiforgery;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.DependencyInjection;
-using System.Runtime.CompilerServices;
 
 namespace SmartComponents.AspNetCore;
 

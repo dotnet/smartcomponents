@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace Microsoft.AspNetCore.Builder;
+namespace SmartComponents.AspNetCore;
 
-public readonly struct SuggestionsRequest
+public readonly struct SmartComboBoxSuggestionsRequest
 {
     public string InputValue { get; init; }
     public int MaxResults { get; init; }

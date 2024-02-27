@@ -49,3 +49,42 @@ input:focus + .smartcombobox-suggestions {
         background-color: #224a96;
         color: white;
     }
+
+[data-suggestion-visible][data-smart-textarea]::selection {
+    color: #999;
+}
+
+.smart-textarea-suggestion-overlay {
+    display: none;
+    position: absolute;
+    background-color: white;
+    color: black;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.3rem;
+    box-shadow: 0 1.25px 4px 0px rgba(0,0,0,0.4);
+    cursor: pointer;
+    user-select: none;
+    margin-right: 1rem;
+}
+
+    .smart-textarea-suggestion-overlay.smart-textarea-suggestion-overlay-visible {
+        display: block;
+    }
+
+.smart-textarea-caret {
+    position: absolute;
+    width: 0.8px;
+    background: red;
+    display: none;
+    animation: caret-blink 1.025s step-end infinite;
+}
+
+@keyframes caret-blink {
+    from, to {
+        opacity: 100%;
+    }
+
+    50% {
+        opacity: 0%;
+    }
+}

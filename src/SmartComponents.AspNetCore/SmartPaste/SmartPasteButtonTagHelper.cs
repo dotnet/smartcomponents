@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Text.Encodings.Web;
 
 namespace SmartComponents.AspNetCore;

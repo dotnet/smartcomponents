@@ -1,5 +1,6 @@
 import typescript from '@rollup/plugin-typescript';
 import terser from '@rollup/plugin-terser';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 
 const config = {
     input: 'typescript/main.ts',
@@ -7,7 +8,9 @@ const config = {
         format: 'es',
         plugins: []
     },
-    plugins: [typescript()]
+    plugins: [typescript({
+        noEmitOnError: true,
+    }), nodeResolve()]
 };
 
 if (process.env.BUILD === 'Debug') {

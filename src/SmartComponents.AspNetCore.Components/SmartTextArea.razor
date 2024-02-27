@@ -1,0 +1,49 @@
+@namespace SmartComponents
+@using Microsoft.AspNetCore.Components.Forms
+@using SmartComponents.Infrastructure
+@using System.Text.Json
+@inject AntiforgeryStateProvider AntiforgeryState
+@inherits InputTextArea
+<textarea
+    aria-autocomplete="both"
+    @attributes="@AdditionalAttributes"
+    data-smart-textarea
+    name="@NameAttributeValue"
+    class="@CssClass"
+    @bind="@CurrentValueAsString"
+    @ref="@Element"></textarea>
+<smart-textarea
+    data-url="_smartcomponents/smarttextarea"
+    data-config="@GetConfigJson()"
+    data-antiforgery-name="@antiforgeryToken?.FormFieldName"
+    data-antiforgery-value="@antiforgeryToken?.Value"></smart-textarea>
+@code {
+    AntiforgeryRequestToken? antiforgeryToken;
+
+    [Parameter, EditorRequired]
+    public string? UserRole { get; set; }
+
+    [Parameter]
+    public string[]? UserPhrases { get; set; }
+
+    protected override void OnInitialized()
+    {
+        antiforgeryToken = AntiforgeryState.GetAntiforgeryToken();
+    }
+
+    protected override void OnParametersSet()
+    {
+        // It just doesn't make sense to use this component without providing some information about
+        // the kinds of suggestions you want.
+        if (string.IsNullOrEmpty(UserRole))
+        {
+            throw new InvalidOperationException($"{nameof(SmartTextArea)} requires a non-null, non-empty {nameof(UserRole)} parameter.");
+        }
+    }
+
+    // We can't data-protect this because we need to support running on WebAssembly. However it's
+    // not necessary to do so, since the role/phrases are no more of an injection risk than
+    // the textarea value itself.
+    private string GetConfigJson()
+        => JsonSerializer.Serialize(new SmartTextAreaConfig { UserRole = UserRole, UserPhrases = UserPhrases });
+}

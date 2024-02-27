@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "lib": [ "es5", "es6", "ES2017", "dom" ],
-    "target": "es2017"
-  }
+    "target": "es2017",
+    "moduleResolution": "Bundler"
+  },
 }
