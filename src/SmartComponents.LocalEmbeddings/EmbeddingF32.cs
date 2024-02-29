@@ -53,7 +53,12 @@ public readonly struct EmbeddingF32 : IEmbedding<EmbeddingF32>
         return new EmbeddingF32(buffer);
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Computes the similarity between this embedding and another. For <see cref="EmbeddingF32"/>,
+    /// this uses cosine similarity.
+    /// </summary>
+    /// <param name="other">The other embedding.</param>
+    /// <returns>A similarity score, approximately in the range 0 to 1. Higher values indicate higher similarity.</returns>
     public float Similarity(EmbeddingF32 other)
         => TensorPrimitives.CosineSimilarity(_values.Span, other._values.Span);
 

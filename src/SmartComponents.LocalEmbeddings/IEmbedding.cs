@@ -23,7 +23,8 @@ public interface IEmbedding<TEmbedding>
     static abstract TEmbedding FromModelOutput(ReadOnlySpan<float> input, Memory<byte> buffer);
 
     /// <summary>
-    /// Computes the cosine similarity between this embedding and another.
+    /// Computes the similarity between this embedding and another. The similarity metric
+    /// is determined by the embedding type.
     /// </summary>
     /// <param name="other">The other embedding.</param>
     /// <returns>A similarity score, approximately in the range 0 to 1. Higher values indicate higher similarity.</returns>

@@ -79,7 +79,12 @@ public readonly struct EmbeddingI1 : IEmbedding<EmbeddingI1>
         }
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Computes the similarity between this embedding and another. For <see cref="EmbeddingI1"/>,
+    /// this is based on Hamming distance.
+    /// </summary>
+    /// <param name="other">The other embedding.</param>
+    /// <returns>A similarity score in the range 0 to 1. Higher values indicate higher similarity.</returns>
     public unsafe float Similarity(EmbeddingI1 other)
     {
         if (other._buffer.Length != _buffer.Length)

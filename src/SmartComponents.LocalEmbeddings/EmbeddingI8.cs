@@ -91,7 +91,12 @@ public readonly struct EmbeddingI8 : IEmbedding<EmbeddingI8>
 
     private const int Vec256ByteLength = 32; // Vector256<sbyte>.Count;
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Computes the similarity between this embedding and another. For <see cref="EmbeddingI8"/>,
+    /// this uses cosine similarity.
+    /// </summary>
+    /// <param name="other">The other embedding.</param>
+    /// <returns>A similarity score, approximately in the range 0 to 1. Higher values indicate higher similarity.</returns>
     public unsafe float Similarity(EmbeddingI8 other)
     {
         var length = _values.Length;
