@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 
 namespace SmartComponents.LocalEmbeddings;
 
-public partial class LocalEmbeddings : IDisposable
+public partial class LocalEmbedder : IDisposable
 {
     private static readonly ArrayPool<float> _outputBufferPool = ArrayPool<float>.Create();
 
@@ -20,13 +20,13 @@ public partial class LocalEmbeddings : IDisposable
     private readonly InferenceSession _onnxSession;
     private readonly RunOptions _runOptions = new RunOptions();
 
-    public int OutputLength { get; }
+    public int Dimensions { get; }
 
-    public LocalEmbeddings(string modelName = "default", bool caseSensitive = false)
+    public LocalEmbedder(string modelName = "default", bool caseSensitive = false)
     {
         _onnxSession = new InferenceSession(GetFullPathToModelFile(modelName, "model.onnx"));
         _tokenizersPool = new DefaultObjectPool<BertTokenizer>(new BertTokenizerPoolPolicy(modelName, caseSensitive), maximumRetained: 32);
-        OutputLength = _onnxSession.OutputMetadata.First().Value.Dimensions.Last(); // 384 for the supported models
+        Dimensions = _onnxSession.OutputMetadata.First().Value.Dimensions.Last(); // 384 for the supported models
     }
 
     private static string GetFullPathToModelFile(string modelName, string fileName)
@@ -42,23 +42,14 @@ public partial class LocalEmbeddings : IDisposable
         return fullPath;
     }
 
-    public ByteEmbedding EmbedAsBytes(string inputText, Memory<sbyte>? outputBuffer = null, int maximumTokens = 512)
-        => ComputeForType<ByteEmbedding, sbyte>(inputText, outputBuffer ?? new sbyte[OutputLength], maximumTokens);
+    const int DefaultMaximumTokens = 512;
 
-    public FloatEmbedding EmbedAsFloats(string inputText, Memory<float>? outputBuffer = null, int maximumTokens = 512)
-        => ComputeForType<FloatEmbedding, float>(inputText, outputBuffer ?? new float[OutputLength], maximumTokens);
+    public EmbeddingF32 Embed(string inputText, int maximumTokens = DefaultMaximumTokens)
+        => Embed<EmbeddingF32>(inputText, null, maximumTokens);
 
-    public static float Similarity<T>(T a, T b) where T: IEmbedding<T>
-        => a.Similarity(b);
-
-    private TEmbedding ComputeForType<TEmbedding, TData>(string inputText, Memory<TData> resultBuffer, int maximumTokens)
-        where TEmbedding: IEmbedding<TEmbedding, TData>
+    public TEmbedding Embed<TEmbedding>(string inputText, Memory<byte>? outputBuffer = default, int maximumTokens = DefaultMaximumTokens)
+        where TEmbedding : IEmbedding<TEmbedding>
     {
-        if (resultBuffer.Length != OutputLength)
-        {
-            throw new InvalidOperationException($"Result buffer length must be {OutputLength} for this model, but the supplied buffer is of length {resultBuffer.Length}");
-        }
-
         var tokenizer = _tokenizersPool.Get();
         try
         {
@@ -91,7 +82,10 @@ public partial class LocalEmbeddings : IDisposable
             // so there's no need to maintain some kind of pool of sessions
             using var outputs = _onnxSession.Run(_runOptions, inputs, _onnxSession.OutputNames);
 
-            return PoolSum<TEmbedding, TData>(outputs[0].GetTensorDataAsSpan<float>(), resultBuffer);
+            return PoolSum<TEmbedding>(
+                outputs[0].GetTensorDataAsSpan<float>(),
+                Dimensions, 
+                outputBuffer ?? new byte[TEmbedding.GetBufferByteLength(Dimensions)]);
         }
         finally
         {
@@ -99,26 +93,25 @@ public partial class LocalEmbeddings : IDisposable
         }
     }
 
-    private static TEmbedding PoolSum<TEmbedding, TData>(ReadOnlySpan<float> input, Memory<TData> resultBuffer)
-        where TEmbedding: IEmbedding<TEmbedding, TData>
+    private static TEmbedding PoolSum<TEmbedding>(ReadOnlySpan<float> input, int outputDimensions, Memory<byte> resultBuffer)
+        where TEmbedding : IEmbedding<TEmbedding>
     {
-        var outputLength = resultBuffer.Length;
-        if (input.Length % outputLength != 0)
+        if (input.Length % outputDimensions != 0)
         {
-            throw new ArgumentException($"Input length ({input.Length}) must be a multiple of output length ({outputLength}), but is not", nameof(input));
+            throw new ArgumentException($"Input length ({input.Length}) must be a multiple of output dimensions ({outputDimensions}), but is not", nameof(input));
         }
 
-        var floatBuffer = _outputBufferPool.Rent(outputLength);
+        var floatBuffer = _outputBufferPool.Rent(outputDimensions);
         try
         {
-            var floatBufferSpan = floatBuffer.AsSpan(0, outputLength);
-            for (var pos = 0; pos < input.Length; pos += outputLength)
+            var floatBufferSpan = floatBuffer.AsSpan(0, outputDimensions);
+            for (var pos = 0; pos < input.Length; pos += outputDimensions)
             {
-                var tokenEmbedding = input.Slice(pos, outputLength);
+                var tokenEmbedding = input.Slice(pos, outputDimensions);
                 TensorPrimitives.Add(floatBufferSpan, tokenEmbedding, floatBufferSpan);
             }
 
-            return TEmbedding.FromFloats(floatBufferSpan, resultBuffer);
+            return TEmbedding.FromModelOutput(floatBufferSpan, resultBuffer);
         }
         finally
         {
@@ -131,4 +124,31 @@ public partial class LocalEmbeddings : IDisposable
         _runOptions?.Dispose();
         _onnxSession?.Dispose();
     }
+
+    // Note that all the following materialize the result as a list, even though the return type is IEnumerable<T>.
+    // We don't want to recompute the embeddings every time the list is enumerated.
+
+    public IList<(string Item, EmbeddingF32 Embedding)> EmbedRange(
+        IEnumerable<string> items,
+        int maximumTokens = DefaultMaximumTokens)
+        => items.Select(item => (item, Embed<EmbeddingF32>(item, maximumTokens: maximumTokens))).ToList();
+
+    public IEnumerable<(string Item, TEmbedding Embedding)> EmbedRange<TEmbedding>(
+        IEnumerable<string> items,
+        int maximumTokens = DefaultMaximumTokens)
+        where TEmbedding: IEmbedding<TEmbedding>
+        => items.Select(item => (item, Embed<TEmbedding>(item, maximumTokens: maximumTokens))).ToList();
+
+    public IEnumerable<(TItem Item, EmbeddingF32 Embedding)> EmbedRange<TItem>(
+        IEnumerable<TItem> items,
+        Func<TItem, string> textRepresentation,
+        int maximumTokens = DefaultMaximumTokens)
+        => items.Select(item => (item, Embed<EmbeddingF32>(textRepresentation(item), maximumTokens: maximumTokens))).ToList();
+
+    public IEnumerable<(TItem Item, TEmbedding Embedding)> EmbedRange<TItem, TEmbedding>(
+        IEnumerable<TItem> items,
+        Func<TItem, string> textRepresentation,
+        int maximumTokens = DefaultMaximumTokens)
+        where TEmbedding : IEmbedding<TEmbedding>
+        => items.Select(item => (item, Embed<TEmbedding>(textRepresentation(item), maximumTokens: maximumTokens))).ToList();
 }

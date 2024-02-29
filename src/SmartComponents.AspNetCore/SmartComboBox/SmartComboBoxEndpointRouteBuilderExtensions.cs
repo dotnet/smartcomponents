@@ -8,25 +8,13 @@ namespace Microsoft.AspNetCore.Builder;
 
 public static class SmartComboBoxEndpointRouteBuilderExtensions
 {
-    public static IEndpointRouteBuilder MapSmartComboBox(this IEndpointRouteBuilder builder, string url, Func<SmartComboBoxSuggestionsRequest, IEnumerable<string>> suggestions)
-        => MapSmartComboBoxCore(builder, url, null, req => Task.FromResult(suggestions(req)));
+    public static IEndpointRouteBuilder MapSmartComboBox(this IEndpointRouteBuilder builder, string url, Func<SmartComboBoxRequest, IEnumerable<string>> suggestions)
+        => MapSmartComboBoxCore(builder, url, req => Task.FromResult(suggestions(req)));
 
-    public static IEndpointRouteBuilder MapSmartComboBox<T>(this IEndpointRouteBuilder builder, string url, Func<SmartComboBoxSuggestionsRequest, IEnumerable<string>> suggestions) where T: ISimilarityMatcher, new()
-        => MapSmartComboBoxCore(builder, url, new T(), req => Task.FromResult(suggestions(req)));
+    public static IEndpointRouteBuilder MapSmartComboBox(this IEndpointRouteBuilder builder, string url, Func<SmartComboBoxRequest, Task<IEnumerable<string>>> suggestions)
+        => MapSmartComboBoxCore(builder, url, req => suggestions(req));
 
-    public static IEndpointRouteBuilder MapSmartComboBox(this IEndpointRouteBuilder builder, string url, ISimilarityMatcher similarityMatcher, Func<SmartComboBoxSuggestionsRequest, IEnumerable<string>> suggestions)
-        => MapSmartComboBoxCore(builder, url, similarityMatcher, req => Task.FromResult(suggestions(req)));
-
-    public static IEndpointRouteBuilder MapSmartComboBox(this IEndpointRouteBuilder builder, string url, Func<SmartComboBoxSuggestionsRequest, Task<IEnumerable<string>>> suggestions)
-        => MapSmartComboBoxCore(builder, url, null, req => suggestions(req));
-
-    public static IEndpointRouteBuilder MapSmartComboBox(this IEndpointRouteBuilder builder, string url, ISimilarityMatcher similarityMatcher, Func<SmartComboBoxSuggestionsRequest, Task<IEnumerable<string>>> suggestions)
-        => MapSmartComboBoxCore(builder, url, similarityMatcher, req => suggestions(req));
-
-    public static IEndpointRouteBuilder MapSmartComboBox<T>(this IEndpointRouteBuilder builder, string url, Func<SmartComboBoxSuggestionsRequest, Task<IEnumerable<string>>> suggestions) where T: ISimilarityMatcher, new()
-        => MapSmartComboBoxCore(builder, url, new T(), req => suggestions(req));
-
-    private static IEndpointRouteBuilder MapSmartComboBoxCore(this IEndpointRouteBuilder builder, string url, ISimilarityMatcher? similarityMatcher, Func<SmartComboBoxSuggestionsRequest, Task<IEnumerable<string>>> suggestions)
+    private static IEndpointRouteBuilder MapSmartComboBoxCore(this IEndpointRouteBuilder builder, string url, Func<SmartComboBoxRequest, Task<IEnumerable<string>>> suggestions)
     {
         // Validates antiforgery implicitly because we accept [FromForm] parameters
         // https://learn.microsoft.com/en-us/aspnet/core/security/anti-request-forgery?view=aspnetcore-8.0#antiforgery-with-minimal-apis
@@ -40,21 +28,16 @@ public static class SmartComboBoxEndpointRouteBuilderExtensions
                 return Results.BadRequest("inputValue is required");
             }
 
-            var suggestionsList = await suggestions(new SmartComboBoxSuggestionsRequest
+            var suggestionsList = await suggestions(new SmartComboBoxRequest
             {
                 HttpContext = httpContext,
-                InputValue = inputValue,
-                MaxResults = maxResults,
-                SimilarityThreshold = similarityThreshold,
+                Query = new SimilarityQuery
+                {
+                    SearchText = inputValue,
+                    MaxResults = maxResults,
+                    MinSimilarity = similarityThreshold,
+                }
             });
-
-            // If you've provided a similarity matcher, we use it. Otherwise we assume the
-            // callback has already done whatever filtering/ordering you want.
-            if (similarityMatcher is not null)
-            {
-                var matches = similarityMatcher.FindClosest(inputValue, suggestionsList, similarityThreshold);
-                suggestionsList = matches.Take(maxResults).Select(r => r.Text);
-            }
 
             return Results.Ok(suggestionsList);
         });

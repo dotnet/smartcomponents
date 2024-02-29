@@ -50,8 +50,11 @@ public class Program
 
         app.UseAuthorization();
 
-        app.MapSmartComboBox<LocalEmbeddingsCache>("/api/accounting-categories",
-            _ => E2ETests.TestData.AccountingCategories);
+        using var embedder = new LocalEmbedder();
+        var accountingCategories = embedder.EmbedRange(E2ETests.TestData.AccountingCategories);
+
+        app.MapSmartComboBox("/api/accounting-categories",
+            request => embedder.FindClosest(request.Query, accountingCategories));
 
         app.MapControllerRoute(
             name: "default",

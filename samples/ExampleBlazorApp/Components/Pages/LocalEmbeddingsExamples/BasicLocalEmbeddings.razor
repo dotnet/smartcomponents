@@ -1,6 +1,6 @@
 ﻿@using SmartComponents.LocalEmbeddings
 @inherits StatefulPageBase<BasicLocalEmbeddings.State>
-@inject LocalEmbeddings LocalEmbeddings
+@inject LocalEmbedder Embedder
 
 <form class="default-form rounded-md bg-gray-200 p-6 shadow-xl mb-10" method="post" @formname="embedding" @onsubmit="@ComputeEmbedding">
     <AntiforgeryToken />
@@ -37,7 +37,7 @@
             return;
         }
 
-        var result = LocalEmbeddings.EmbedAsBytes(TextToEmbed);
+        var result = Embedder.Embed<EmbeddingI8>(TextToEmbed);
         PageState.LatestText = TextToEmbed;
         PageState.TextsWithEmbeddings[TextToEmbed] = result;
     }
@@ -46,7 +46,7 @@
     {
         var latestEmbedding = PageState.TextsWithEmbeddings[PageState.LatestText!];
         return PageState.TextsWithEmbeddings
-            .Select(item => (Text: item.Key, Similarity: LocalEmbeddings.Similarity(latestEmbedding, item.Value)))
+            .Select(item => (Text: item.Key, Similarity: LocalEmbedder.Similarity(latestEmbedding, item.Value)))
             .OrderByDescending(x => x.Similarity)
             .ToArray();
     }
@@ -54,6 +54,6 @@
     public class State
     {
         public string? LatestText { get; set; }
-        public Dictionary<string, ByteEmbedding> TextsWithEmbeddings { get; set; } = new();
+        public Dictionary<string, EmbeddingI8> TextsWithEmbeddings { get; set; } = new();
     }
 }

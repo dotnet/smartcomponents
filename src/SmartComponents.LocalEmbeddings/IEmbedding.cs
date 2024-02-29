@@ -1,19 +1,31 @@
 ﻿using System;
-using System.IO;
-using System.Threading.Tasks;
 
 namespace SmartComponents.LocalEmbeddings;
 
+/// <summary>
+/// Implements a representation for an embedded value.
+/// </summary>
 public interface IEmbedding<TEmbedding>
 {
-    float Similarity(TEmbedding other);
-}
+    /// <summary>
+    /// Gives the byte length of the buffer required to store a <typeparamref name="TEmbedding"/> with the given number of dimensions.
+    /// </summary>
+    /// <param name="dimensions">The number of dimensions.</param>
+    /// <returns>The byte length of the buffer required to store the embedding as a <typeparamref name="TEmbedding"/>.</returns>
+    static abstract int GetBufferByteLength(int dimensions);
 
-internal interface IEmbedding<TEmbedding, TData> : IEmbedding<TEmbedding>
-    where TEmbedding: IEmbedding<TEmbedding, TData>
-{
-    static abstract TEmbedding FromFloats(ReadOnlySpan<float> input, Memory<TData> buffer);
-    ReadOnlyMemory<TData> Values { get; }
-    int ByteLength { get; }
-    ValueTask WriteToAsync(Stream destination);
+    /// <summary>
+    /// Converts an embedding model's raw output into a <typeparamref name="TEmbedding"/>.
+    /// </summary>
+    /// <param name="input">The raw output from the embedding model.</param>
+    /// <param name="buffer">A buffer used to store the <typeparamref name="TEmbedding"/>'s data. Its length must match the output from <see cref="GetBufferByteLength(int)"/>.</param>
+    /// <returns>The embedded value in the <typeparamref name="TEmbedding"/> representation.</returns>
+    static abstract TEmbedding FromModelOutput(ReadOnlySpan<float> input, Memory<byte> buffer);
+
+    /// <summary>
+    /// Computes the cosine similarity between this embedding and another.
+    /// </summary>
+    /// <param name="other">The other embedding.</param>
+    /// <returns>A similarity score, approximately in the range 0 to 1. Higher values indicate higher similarity.</returns>
+    float Similarity(TEmbedding other);
 }

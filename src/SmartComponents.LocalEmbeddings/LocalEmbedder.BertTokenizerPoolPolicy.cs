@@ -4,7 +4,7 @@ using System.IO;
 
 namespace SmartComponents.LocalEmbeddings;
 
-public partial class LocalEmbeddings
+public partial class LocalEmbedder
 {
     private class BertTokenizerPoolPolicy : DefaultPooledObjectPolicy<BertTokenizer>
     {
