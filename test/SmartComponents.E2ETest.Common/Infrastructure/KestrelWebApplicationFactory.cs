@@ -1,17 +1,20 @@
-﻿using Microsoft.AspNetCore.Hosting.Server.Features;
-using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.DependencyInjection;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Net;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace SmartComponents.E2ETest.Common.Infrastructure;
 
 // Credit: https://danieldonbavand.com/2022/06/13/using-playwright-with-the-webapplicationfactory-to-test-a-blazor-application/
 // which is based on work from https://github.com/martincostello/dotnet-minimal-api-integration-testing/blob/main/tests/TodoApp.Tests/HttpServerFixture.cs#L54
 
-public class KestrelWebApplicationFactory<TStartup> : WebApplicationFactory<TStartup> where TStartup: class
+public class KestrelWebApplicationFactory<TStartup> : WebApplicationFactory<TStartup> where TStartup : class
 {
     IHost? _host;
 
@@ -28,8 +31,11 @@ public class KestrelWebApplicationFactory<TStartup> : WebApplicationFactory<TSta
     {
         if (_host is null)
         {
-            // This forces WebApplicationFactory to bootstrap the server  
-            using var _ = CreateDefaultClient();
+            // This forces WebApplicationFactory to bootstrap the server,
+            // avoiding the issue with "The server has not been started or
+            // no web application was configured" mentioned at
+            // https://github.com/dotnet/aspnetcore/issues/33846#issuecomment-1763389955
+            var _ = Services;
         }
     }
 

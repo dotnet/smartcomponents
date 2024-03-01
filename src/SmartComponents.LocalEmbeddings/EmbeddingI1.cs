@@ -1,4 +1,7 @@
-﻿using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -154,7 +157,7 @@ public readonly struct EmbeddingI1 : IEmbedding<EmbeddingI1>
     public static int GetBufferByteLength(int dimensions)
         => dimensions / 8;
 
-    class BitEmbeddingJsonConverter : JsonConverter<EmbeddingI1>
+    sealed class BitEmbeddingJsonConverter : JsonConverter<EmbeddingI1>
     {
         public override EmbeddingI1 Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             => new EmbeddingI1(reader.GetBytesFromBase64());

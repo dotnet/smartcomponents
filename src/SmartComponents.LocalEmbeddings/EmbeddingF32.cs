@@ -1,9 +1,12 @@
-﻿using System.Numerics.Tensors;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
+using System.Buffers;
+using System.Numerics.Tensors;
 using System.Runtime.InteropServices;
 using System.Text.Json;
-using System;
 using System.Text.Json.Serialization;
-using System.Buffers;
 
 namespace SmartComponents.LocalEmbeddings;
 
@@ -66,12 +69,7 @@ public readonly struct EmbeddingF32 : IEmbedding<EmbeddingF32>
     public static int GetBufferByteLength(int dimensions)
         => dimensions * sizeof(float);
 
-    public static EmbeddingF32 FromBuffer(ReadOnlyMemory<byte> buffer)
-    {
-        throw new NotImplementedException();
-    }
-
-    class FloatEmbeddingJsonConverter : JsonConverter<EmbeddingF32>
+    sealed class FloatEmbeddingJsonConverter : JsonConverter<EmbeddingF32>
     {
         public override EmbeddingF32 Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             => new EmbeddingF32(reader.GetBytesFromBase64());
@@ -88,7 +86,10 @@ public readonly struct EmbeddingF32 : IEmbedding<EmbeddingF32>
             where TTo : unmanaged
         {
             // avoid the extra allocation/indirection, at the cost of a gen-0 box
-            if (typeof(TFrom) == typeof(TTo)) return (Memory<TTo>)(object)from;
+            if (typeof(TFrom) == typeof(TTo))
+            {
+                return (Memory<TTo>)(object)from;
+            }
 
             return new CastMemoryManager<TFrom, TTo>(from).Memory;
         }

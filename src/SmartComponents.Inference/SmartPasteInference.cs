@@ -1,5 +1,7 @@
-﻿using System;
-using System.ComponentModel;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
@@ -8,13 +10,10 @@ using SmartComponents.StaticAssets.Inference;
 
 namespace SmartComponents.Inference;
 
-public static class SmartPasteInference
+public class SmartPasteInference
 {
     private readonly static JsonSerializerOptions jsonSerializerOptions
         = new JsonSerializerOptions(JsonSerializerDefaults.Web);
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public static DateTime? OverrideDateForTesting { get; set; }
 
     public class SmartPasteRequestData
     {
@@ -36,23 +35,27 @@ public static class SmartPasteInference
         public string? Response { get; init; }
     }
 
-    public static async Task<SmartPasteResponseData> GetFormCompletionsAsync(IInferenceBackend inferenceBackend, string dataJson)
+    public Task<SmartPasteResponseData> GetFormCompletionsAsync(IInferenceBackend inferenceBackend, string dataJson)
     {
         var data = JsonSerializer.Deserialize<SmartPasteRequestData>(dataJson, jsonSerializerOptions)!;
         if (data.FormFields is null || data.FormFields.Length == 0 || string.IsNullOrEmpty(data.ClipboardContents))
         {
-            return new SmartPasteResponseData { BadRequest = true };
+            return Task.FromResult(new SmartPasteResponseData { BadRequest = true });
         }
 
-        var currentDate = OverrideDateForTesting ?? DateTime.Today;
+        return GetFormCompletionsAsync(inferenceBackend, data);
+    }
+
+    public virtual ChatParameters BuildPrompt(SmartPasteRequestData data)
+    {
         var systemMessage = @$"
-Current date: {currentDate.ToString("D", CultureInfo.InvariantCulture)}
+Current date: {DateTime.Today.ToString("D", CultureInfo.InvariantCulture)}
 
 Each response line matches the following format:
 FIELD identifier^^^value
 
 Give a response with the following lines only, with values inferred from USER_DATA:
-{ToFieldOutputExamples(data.FormFields)}
+{ToFieldOutputExamples(data.FormFields!)}
 END_RESPONSE
 
 Do not explain how the values were determined.
@@ -62,7 +65,7 @@ For fields without any corresponding information in USER_DATA, use value value N
 USER_DATA: {data.ClipboardContents}
 ";
 
-        var completionsResponse = await inferenceBackend.GetChatResponseAsync(new ChatOptions
+        return new ChatParameters
         {
             Messages = [
                 new (ChatMessageRole.System, systemMessage),
@@ -74,8 +77,13 @@ USER_DATA: {data.ClipboardContents}
             FrequencyPenalty = 0.1f,
             PresencePenalty = 0,
             StopSequences = ["END_RESPONSE"],
-        });
+        };
+    }
 
+    public virtual async Task<SmartPasteResponseData> GetFormCompletionsAsync(IInferenceBackend inferenceBackend, SmartPasteRequestData requestData)
+    {
+        var chatOptions = BuildPrompt(requestData);
+        var completionsResponse = await inferenceBackend.GetChatResponseAsync(chatOptions);
         return new SmartPasteResponseData { Response = completionsResponse };
     }
 

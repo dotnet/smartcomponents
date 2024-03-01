@@ -1,4 +1,7 @@
-﻿using System.Numerics.Tensors;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.Numerics.Tensors;
 using System.Text.Json;
 
 namespace SmartComponents.LocalEmbeddings.Test;
@@ -33,7 +36,7 @@ public class EmbeddingI8Test
             var actualByte = bytes.Values.Span[i];
             var expectedByte = (sbyte)scaledFloats[i];
             Assert.InRange(actualByte, expectedByte - 1, expectedByte + 1);
-        }   
+        }
     }
 
     [Fact]

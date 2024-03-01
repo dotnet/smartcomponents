@@ -1,0 +1,25 @@
+﻿@{
+    ViewData["Title"] = "Smart TextArea";
+
+    string text = "It's 35 degrees C\n\nNext, sport.";
+
+    string userRole = "Weather reporter";
+    string[] userPhrases = [
+        "That's positively sweltering!",
+        "That's bracing!"
+    ];
+}
+
+<h3>SmartTextArea testcases</h3>
+
+<p>
+    <div>Default suggestion display (inline on desktop):</div>
+    <smart-textarea user-role="@userRole" user-phrases="@userPhrases"
+        id="standard-smarttextarea" cols="100" rows="6">@text</smart-textarea>
+</p>
+
+<p>
+    <div>Overlay suggestion display:</div>
+    <smart-textarea user-role="@userRole" user-phrases="@userPhrases"
+        id="with-overlay-display" data-inline-suggestions="false" cols="100" rows="6">@text</smart-textarea>
+</p>

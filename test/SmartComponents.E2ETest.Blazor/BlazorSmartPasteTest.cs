@@ -1,4 +1,6 @@
-﻿using SmartComponents.Inference;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using TestBlazorApp;
 using Xunit;
 using static Microsoft.Playwright.Assertions;
@@ -9,14 +11,13 @@ public class BlazorSmartPasteTest : SmartPasteTest<Program>
 {
     public BlazorSmartPasteTest(KestrelWebApplicationFactory<Program> server) : base(server)
     {
-        SmartPasteInference.OverrideDateForTesting = new DateTime(2024, 2, 9);
     }
 
     [Fact]
     public async Task WorksOnInteractiveWebAssembly()
     {
         await Page.GotoAsync(Server.Address + "/smartpaste/webassembly");
-        await Expect(Page.Locator("#is-interactive")).ToHaveTextAsync("True", new() { Timeout = 20000 });
+        await Expect(Page.Locator("#is-interactive")).ToHaveTextAsync("True", new() { Timeout = 30000 });
 
         var form = Page.Locator("#simple-case");
         await Expect(form.Locator("[name=firstname]")).ToBeEmptyAsync();

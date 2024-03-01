@@ -1,6 +1,7 @@
 import { SuggestionDisplay } from './SuggestionDisplay';
 import { InlineSuggestionDisplay } from './InlineSuggestionDisplay';
 import { OverlaySuggestionDisplay } from './OverlaySuggestionDisplay';
+import { insertTextAtCaretPosition, scrollTextAreaDownToCaretIfNeeded } from './CaretUtil';
 
 export function registerSmartTextAreaCustomElement() {
     customElements.define('smart-textarea', SmartTextArea);
@@ -46,17 +47,38 @@ export class SmartTextArea extends HTMLElement {
             case 'Command':
                 break;
             default:
-                this.removeExistingOrPendingSuggestion();
+                const keyMatchesExistingSuggestion = this.suggestionDisplay.isShowing()
+                    && this.suggestionDisplay.currentSuggestion.startsWith(event.key);
+                if (keyMatchesExistingSuggestion) {
+                    // Let the typing happen, but without side-effects like removing the existing selection
+                    insertTextAtCaretPosition(this.textArea, event.key);
+                    event.preventDefault();
+
+                    // Update the existing suggestion to match the new text
+                    this.suggestionDisplay.show(this.suggestionDisplay.currentSuggestion.substring(event.key.length));
+                    scrollTextAreaDownToCaretIfNeeded(this.textArea);
+                } else {
+                    this.removeExistingOrPendingSuggestion();
+                }
                 break;
         }
+    }
+
+    keyMatchesExistingSuggestion(key: string): boolean {
+        return ;
     }
 
     // If this was changed to a 'keypress' event instead, we'd only initiate suggestions after
     // the user types a visible character, not pressing another key (e.g., arrows, or ctrl+c).
     // However for now I think it is desirable to show suggestions after cursor movement.
     handleKeyUp(event: KeyboardEvent) {
-        clearTimeout(this.typingDebounceTimeout);
-        this.typingDebounceTimeout = setTimeout(() => this.handleTypingPaused(), 350);
+        // If a suggestion is already visible, it must match the current keystroke or it would
+        // already have been removed during keydown. So we only start the timeout process if
+        // there's no visible suggestion.
+        if (!this.suggestionDisplay.isShowing()) {
+            clearTimeout(this.typingDebounceTimeout);
+            this.typingDebounceTimeout = setTimeout(() => this.handleTypingPaused(), 350);
+        }
     }
 
     handleTypingPaused() {
@@ -77,6 +99,8 @@ export class SmartTextArea extends HTMLElement {
     }
 
     removeExistingOrPendingSuggestion() {
+        clearTimeout(this.typingDebounceTimeout);
+
         this.pendingSuggestionAbortController?.abort();
         this.pendingSuggestionAbortController = null;
 

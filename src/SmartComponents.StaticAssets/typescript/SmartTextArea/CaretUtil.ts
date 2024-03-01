@@ -20,3 +20,19 @@ export function getCaretOffsetFromOffsetParent(elem: HTMLTextAreaElement): { top
         elemStyle: elemStyle,
     }
 }
+
+export function insertTextAtCaretPosition(textArea: HTMLTextAreaElement, text: string) {
+    // Even though document.execCommand is deprecated, it's still the best way to insert text, because it's
+    // the only way that interacts correctly with the undo buffer. If we have to fall back on mutating
+    // the .value property directly, it works but erases the undo buffer.
+    if (document.execCommand) {
+        document.execCommand('insertText', false, text);
+    } else {
+        let caretPos = textArea.selectionStart;
+        textArea.value = textArea.value.substring(0, caretPos)
+            + text
+            + textArea.value.substring(textArea.selectionEnd);
+        caretPos += text.length;
+        textArea.setSelectionRange(caretPos, caretPos);
+    }
+}

@@ -1,10 +1,13 @@
-﻿using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Numerics.Tensors;
 using System.Runtime.CompilerServices;
-using System.Runtime.Intrinsics.X86;
 using System.Runtime.Intrinsics;
-using System.Text.Json.Serialization;
+using System.Runtime.Intrinsics.X86;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace SmartComponents.LocalEmbeddings;
 
@@ -144,7 +147,7 @@ public readonly struct EmbeddingI8 : IEmbedding<EmbeddingI8>
     public static int GetBufferByteLength(int dimensions)
         => 4 + dimensions; // Magnitude, then the bytes
 
-    class ByteEmbeddingJsonConverter : JsonConverter<EmbeddingI8>
+    sealed class ByteEmbeddingJsonConverter : JsonConverter<EmbeddingI8>
     {
         public override EmbeddingI8 Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             => new EmbeddingI8(reader.GetBytesFromBase64());

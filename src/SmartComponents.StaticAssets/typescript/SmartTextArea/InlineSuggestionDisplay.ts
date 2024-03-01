@@ -3,6 +3,7 @@ import { SmartTextArea } from './SmartTextArea';
 import { getCaretOffsetFromOffsetParent, scrollTextAreaDownToCaretIfNeeded } from './CaretUtil';
 
 export class InlineSuggestionDisplay implements SuggestionDisplay {
+    latestSuggestionText: string = '';
     suggestionStartPos: number | null = null;
     suggestionEndPos: number | null = null;
     fakeCaret: FakeCaret | null = null;
@@ -15,6 +16,7 @@ export class InlineSuggestionDisplay implements SuggestionDisplay {
     }
 
     show(suggestion: string): void {
+        this.latestSuggestionText = suggestion;
         this.suggestionStartPos = this.textArea.selectionStart;
         this.suggestionEndPos = this.suggestionStartPos + suggestion.length;
 
@@ -24,6 +26,10 @@ export class InlineSuggestionDisplay implements SuggestionDisplay {
 
         this.fakeCaret ??= new FakeCaret(this.owner, this.textArea);
         this.fakeCaret.show();
+    }
+
+    get currentSuggestion() {
+        return this.latestSuggestionText;
     }
 
     accept(): void {

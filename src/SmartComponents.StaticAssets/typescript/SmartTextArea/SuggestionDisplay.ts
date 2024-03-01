@@ -3,4 +3,6 @@ export interface SuggestionDisplay {
     accept(): void;
     reject(): void;
     isShowing(): boolean;
+
+    get currentSuggestion(): string;
 }

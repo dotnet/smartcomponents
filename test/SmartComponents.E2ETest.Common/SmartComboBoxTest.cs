@@ -1,4 +1,7 @@
-﻿using Microsoft.Playwright;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using Microsoft.Playwright;
 
 namespace SmartComponents.E2ETest.Common;
 
@@ -165,7 +168,7 @@ public class SmartComboBoxTest<TStartup> : PlaywrightTestBase<TStartup> where TS
         await Expect(input).ToHaveAttributeAsync("aria-expanded", "false");
     }
 
-    private async Task AssertNthSuggestionIsActive(ILocator input, ILocator suggestions, int expectedSuggestionIndex)
+    private static async Task AssertNthSuggestionIsActive(ILocator input, ILocator suggestions, int expectedSuggestionIndex)
     {
         var suggestionItems = suggestions.Locator(".smartcombobox-suggestion");
         var expectedSuggestionId = await suggestionItems.Nth(expectedSuggestionIndex).GetAttributeAsync("id");

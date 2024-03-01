@@ -1,25 +1,27 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Linq;
-using Azure.AI.OpenAI;
+using System.Threading.Tasks;
 using Azure;
+using Azure.AI.OpenAI;
 using Microsoft.Extensions.Configuration;
 using SmartComponents.StaticAssets.Inference;
-using System.Collections.Generic;
 
 namespace SmartComponents.Inference.OpenAI;
 
 public class OpenAIInferenceBackend(IConfiguration configuration)
     : IInferenceBackend
 {
-    public async Task<string> GetChatResponseAsync(ChatOptions options)
+    public async Task<string> GetChatResponseAsync(ChatParameters options)
     {
-        #if DEBUG
+#if DEBUG
         if (ResponseCache.TryGetCachedResponse(options, out var cachedResponse))
         {
             return cachedResponse!;
         }
-        #endif
+#endif
 
         var apiConfig = new ApiConfig(configuration);
         var client = new OpenAIClient(
@@ -59,9 +61,9 @@ public class OpenAIInferenceBackend(IConfiguration configuration)
 
         var response = completionsResponse.Value.Choices.FirstOrDefault()?.Message.Content ?? string.Empty;
 
-        #if DEBUG
+#if DEBUG
         ResponseCache.SetCachedResponse(options, response);
-        #endif
+#endif
 
         return response;
     }

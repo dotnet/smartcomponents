@@ -14,6 +14,7 @@
 
     <ItemGroup>
         <Compile Include="$(SharedSrcRoot)RepoSharedConfigUtil.cs" />
+        <Compile Include="..\TestBlazorApp\SmartPasteInferenceForTests.cs" />
         <Compile Include="..\TestBlazorApp\TestData.cs" />
     </ItemGroup>
 

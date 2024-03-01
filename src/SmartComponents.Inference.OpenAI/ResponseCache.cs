@@ -1,5 +1,7 @@
-﻿#if DEBUG
-using SmartComponents.StaticAssets.Inference;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#if DEBUG
 using System;
 using System.IO;
 using System.Linq;
@@ -7,6 +9,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using SmartComponents.StaticAssets.Inference;
 
 namespace SmartComponents.Inference.OpenAI;
 
@@ -26,7 +29,7 @@ internal static class ResponseCache
         return dir;
     });
 
-    public static bool TryGetCachedResponse(ChatOptions request, out string? response)
+    public static bool TryGetCachedResponse(ChatParameters request, out string? response)
     {
         if (!IsEnabled)
         {
@@ -37,17 +40,19 @@ internal static class ResponseCache
         var filePath = GetCacheFilePath(request);
         if (File.Exists(filePath))
         {
+            Console.WriteLine("Using cached response for " + Path.GetFileName(filePath));
             response = File.ReadAllText(filePath);
             return true;
         }
         else
         {
+            Console.WriteLine("Did not find cached response for " + Path.GetFileName(filePath));
             response = null;
             return false;
         }
     }
 
-    public static void SetCachedResponse(ChatOptions request, string response)
+    public static void SetCachedResponse(ChatParameters request, string response)
     {
         if (IsEnabled)
         {
@@ -57,7 +62,7 @@ internal static class ResponseCache
         }
     }
 
-    private static string GetCacheFilePath(ChatOptions request)
+    private static string GetCacheFilePath(ChatParameters request)
         => GetCacheFilePath(request, request.Messages.LastOrDefault()?.Text ?? "no_messages");
 
     private static string GetCacheFilePath<T>(T request, string summary)
@@ -90,7 +95,7 @@ internal static class ResponseCache
         var json = GetCacheKeyInput(request);
         var sha256 = SHA256.Create();
         var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(json));
-        
+
         var sb = new StringBuilder();
         for (var i = 0; i < 8; i++)
         {

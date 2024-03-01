@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Antiforgery;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.Globalization;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.Routing;
@@ -37,9 +41,9 @@ public class SmartComboBoxTagHelper : TagHelper
         output.PostElement.SetHtmlContent("<smart-combobox role=\"listbox\"");
         PassThroughAttributeIfPresent(context, output, "title", "title");
         PassThroughAttributeIfPresent(context, output, "id", "aria-label");
-        
-        AddPostElementAttribute(output, " data-max-suggestions", MaxSuggestions.ToString());
-        AddPostElementAttribute(output, " data-similarity-threshold", SimilarityThreshold.ToString());
+
+        AddPostElementAttribute(output, " data-max-suggestions", MaxSuggestions.ToString(CultureInfo.InvariantCulture));
+        AddPostElementAttribute(output, " data-similarity-threshold", SimilarityThreshold.ToString(CultureInfo.InvariantCulture));
 
         var services = ViewContext.HttpContext.RequestServices;
         var urlHelper = services.GetRequiredService<IUrlHelperFactory>().GetUrlHelper(ViewContext);

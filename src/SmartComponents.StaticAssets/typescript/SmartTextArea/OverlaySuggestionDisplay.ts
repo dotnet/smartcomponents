@@ -1,9 +1,12 @@
-﻿import { SuggestionDisplay } from './SuggestionDisplay';
+import { SuggestionDisplay } from './SuggestionDisplay';
 import { SmartTextArea } from './SmartTextArea';
-import { getCaretOffsetFromOffsetParent, scrollTextAreaDownToCaretIfNeeded } from './CaretUtil';
+import { getCaretOffsetFromOffsetParent, insertTextAtCaretPosition, scrollTextAreaDownToCaretIfNeeded } from './CaretUtil';
 
 export class OverlaySuggestionDisplay implements SuggestionDisplay {
+    latestSuggestionText: string = '';
     suggestionElement: HTMLDivElement;
+    suggestionPrefixElement: HTMLSpanElement;
+    suggestionTextElement: HTMLSpanElement;
     showing: boolean;
 
     constructor(owner: SmartTextArea, private textArea: HTMLTextAreaElement) {
@@ -12,6 +15,13 @@ export class OverlaySuggestionDisplay implements SuggestionDisplay {
         this.suggestionElement.addEventListener('mousedown', e => this.handleSuggestionClicked(e));
         this.suggestionElement.addEventListener('touchend', e => this.handleSuggestionClicked(e));
 
+        this.suggestionPrefixElement = document.createElement('span');
+        this.suggestionTextElement = document.createElement('span');
+        this.suggestionElement.appendChild(this.suggestionPrefixElement);
+        this.suggestionElement.appendChild(this.suggestionTextElement);
+
+        this.suggestionPrefixElement.style.opacity = '0.3';
+
         const computedStyle = window.getComputedStyle(this.textArea);
         this.suggestionElement.style.font = computedStyle.font;
         this.suggestionElement.style.marginTop = (parseFloat(computedStyle.fontSize) * 1.4) + 'px';
@@ -19,18 +29,32 @@ export class OverlaySuggestionDisplay implements SuggestionDisplay {
         owner.appendChild(this.suggestionElement);
     }
 
+    get currentSuggestion() {
+        return this.latestSuggestionText;
+    }
+
     show(suggestion: string): void {
-        this.suggestionElement.textContent = suggestion;
+        this.latestSuggestionText = suggestion;
+
+        this.suggestionPrefixElement.textContent = suggestion[0] != ' ' ? getCurrentIncompleteWord(this.textArea, 20) : '';
+        this.suggestionTextElement.textContent = suggestion;
 
         const caretOffset = getCaretOffsetFromOffsetParent(this.textArea);
         const style = this.suggestionElement.style;
         style.minWidth = null;
-        style.top = caretOffset.top + 'px';
-        style.left = caretOffset.left + 'px';
+        this.suggestionElement.classList.add('smart-textarea-suggestion-overlay-visible');
         style.zIndex = this.textArea.style.zIndex;
+        style.top = caretOffset.top + 'px';
+
+        // If the horizontal position is already close enough, leave it alone. Otherwise it
+        // can jiggle annoyingly due to inaccuracies in measuring the caret position.
+        const newLeftPos = caretOffset.left - this.suggestionPrefixElement.offsetWidth;
+        if (!style.left || Math.abs(parseFloat(style.left) - newLeftPos) > 10) {
+            style.left = newLeftPos + 'px';
+        }
+
         this.showing = true;
 
-        this.suggestionElement.classList.add('smart-textarea-suggestion-overlay-visible');
 
         // Normally we're happy for the overlay to take up as much width as it can up to the edge of the page.
         // However, if it's too narrow (because the edge of the page is already too close), it will wrap onto
@@ -56,19 +80,7 @@ export class OverlaySuggestionDisplay implements SuggestionDisplay {
             return;
         }
 
-        // Even though document.execCommand is deprecated, it's still the best way to insert text, because it's
-        // the only way that interacts correctly with the undo buffer. If we have to fall back on mutating
-        // the .value property directly, it works but erases the undo buffer.
-        if (document.execCommand) {
-            document.execCommand('insertText', false, this.suggestionElement.textContent);
-        } else {
-            let caretPos = this.textArea.selectionStart;
-            this.textArea.value = this.textArea.value.substring(0, caretPos)
-                + this.suggestionElement.textContent
-                + this.textArea.value.substring(caretPos);
-            caretPos += this.suggestionElement.textContent.length;
-            this.textArea.setSelectionRange(caretPos, caretPos);
-        }
+        insertTextAtCaretPosition(this.textArea, this.currentSuggestion);
 
         // The newly-inserted text could be so long that the new caret position is off the bottom of the textarea.
         // It won't scroll to the new caret position by default
@@ -97,4 +109,20 @@ export class OverlaySuggestionDisplay implements SuggestionDisplay {
         event.stopImmediatePropagation();
         this.accept();
     }
+}
+
+function getCurrentIncompleteWord(textArea: HTMLTextAreaElement, maxLength: number) {
+    const text = textArea.value;
+    const caretPos = textArea.selectionStart;
+
+    // Not all languages have words separated by spaces. Imposing the maxlength rule
+    // means we'll not show the prefix for those languages if you're in the middle
+    // of longer text (and ensures we don't search through a long block), which is ideal.
+    for (let i = caretPos - 1; i > caretPos - maxLength; i--) {
+        if (i < 0 || text[i].match(/\s/)) {
+            return text.substring(i + 1, caretPos);
+        }
+    }
+
+    return '';
 }

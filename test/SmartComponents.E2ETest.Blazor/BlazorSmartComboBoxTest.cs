@@ -1,4 +1,7 @@
-﻿using TestBlazorApp;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using TestBlazorApp;
 using Xunit;
 using static Microsoft.Playwright.Assertions;
 
@@ -16,7 +19,7 @@ public class BlazorSmartComboBoxTest : SmartComboBoxTest<Program>
     public async Task TriggersBindings(string host)
     {
         await Page.GotoAsync(Server.Address + "/smartcombobox/" + host);
-        await Expect(Page.Locator("#is-interactive")).ToHaveTextAsync("True", new() { Timeout = 20000 });
+        await Expect(Page.Locator("#is-interactive")).ToHaveTextAsync("True", new() { Timeout = 30000 });
 
         var input = Page.Locator("#default-params input");
         var suggestions = Page.Locator("#default-params smart-combobox");

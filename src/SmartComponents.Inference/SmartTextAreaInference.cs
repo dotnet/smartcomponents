@@ -1,14 +1,18 @@
-﻿using SmartComponents.Infrastructure;
-using SmartComponents.StaticAssets.Inference;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using SmartComponents.Infrastructure;
+using SmartComponents.StaticAssets.Inference;
 
 namespace SmartComponents.Inference;
 
 public class SmartTextAreaInference
 {
-    public static async Task<string> GetInsertionSuggestionAsync(IInferenceBackend inference, SmartTextAreaConfig config, string textBefore, string textAfter)
+    public virtual ChatParameters BuildPrompt(SmartTextAreaConfig config, string textBefore, string textAfter)
     {
         var systemMessageBuilder = new StringBuilder();
         systemMessageBuilder.Append(@"Predict what text the user in the given ROLE would insert at the cursor position indicated by ^^^.
@@ -30,7 +34,7 @@ RULES:
             }
         }
 
-        ChatMessage[] messages =
+        List<ChatMessage> messages =
         [
             new(ChatMessageRole.System, systemMessageBuilder.ToString()),
 
@@ -66,7 +70,7 @@ USER_TEXT: Have you found^^^"),
 USER_TEXT: {textBefore}^^^{textAfter}"),
         ];
 
-        var chatOptions = new ChatOptions
+        return new ChatParameters
         {
             Messages = messages,
             Temperature = 0,
@@ -75,7 +79,11 @@ USER_TEXT: {textBefore}^^^{textAfter}"),
             FrequencyPenalty = 0,
             PresencePenalty = 0,
         };
+    }
 
+    public virtual async Task<string> GetInsertionSuggestionAsync(IInferenceBackend inference, SmartTextAreaConfig config, string textBefore, string textAfter)
+    {
+        var chatOptions = BuildPrompt(config, textBefore, textAfter);
         var response = await inference.GetChatResponseAsync(chatOptions);
         if (response.Length > 5 && response.StartsWith("OK:[", StringComparison.Ordinal))
         {
@@ -86,7 +94,19 @@ USER_TEXT: {textBefore}^^^{textAfter}"),
                 response = response.Substring(0, trimAfter + 1);
             }
 
-            return response.Substring(4).TrimEnd(']', ' ');
+            // Leave it up to the frontend code to decide whether to add a training space
+            var trimmedResponse = response.Substring(4).TrimEnd(']', ' ');
+
+            // Don't have a leading space on the suggestion if there's already a space right
+            // before the cursor. The language model normally gets this right anyway (distinguishing
+            // between starting a new word, vs continuing a partly-typed one) but sometimes it adds
+            // an unnecessary extra space.
+            if (textBefore.Length > 0 && textBefore[textBefore.Length - 1] == ' ')
+            {
+                trimmedResponse = trimmedResponse.TrimStart(' ');
+            }
+
+            return trimmedResponse;
         }
 
         return string.Empty;

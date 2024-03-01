@@ -6,7 +6,7 @@
 <form class="default-form rounded-md bg-gray-200 p-6 shadow-xl mb-12">
     <div class="grid mb-5">
         <label for="name">Comment</label>
-        <SmartTextArea UserRole="@currentPreset.Role" UserPhrases="@currentPreset.Phrases" @bind-Value="@currenText"
+        <SmartTextArea UserRole="@currentPreset.Role" UserPhrases="@currentPreset.Phrases" @bind-Value="@currentText"
                        style="height: 100px;" placeholder="Type your comment here..." autofocus />
     </div>
 
@@ -28,7 +28,7 @@
 </form>
 
 @code {
-    private string? currenText;
+    private string? currentText;
     private Preset currentPreset;
 
     private Preset[] presets = [

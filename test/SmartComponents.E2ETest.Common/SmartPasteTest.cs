@@ -1,4 +1,7 @@
-﻿namespace SmartComponents.E2ETest.Common;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+namespace SmartComponents.E2ETest.Common;
 
 public class SmartPasteTest<TStartup> : PlaywrightTestBase<TStartup> where TStartup : class
 {
@@ -64,7 +67,7 @@ public class SmartPasteTest<TStartup> : PlaywrightTestBase<TStartup> where TStar
     public async Task CanHaveDefaultIcon()
     {
         var button = Page.Locator("#with-icon");
-        
+
         var normalIcon = button.Locator("svg.smart-paste-icon.smart-paste-icon-normal");
         var runningIcon = button.Locator("svg.smart-paste-icon.smart-paste-icon-running");
 

@@ -1,16 +1,19 @@
-﻿using System.Collections.Generic;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.Collections.Generic;
 
 namespace SmartComponents.StaticAssets.Inference;
 
-public class ChatOptions
+public class ChatParameters
 {
-    public ICollection<ChatMessage>? Messages { get; set; }
+    public IList<ChatMessage>? Messages { get; set; }
     public float? Temperature { get; set; }
     public float? TopP { get; set; }
     public int? MaxTokens { get; set; }
     public float? FrequencyPenalty { get; set; }
     public float? PresencePenalty { get; set; }
-    public ICollection<string>? StopSequences { get; set; }
+    public IList<string>? StopSequences { get; set; }
 }
 
 public class ChatMessage(ChatMessageRole role, string text)

@@ -1,6 +1,6 @@
-﻿using FastBertTokenizer;
-using Microsoft.Extensions.ObjectPool;
-using Microsoft.ML.OnnxRuntime;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -9,10 +9,13 @@ using System.Linq;
 using System.Numerics.Tensors;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using FastBertTokenizer;
+using Microsoft.Extensions.ObjectPool;
+using Microsoft.ML.OnnxRuntime;
 
 namespace SmartComponents.LocalEmbeddings;
 
-public partial class LocalEmbedder : IDisposable
+public sealed partial class LocalEmbedder : IDisposable
 {
     private static readonly ArrayPool<float> _outputBufferPool = ArrayPool<float>.Create();
 
@@ -84,7 +87,7 @@ public partial class LocalEmbedder : IDisposable
 
             return PoolSum<TEmbedding>(
                 outputs[0].GetTensorDataAsSpan<float>(),
-                Dimensions, 
+                Dimensions,
                 outputBuffer ?? new byte[TEmbedding.GetBufferByteLength(Dimensions)]);
         }
         finally
@@ -136,7 +139,7 @@ public partial class LocalEmbedder : IDisposable
     public IEnumerable<(string Item, TEmbedding Embedding)> EmbedRange<TEmbedding>(
         IEnumerable<string> items,
         int maximumTokens = DefaultMaximumTokens)
-        where TEmbedding: IEmbedding<TEmbedding>
+        where TEmbedding : IEmbedding<TEmbedding>
         => items.Select(item => (item, Embed<TEmbedding>(item, maximumTokens: maximumTokens))).ToList();
 
     public IEnumerable<(TItem Item, EmbeddingF32 Embedding)> EmbedRange<TItem>(
