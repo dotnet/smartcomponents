@@ -88,11 +88,10 @@ public class SmartTextAreaOverlayTest<TStartup> : PlaywrightTestBase<TStartup> w
 
         // It goes away if you type something that doesn't match the suggestion
         await textArea.PressSequentiallyAsync("sibly");
-        await AssertIsNotShowingSuggestionAsync();
-        await Expect(textArea).ToHaveValueAsync("It's 35 degrees C - that's possibly\n\nNext, sport.");
 
-        // See a new suggestion appears. The LLM actually replies with multiple sentences here, but
-        // the server-side code trims it at the end of the first sentence.
+        // Unfortunately we can't observe in tests that the suggestion went away, because
+        // another suggestion will appear later. So the best we can do is assert about the
+        // state after the next suggestion appears.
         await AssertIsShowingSuggestionAsync(35, "", " the hottest day of the year! ");
     }
 

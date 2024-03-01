@@ -30,6 +30,8 @@ jobs:
       run: dotnet test --no-build --verbosity normal
     - name: Pack
       run: dotnet pack -c Release /p:BuildNumber=${{ github.run_number }}
+    - name: Benchmark
+      run: cd benchmark/SmartComponents.LocalEmbeddings.Benchmark && dotnet run -c Release -- --filter "*"
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:

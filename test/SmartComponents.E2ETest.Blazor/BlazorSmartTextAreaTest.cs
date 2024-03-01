@@ -4,7 +4,6 @@
 using TestBlazorApp;
 using Xunit;
 using static Microsoft.Playwright.Assertions;
-using static SmartComponents.E2ETest.Common.Infrastructure.TextAreaAssertions;
 
 namespace SmartComponents.E2ETest.Blazor;
 
@@ -27,13 +26,12 @@ public class BlazorSmartTextAreaInlineTest : SmartTextAreaInlineTest<Program>
         await textArea.PressSequentiallyAsync(" - that's pos");
         await AssertIsShowingSuggestionAsync(30, "itively sweltering! ");
 
-        // Accept it
+        // Accept it, and wait until another suggestion appears
         await textArea.PressAsync("Tab");
-        await AssertIsNotShowingSuggestionAsync();
-        await Expect(textArea).ToHaveValueAsync("It's 35 degrees C - that's positively sweltering! \n\nNext, sport.");
-        await AssertSelectionPositionAsync(textArea, 50, 0);
+        await AssertIsShowingSuggestionAsync(50, "I hope you're staying cool out there! ");
 
-        // See the binding is updated only after the change event
+        // See the binding is updated only after the change event, and it doesn't include the suggestion we didn't yet accept
+        await Task.Delay(500); // ... even if we wait a bit, it's still not updated
         await Expect(Page.Locator("#bound-text")).ToHaveTextAsync("It's 35 degrees C\n\nNext, sport.");
         await textArea.BlurAsync();
         await Expect(Page.Locator("#bound-text")).ToHaveTextAsync("It's 35 degrees C - that's positively sweltering! \n\nNext, sport.");
@@ -59,13 +57,12 @@ public class BlazorSmartTextAreaOverlayTest : SmartTextAreaOverlayTest<Program>
         await textArea.PressSequentiallyAsync(" - that's pos");
         await AssertIsShowingSuggestionAsync(30, "pos", "itively sweltering! ");
 
-        // Accept it
+        // Accept it, and wait until another suggestion appears
         await textArea.PressAsync("Tab");
-        await AssertIsNotShowingSuggestionAsync();
-        await Expect(textArea).ToHaveValueAsync("It's 35 degrees C - that's positively sweltering! \n\nNext, sport.");
-        await AssertSelectionPositionAsync(textArea, 50, 0);
+        await AssertIsShowingSuggestionAsync(50, "", "I hope you're staying cool out there! ");
 
-        // See the binding is updated only after the change event
+        // See the binding is updated only after the change event, and it doesn't include the suggestion we didn't yet accept
+        await Task.Delay(500); // ... even if we wait a bit, it's still not updated
         await Expect(Page.Locator("#bound-text")).ToHaveTextAsync("It's 35 degrees C\n\nNext, sport.");
         await textArea.BlurAsync();
         await Expect(Page.Locator("#bound-text")).ToHaveTextAsync("It's 35 degrees C - that's positively sweltering! \n\nNext, sport.");

@@ -7,8 +7,32 @@ export class InlineSuggestionDisplay implements SuggestionDisplay {
     suggestionStartPos: number | null = null;
     suggestionEndPos: number | null = null;
     fakeCaret: FakeCaret | null = null;
+    originalValueProperty: PropertyDescriptor;
 
     constructor(private owner: SmartTextArea, private textArea: HTMLTextAreaElement) {
+        // When any other JS code asks for the value of the textarea, we want to return the value
+        // without any pending suggestion, otherwise it will break things like bindings
+        this.originalValueProperty = findPropertyRecursive(textArea, 'value');
+        const self = this;
+        Object.defineProperty(textArea, 'value', {
+            get() {
+                const trueValue = self.originalValueProperty.get.call(textArea);
+                return self.isShowing()
+                    ? trueValue.substring(0, self.suggestionStartPos) + trueValue.substring(self.suggestionEndPos)
+                    : trueValue;
+            },
+            set(v) {
+                self.originalValueProperty.set.call(textArea, v);
+            }
+        });
+    }
+
+    get valueIncludingSuggestion() {
+        return this.originalValueProperty.get.call(this.textArea);
+    }
+
+    set valueIncludingSuggestion(val: string) {
+        this.originalValueProperty.set.call(this.textArea, val);
     }
 
     isShowing(): boolean {
@@ -21,7 +45,7 @@ export class InlineSuggestionDisplay implements SuggestionDisplay {
         this.suggestionEndPos = this.suggestionStartPos + suggestion.length;
 
         this.textArea.setAttribute('data-suggestion-visible', '');
-        this.textArea.value = this.textArea.value.substring(0, this.suggestionStartPos) + suggestion + this.textArea.value.substring(this.suggestionStartPos);
+        this.valueIncludingSuggestion = this.valueIncludingSuggestion.substring(0, this.suggestionStartPos) + suggestion + this.valueIncludingSuggestion.substring(this.suggestionStartPos);
         this.textArea.setSelectionRange(this.suggestionStartPos, this.suggestionEndPos);
 
         this.fakeCaret ??= new FakeCaret(this.owner, this.textArea);
@@ -51,7 +75,7 @@ export class InlineSuggestionDisplay implements SuggestionDisplay {
 
         const prevSelectionStart = this.textArea.selectionStart;
         const prevSelectionEnd = this.textArea.selectionEnd;
-        this.textArea.value = this.textArea.value.substring(0, this.suggestionStartPos) + this.textArea.value.substring(this.suggestionEndPos);
+        this.valueIncludingSuggestion = this.valueIncludingSuggestion.substring(0, this.suggestionStartPos) + this.valueIncludingSuggestion.substring(this.suggestionEndPos);
 
         if (this.suggestionStartPos === prevSelectionStart && this.suggestionEndPos === prevSelectionEnd) {
             // For most interactions we don't need to do anything to preserve the cursor position, but for
@@ -89,4 +113,16 @@ class FakeCaret {
     hide() {
         this.caretDiv.style.display = 'none';
     }
+}
+
+function findPropertyRecursive(obj: any, propName: string): PropertyDescriptor {
+    while (obj) {
+        const descriptor = Object.getOwnPropertyDescriptor(obj, propName);
+        if (descriptor) {
+            return descriptor;
+        }
+        obj = Object.getPrototypeOf(obj);
+    }
+
+    throw new Error(`Property ${propName} not found on object or its prototype chain`);
 }
