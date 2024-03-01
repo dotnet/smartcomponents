@@ -6,7 +6,6 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
-using System.Runtime.Intrinsics.X86;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -107,8 +106,8 @@ public readonly struct EmbeddingI1 : IEmbedding<EmbeddingI1>
         // Process as many Vector256 blocks as possible
         while (lhsPtr <= lhsPtrEnd - 32)
         {
-            var lhsBlock = Avx.LoadVector256(lhsPtr);
-            var rhsBlock = Avx.LoadVector256(rhsPtr);
+            var lhsBlock = Vector256.Load(lhsPtr);
+            var rhsBlock = Vector256.Load(rhsPtr);
             var xorBlock = Vector256.Xor(lhsBlock, rhsBlock).AsUInt64();
 
             // This is 10x faster than any AVX2/SSE3 vectorized approach I could find (e.g.,
@@ -127,8 +126,8 @@ public readonly struct EmbeddingI1 : IEmbedding<EmbeddingI1>
         // Process as many Vector128 blocks as possible
         while (lhsPtr <= lhsPtrEnd - 16)
         {
-            var lhsBlock = Sse2.LoadVector128(lhsPtr);
-            var rhsBlock = Sse2.LoadVector128(rhsPtr);
+            var lhsBlock = Vector128.Load(lhsPtr);
+            var rhsBlock = Vector128.Load(rhsPtr);
             var xorBlock = Vector128.Xor(lhsBlock, rhsBlock).AsUInt64();
 
             differences +=

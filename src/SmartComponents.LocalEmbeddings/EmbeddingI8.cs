@@ -5,6 +5,7 @@ using System;
 using System.Numerics.Tensors;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.Arm;
 using System.Runtime.Intrinsics.X86;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -73,16 +74,36 @@ public readonly struct EmbeddingI8 : IEmbedding<EmbeddingI8>
             Vector256<int> magnitudeSquareds = default;
             fixed (byte* bufferPtr = buffer.Span.Slice(4))
             {
-                for (var pos = 0; pos < length; pos += blockLength)
+                if (Avx.IsSupported)
                 {
-                    var block = Avx.LoadVector256(inputPtr + pos) * scaleFactor;
-                    var blockInt = Avx.ConvertToVector256Int32(block);
-                    var packedShort = Avx.PackSignedSaturate(blockInt.GetLower(), blockInt.GetUpper());
-                    var packedByte = Avx.PackSignedSaturate(packedShort, default);
-                    var packedByteLower = packedByte.GetLower();
-                    packedByteLower.AsByte().Store(bufferPtr + pos);
+                    for (var pos = 0; pos < length; pos += blockLength)
+                    {
+                        var block = Avx.LoadVector256(inputPtr + pos) * scaleFactor;
+                        var blockInt = Avx.ConvertToVector256Int32(block);
+                        var packedShort = Avx.PackSignedSaturate(blockInt.GetLower(), blockInt.GetUpper());
+                        var packedSByte = Avx.PackSignedSaturate(packedShort, packedShort).GetLower();
+                        Vector64.Store(packedSByte.AsByte(), bufferPtr + pos);
+                        magnitudeSquareds += blockInt * blockInt;
+                    }
+                }
+                else if (AdvSimd.IsSupported)
+                {
+                    for (var pos = 0; pos < length; pos += blockLength)
+                    {
+                        var block = Vector256.Load(inputPtr + pos) * scaleFactor;
+                        var blockInt = Vector256.ConvertToInt32(block);
 
-                    magnitudeSquareds += blockInt * blockInt;
+                        var blockShort = Vector128.Create(
+                            AdvSimd.ExtractNarrowingLower(blockInt.GetLower()),
+                            AdvSimd.ExtractNarrowingLower(blockInt.GetUpper()));
+                        var blockByte = AdvSimd.ExtractNarrowingLower(blockShort);
+                        blockByte.AsByte().Store(bufferPtr + pos);
+                        magnitudeSquareds += blockInt * blockInt;
+                    }
+                }
+                else
+                {
+                    throw new PlatformNotSupportedException($"{nameof(EmbeddingI8)} requires a CPU that supports either AVX (x86) or AdvSIMD (ARM).");
                 }
             }
 
@@ -122,25 +143,41 @@ public readonly struct EmbeddingI8 : IEmbedding<EmbeddingI8>
         {
             for (var pos = 0; pos < length; pos += Vec256ByteLength)
             {
-                var thisVecSByte = Avx.LoadVector256(thisPtr + pos);
-                var otherVecSByte = Avx.LoadVector256(otherPtr + pos);
+                var thisVecSByte = Vector256.Load(thisPtr + pos);
+                var otherVecSByte = Vector256.Load(otherPtr + pos);
 
                 // Multiply the lower halves
-                var thisVecShort = Avx2.ConvertToVector256Int16(thisVecSByte.GetLower());
-                var otherVecShort = Avx2.ConvertToVector256Int16(otherVecSByte.GetLower());
-                var products = Avx2.MultiplyAddAdjacent(thisVecShort, otherVecShort);
-                sumsOfProducts += products;
+                var thisVecShort = Vector256.WidenLower(thisVecSByte);
+                var otherVecShort = Vector256.WidenLower(otherVecSByte);
+                if (Avx2.IsSupported)
+                {
+                    sumsOfProducts += Avx2.MultiplyAddAdjacent(thisVecShort, otherVecShort);
+                }
+                else
+                {
+                    // We know the multiply won't overflow because the values are all in the range -128 to 127
+                    var products = Vector256.Multiply(thisVecShort, otherVecShort);
+                    sumsOfProducts += Vector256.WidenLower(products) + Vector256.WidenUpper(products);
+                }
 
                 // Multiply the upper halves
-                thisVecShort = Avx2.ConvertToVector256Int16(thisVecSByte.GetUpper());
-                otherVecShort = Avx2.ConvertToVector256Int16(otherVecSByte.GetUpper());
-                products = Avx2.MultiplyAddAdjacent(thisVecShort, otherVecShort);
-                sumsOfProducts += products;
+                thisVecShort = Vector256.WidenUpper(thisVecSByte);
+                otherVecShort = Vector256.WidenUpper(otherVecSByte);
+                if (Avx2.IsSupported)
+                {
+                    sumsOfProducts += Avx2.MultiplyAddAdjacent(thisVecShort, otherVecShort);
+                }
+                else
+                {
+                    // We know the multiply won't overflow because the values are all in the range -128 to 127
+                    var products = Vector256.Multiply(thisVecShort, otherVecShort);
+                    sumsOfProducts += Vector256.WidenLower(products) + Vector256.WidenUpper(products);
+                }
             }
-        }
 
-        var totalsFloats = Avx.ConvertToVector256Single(sumsOfProducts);
-        return Vector256.Sum(totalsFloats) / (_magnitude * other._magnitude);
+            var totalsFloats = Vector256.ConvertToSingle(sumsOfProducts);
+            return Vector256.Sum(totalsFloats) / (_magnitude * other._magnitude);
+        }
     }
 
     /// <inheritdoc />

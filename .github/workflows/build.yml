@@ -11,7 +11,10 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-14]
     steps:
     - uses: actions/checkout@v3
       with:
@@ -33,6 +36,7 @@ jobs:
     - name: Benchmark
       run: cd benchmark/SmartComponents.LocalEmbeddings.Benchmark && dotnet run -c Release -- --filter "*"
     - name: Upload artifacts
+      if: matrix.os == 'ubuntu-latest'
       uses: actions/upload-artifact@v3
       with:
         name: nuget-packages
@@ -40,5 +44,5 @@ jobs:
         if-no-files-found: error
 # NuGet package publishing works but is disabled until closer to release
 #    - name: Publish to NuGet.org
-#      if: github.ref == 'refs/heads/main'
+#      if: github.ref == 'refs/heads/main' && matrix.os == 'ubuntu-latest'
 #      run:  dotnet nuget push artifacts/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_API_KEY}}

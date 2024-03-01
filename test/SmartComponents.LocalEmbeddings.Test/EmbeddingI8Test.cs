@@ -45,7 +45,7 @@ public class EmbeddingI8Test
         using var embedder = new LocalEmbedder();
         var testSentence = "This is my test sentence";
         var values = embedder.Embed<EmbeddingI8>(testSentence);
-        Assert.Equal(1, LocalEmbedder.Similarity(values, values));
+        Assert.Equal(1, MathF.Round(LocalEmbedder.Similarity(values, values), 3));
     }
 
     [Fact]
