@@ -69,14 +69,14 @@ public readonly struct EmbeddingI1 : IEmbedding<EmbeddingI1>
             // speed of doing it in this naive way
             var sources = input.Slice(j, 8);
             var sum = (byte)0;
-            if (float.IsPositive(sources[0])) sum |= 128;
-            if (float.IsPositive(sources[1])) sum |= 64;
-            if (float.IsPositive(sources[2])) sum |= 32;
-            if (float.IsPositive(sources[3])) sum |= 16;
-            if (float.IsPositive(sources[4])) sum |= 8;
-            if (float.IsPositive(sources[5])) sum |= 4;
-            if (float.IsPositive(sources[6])) sum |= 2;
-            if (float.IsPositive(sources[7])) sum |= 1;
+            if (float.IsPositive(sources[0])) { sum |= 128; }
+            if (float.IsPositive(sources[1])) { sum |= 64; }
+            if (float.IsPositive(sources[2])) { sum |= 32; }
+            if (float.IsPositive(sources[3])) { sum |= 16; }
+            if (float.IsPositive(sources[4])) { sum |= 8; }
+            if (float.IsPositive(sources[5])) { sum |= 4; }
+            if (float.IsPositive(sources[6])) { sum |= 2; }
+            if (float.IsPositive(sources[7])) { sum |= 1; }
             result[j / 8] = sum;
         }
     }
