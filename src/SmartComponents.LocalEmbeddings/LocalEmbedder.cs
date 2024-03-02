@@ -21,7 +21,7 @@ public sealed partial class LocalEmbedder : IDisposable
 
     private readonly ObjectPool<BertTokenizer> _tokenizersPool;
     private readonly InferenceSession _onnxSession;
-    private readonly RunOptions _runOptions = new RunOptions();
+    private readonly RunOptions _runOptions = new();
 
     public int Dimensions { get; }
 
@@ -61,29 +61,26 @@ public sealed partial class LocalEmbedder : IDisposable
             // we've finished getting the final result
             var tokens = tokenizer.Encode(inputText, maximumTokens: maximumTokens);
 
-            var inputIdsOrtValue = OrtValue.CreateTensorValueFromMemory(
+            using var inputIdsOrtValue = OrtValue.CreateTensorValueFromMemory(
                 OrtMemoryInfo.DefaultInstance,
                 MemoryMarshal.AsMemory(tokens.InputIds),
                 [1L, tokens.InputIds.Length]);
-            var attMaskOrtValue = OrtValue.CreateTensorValueFromMemory(
+            using var attMaskOrtValue = OrtValue.CreateTensorValueFromMemory(
                 OrtMemoryInfo.DefaultInstance,
                 MemoryMarshal.AsMemory(tokens.AttentionMask),
                 [1, tokens.AttentionMask.Length]);
-            var typeIdsOrtValue = OrtValue.CreateTensorValueFromMemory(
+            using var typeIdsOrtValue = OrtValue.CreateTensorValueFromMemory(
                 OrtMemoryInfo.DefaultInstance,
                 MemoryMarshal.AsMemory(tokens.TokenTypeIds),
                 [1, tokens.TokenTypeIds.Length]);
 
-            var inputs = new Dictionary<string, OrtValue>
-            {
-                { "input_ids", inputIdsOrtValue },
-                { "attention_mask", attMaskOrtValue },
-                { "token_type_ids", typeIdsOrtValue }
-            };
-
             // InferenceSession.Run is thread-safe as per https://github.com/microsoft/onnxruntime/issues/114
             // so there's no need to maintain some kind of pool of sessions
-            using var outputs = _onnxSession.Run(_runOptions, inputs, _onnxSession.OutputNames);
+            using var outputs = _onnxSession.Run(
+                _runOptions,
+                ["input_ids", "attention_mask", "token_type_ids"],
+                [inputIdsOrtValue, attMaskOrtValue, typeIdsOrtValue],
+                _onnxSession.OutputNames);
 
             return PoolSum<TEmbedding>(
                 outputs[0].GetTensorDataAsSpan<float>(),
