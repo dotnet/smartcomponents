@@ -74,36 +74,40 @@ public readonly struct EmbeddingI8 : IEmbedding<EmbeddingI8>
             Vector256<int> magnitudeSquareds = default;
             fixed (byte* bufferPtr = buffer.Span.Slice(4))
             {
-                if (Avx.IsSupported)
+                for (var pos = 0; pos < length; pos += blockLength)
                 {
-                    for (var pos = 0; pos < length; pos += blockLength)
-                    {
-                        var block = Avx.LoadVector256(inputPtr + pos) * scaleFactor;
-                        var blockInt = Avx.ConvertToVector256Int32(block);
-                        var packedShort = Avx.PackSignedSaturate(blockInt.GetLower(), blockInt.GetUpper());
-                        var packedSByte = Avx.PackSignedSaturate(packedShort, packedShort).GetLower();
-                        Vector64.Store(packedSByte.AsByte(), bufferPtr + pos);
-                        magnitudeSquareds += blockInt * blockInt;
-                    }
-                }
-                else if (AdvSimd.IsSupported)
-                {
-                    for (var pos = 0; pos < length; pos += blockLength)
-                    {
-                        var block = Vector256.Load(inputPtr + pos) * scaleFactor;
-                        var blockInt = Vector256.ConvertToInt32(block);
+                    var block = Vector256.Load(inputPtr + pos) * scaleFactor;
+                    var blockInt = Vector256.ConvertToInt32(block);
+                    Vector64<sbyte> packedSByte;
 
-                        var blockShort = Vector128.Create(
+                    if (Sse2.IsSupported)
+                    {
+                        var packedShort = Sse2.PackSignedSaturate(blockInt.GetLower(), blockInt.GetUpper());
+                        packedSByte = Sse2.PackSignedSaturate(packedShort, packedShort).GetLower();
+                    }
+                    else if (AdvSimd.IsSupported)
+                    {
+                        var packedShort = Vector128.Create(
                             AdvSimd.ExtractNarrowingLower(blockInt.GetLower()),
                             AdvSimd.ExtractNarrowingLower(blockInt.GetUpper()));
-                        var blockByte = AdvSimd.ExtractNarrowingLower(blockShort);
-                        blockByte.AsByte().Store(bufferPtr + pos);
-                        magnitudeSquareds += blockInt * blockInt;
+                        packedSByte = AdvSimd.ExtractNarrowingLower(packedShort);
                     }
-                }
-                else
-                {
-                    throw new PlatformNotSupportedException($"{nameof(EmbeddingI8)} requires a CPU that supports either AVX (x86) or AdvSIMD (ARM).");
+                    else
+                    {
+                        var blockIntByte = blockInt.AsSByte();
+                        packedSByte = Vector64.Create(
+                            blockIntByte[0],
+                            blockIntByte[4],
+                            blockIntByte[8],
+                            blockIntByte[12],
+                            blockIntByte[16],
+                            blockIntByte[20],
+                            blockIntByte[24],
+                            blockIntByte[28]);
+                    }
+
+                    Vector64.Store(packedSByte.AsByte(), bufferPtr + pos);
+                    magnitudeSquareds += blockInt * blockInt;
                 }
             }
 
