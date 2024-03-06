@@ -24,9 +24,11 @@ public class OpenAIInferenceBackend(IConfiguration configuration)
 #endif
 
         var apiConfig = new ApiConfig(configuration);
-        var client = new OpenAIClient(
-            new Uri(apiConfig.Endpoint), // TODO: Don't assume it's Azure OpenAI
-            new AzureKeyCredential(apiConfig.ApiKey));
+        var client = string.IsNullOrEmpty(apiConfig.Endpoint)
+            ? new OpenAIClient(apiConfig.ApiKey)
+            : new OpenAIClient(
+                new Uri(apiConfig.Endpoint),
+                new AzureKeyCredential(apiConfig.ApiKey));
 
         var chatCompletionsOptions = new ChatCompletionsOptions
         {
