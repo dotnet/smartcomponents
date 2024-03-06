@@ -35,14 +35,14 @@ public static class SmartComponentsServiceCollectionExtensions
 
             builder.UseEndpoints(app =>
             {
-                app.MapPost("/_smartcomponents/smartpaste", async (IInferenceBackend inference, HttpContext httpContext, [FromServices] IAntiforgery antiforgery, [FromServices] SmartPasteInference smartPasteInference, [FromForm] string dataJson) =>
+                app.MapPost("/_smartcomponents/smartpaste", async ([FromServices] IInferenceBackend inference, HttpContext httpContext, [FromServices] IAntiforgery antiforgery, [FromServices] SmartPasteInference smartPasteInference, [FromForm] string dataJson) =>
                 {
                     await antiforgery.ValidateRequestAsync(httpContext);
                     var result = await smartPasteInference.GetFormCompletionsAsync(inference, dataJson);
                     return result.BadRequest ? Results.BadRequest() : Results.Content(result.Response);
                 });
 
-                app.MapPost("/_smartcomponents/smarttextarea", async (IInferenceBackend inference, HttpContext httpContext, [FromServices] IAntiforgery antiforgery, [FromServices] SmartTextAreaInference smartTextAreaInference, [FromForm] string config, [FromForm] string textBefore, [FromForm] string textAfter) =>
+                app.MapPost("/_smartcomponents/smarttextarea", async ([FromServices] IInferenceBackend inference, HttpContext httpContext, [FromServices] IAntiforgery antiforgery, [FromServices] SmartTextAreaInference smartTextAreaInference, [FromForm] string config, [FromForm] string textBefore, [FromForm] string textAfter) =>
                 {
                     await antiforgery.ValidateRequestAsync(httpContext);
 
