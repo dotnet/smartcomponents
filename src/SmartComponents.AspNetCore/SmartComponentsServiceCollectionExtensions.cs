@@ -37,19 +37,24 @@ public static class SmartComponentsServiceCollectionExtensions
             {
                 app.MapPost("/_smartcomponents/smartpaste", async ([FromServices] IInferenceBackend inference, HttpContext httpContext, [FromServices] IAntiforgery antiforgery, [FromServices] SmartPasteInference smartPasteInference, [FromForm] string dataJson) =>
                 {
+                    // We use DisableAntiforgery and validate manually so that it works whether
+                    // or not you have UseAntiforgery middleware in the pipeline. Without doing that,
+                    // people will get errors like https://stackoverflow.com/questions/61829324
                     await antiforgery.ValidateRequestAsync(httpContext);
+
                     var result = await smartPasteInference.GetFormCompletionsAsync(inference, dataJson);
                     return result.BadRequest ? Results.BadRequest() : Results.Content(result.Response);
-                });
+                }).DisableAntiforgery();
 
                 app.MapPost("/_smartcomponents/smarttextarea", async ([FromServices] IInferenceBackend inference, HttpContext httpContext, [FromServices] IAntiforgery antiforgery, [FromServices] SmartTextAreaInference smartTextAreaInference, [FromForm] string config, [FromForm] string textBefore, [FromForm] string textAfter) =>
                 {
+                    // See above for why we validate antiforgery manually
                     await antiforgery.ValidateRequestAsync(httpContext);
 
                     var parsedConfig = JsonSerializer.Deserialize<SmartTextAreaConfig>(config)!;
                     var suggestion = await smartTextAreaInference.GetInsertionSuggestionAsync(inference, parsedConfig, textBefore, textAfter);
                     return Results.Content(suggestion);
-                });
+                }).DisableAntiforgery();
             });
         };
     }
