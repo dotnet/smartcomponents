@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using static SmartComponents.LocalEmbeddings.VectorCompat;
 
 namespace SmartComponents.LocalEmbeddings;
 
@@ -175,43 +176,5 @@ public readonly struct EmbeddingI1 : IEmbedding<EmbeddingI1>
 
         public override void Write(Utf8JsonWriter writer, EmbeddingI1 value, JsonSerializerOptions options)
             => writer.WriteBase64StringValue(value.Buffer.Span);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static unsafe Vector128<byte> Vector128Load(byte* ptr)
-    {
-#if NET8_0_OR_GREATER
-        return Vector128.Load(ptr);
-#else
-        return Vector128.Create(((long*)ptr)[0], ((long*)ptr)[1]).AsByte();
-#endif
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static unsafe Vector256<byte> Vector256Load(byte* ptr)
-    {
-#if NET8_0_OR_GREATER
-        return Vector256.Load(ptr);
-#else
-        return Vector256.Create(((long*)ptr)[0], ((long*)ptr)[1], ((long*)ptr)[2], ((long*)ptr)[3]).AsByte();
-#endif
-    }
-
-    private static unsafe Vector128<byte> Vector128Xor(Vector128<byte> lhs, Vector128<byte> rhs)
-    {
-#if NET8_0_OR_GREATER
-        return Vector128.Xor(lhs, rhs);
-#else
-        return Vector.Xor(lhs.AsVector(), rhs.AsVector()).AsVector128();
-#endif
-    }
-
-    private static unsafe Vector256<byte> Vector256Xor(Vector256<byte> lhs, Vector256<byte> rhs)
-    {
-#if NET8_0_OR_GREATER
-        return Vector256.Xor(lhs, rhs);
-#else
-        return Vector.Xor(lhs.AsVector(), rhs.AsVector()).AsVector256();
-#endif
     }
 }

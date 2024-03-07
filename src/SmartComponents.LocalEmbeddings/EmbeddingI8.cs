@@ -2,15 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-#if NET8_0_OR_GREATER
 using System.Numerics.Tensors;
-using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.Arm;
 using System.Runtime.Intrinsics.X86;
+#if NET8_0_OR_GREATER
+using System.Runtime.CompilerServices;
+#else
+using System.Runtime.InteropServices;
 #endif
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using static SmartComponents.LocalEmbeddings.VectorCompat;
 
 namespace SmartComponents.LocalEmbeddings;
 
@@ -53,17 +56,16 @@ public readonly struct EmbeddingI8 : IEmbedding<EmbeddingI8>
         _magnitude = BitConverter.ToSingle(buffer.Span);
 
 #if NET8_0_OR_GREATER
+        // No allocation
         _values = Unsafe.BitCast<ReadOnlyMemory<byte>, ReadOnlyMemory<sbyte>>(buffer.Slice(4));
 #else
-        _values = default;
-        throw new NotImplementedException();
+        _values = EmbeddingF32.Utils.Cast<byte, sbyte>(MemoryMarshal.AsMemory(buffer.Slice(4)));
 #endif
     }
 
     /// <inheritdoc />
     public static unsafe EmbeddingI8 FromModelOutput(ReadOnlySpan<float> input, Memory<byte> buffer)
     {
-#if NET8_0_OR_GREATER
         var length = input.Length;
         var blockLength = Vector256<float>.Count;
 
@@ -85,8 +87,8 @@ public readonly struct EmbeddingI8 : IEmbedding<EmbeddingI8>
             {
                 for (var pos = 0; pos < length; pos += blockLength)
                 {
-                    var block = Vector256.Load(inputPtr + pos) * scaleFactor;
-                    var blockInt = Vector256.ConvertToInt32(block);
+                    var block = Vector256Multiply(Vector256Load(inputPtr + pos), scaleFactor);
+                    var blockInt = Vector256ConvertToInt32(block);
                     Vector64<sbyte> packedSByte;
 
                     if (Sse2.IsSupported)
@@ -105,28 +107,25 @@ public readonly struct EmbeddingI8 : IEmbedding<EmbeddingI8>
                     {
                         var blockIntByte = blockInt.AsSByte();
                         packedSByte = Vector64.Create(
-                            blockIntByte[0],
-                            blockIntByte[4],
-                            blockIntByte[8],
-                            blockIntByte[12],
-                            blockIntByte[16],
-                            blockIntByte[20],
-                            blockIntByte[24],
-                            blockIntByte[28]);
+                            blockIntByte.GetElement(0),
+                            blockIntByte.GetElement(4),
+                            blockIntByte.GetElement(8),
+                            blockIntByte.GetElement(12),
+                            blockIntByte.GetElement(16),
+                            blockIntByte.GetElement(20),
+                            blockIntByte.GetElement(24),
+                            blockIntByte.GetElement(28));
                     }
 
-                    Vector64.Store(packedSByte.AsByte(), bufferPtr + pos);
-                    magnitudeSquareds += blockInt * blockInt;
+                    Vector64Store(packedSByte.AsByte(), bufferPtr + pos);
+                    magnitudeSquareds = Vector256Add(magnitudeSquareds, Vector256Multiply(blockInt, blockInt));
                 }
             }
 
-            var magnitudeSquared = Vector256.Sum(magnitudeSquareds);
+            var magnitudeSquared = Vector256Sum(magnitudeSquareds);
             BitConverter.TryWriteBytes(buffer.Span, MathF.Sqrt(magnitudeSquared));
             return new EmbeddingI8(buffer);
         }
-#else
-        throw new NotImplementedException();
-#endif
     }
 
 #if NET8_0_OR_GREATER
