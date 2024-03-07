@@ -1,9 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.Arm;
 using System.Runtime.Intrinsics.X86;
 
 namespace SmartComponents.LocalEmbeddings;
@@ -110,17 +112,15 @@ internal static class VectorCompat
         {
             return Avx.ConvertToVector256Int32(vector);
         }
-        else
+        else if (AdvSimd.IsSupported)
         {
             return Vector256.Create(
-                (int)vector.GetElement(0),
-                (int)vector.GetElement(1),
-                (int)vector.GetElement(2),
-                (int)vector.GetElement(3),
-                (int)vector.GetElement(4),
-                (int)vector.GetElement(5),
-                (int)vector.GetElement(6),
-                (int)vector.GetElement(7));
+                AdvSimd.ConvertToInt32RoundToZero(vector.GetLower()),
+                AdvSimd.ConvertToInt32RoundToZero(vector.GetUpper()));
+        }
+        else
+        {
+            throw new PlatformNotSupportedException("This operation requires .NET 8, or a CPU that supports AVX (x86) or AdvSIMD (ARM).");
         }
 #endif
     }
@@ -135,17 +135,15 @@ internal static class VectorCompat
         {
             return Avx.ConvertToVector256Single(vector);
         }
-        else
+        else if (AdvSimd.IsSupported)
         {
             return Vector256.Create(
-                (float)vector.GetElement(0),
-                (float)vector.GetElement(1),
-                (float)vector.GetElement(2),
-                (float)vector.GetElement(3),
-                (float)vector.GetElement(4),
-                (float)vector.GetElement(5),
-                (float)vector.GetElement(6),
-                (float)vector.GetElement(7));
+                AdvSimd.ConvertToSingle(vector.GetLower()),
+                AdvSimd.ConvertToSingle(vector.GetUpper()));
+        }
+        else
+        {
+            throw new PlatformNotSupportedException("This operation requires .NET 8, or a CPU that supports AVX (x86) or AdvSIMD (ARM).");
         }
 #endif
         }
@@ -168,20 +166,17 @@ internal static class VectorCompat
 #else
         if (Avx.IsSupported)
         {
-            // TODO: Is this right?
             return Avx2.ConvertToVector256Int32(vector.GetLower());
+        }
+        else if (AdvSimd.IsSupported)
+        {
+            return Vector256.Create(
+                AdvSimd.ZeroExtendWideningLower(vector.GetLower().GetLower()),
+                AdvSimd.ZeroExtendWideningLower(vector.GetLower().GetUpper()));
         }
         else
         {
-            return Vector256.Create(
-                (int)vector.GetElement(0),
-                (int)vector.GetElement(1),
-                (int)vector.GetElement(2),
-                (int)vector.GetElement(3),
-                (int)vector.GetElement(4),
-                (int)vector.GetElement(5),
-                (int)vector.GetElement(6),
-                (int)vector.GetElement(7));
+            throw new PlatformNotSupportedException("This operation requires .NET 8, or a CPU that supports AVX (x86) or AdvSIMD (ARM).");
         }
 #endif
     }
@@ -196,17 +191,15 @@ internal static class VectorCompat
         {
             return Avx2.ConvertToVector256Int32(vector.GetUpper());
         }
-        else
+        else if (AdvSimd.IsSupported)
         {
             return Vector256.Create(
-                (int)vector.GetElement(8),
-                (int)vector.GetElement(9),
-                (int)vector.GetElement(10),
-                (int)vector.GetElement(11),
-                (int)vector.GetElement(12),
-                (int)vector.GetElement(13),
-                (int)vector.GetElement(14),
-                (int)vector.GetElement(15));
+                AdvSimd.ZeroExtendWideningLower(vector.GetUpper().GetLower()),
+                AdvSimd.ZeroExtendWideningLower(vector.GetUpper().GetUpper()));
+        }
+        else
+        {
+            throw new PlatformNotSupportedException("This operation requires .NET 8, or a CPU that supports AVX (x86) or AdvSIMD (ARM).");
         }
 #endif
     }
@@ -221,25 +214,15 @@ internal static class VectorCompat
         {
             return Avx2.ConvertToVector256Int16(vector.GetLower());
         }
-        else
+        else if (AdvSimd.IsSupported)
         {
             return Vector256.Create(
-                (short)vector.GetElement(0),
-                (short)vector.GetElement(1),
-                (short)vector.GetElement(2),
-                (short)vector.GetElement(3),
-                (short)vector.GetElement(4),
-                (short)vector.GetElement(5),
-                (short)vector.GetElement(6),
-                (short)vector.GetElement(7),
-                (short)vector.GetElement(8),
-                (short)vector.GetElement(9),
-                (short)vector.GetElement(10),
-                (short)vector.GetElement(11),
-                (short)vector.GetElement(12),
-                (short)vector.GetElement(13),
-                (short)vector.GetElement(14),
-                (short)vector.GetElement(15));
+                AdvSimd.ZeroExtendWideningLower(vector.GetLower().GetLower()),
+                AdvSimd.ZeroExtendWideningLower(vector.GetLower().GetUpper()));
+        }
+        else
+        {
+            throw new PlatformNotSupportedException("This operation requires .NET 8, or a CPU that supports AVX (x86) or AdvSIMD (ARM).");
         }
 #endif
     }
@@ -254,25 +237,15 @@ internal static class VectorCompat
         {
             return Avx2.ConvertToVector256Int16(vector.GetUpper());
         }
-        else
+        else if (AdvSimd.IsSupported)
         {
             return Vector256.Create(
-                (short)vector.GetElement(16),
-                (short)vector.GetElement(17),
-                (short)vector.GetElement(18),
-                (short)vector.GetElement(19),
-                (short)vector.GetElement(20),
-                (short)vector.GetElement(21),
-                (short)vector.GetElement(22),
-                (short)vector.GetElement(23),
-                (short)vector.GetElement(24),
-                (short)vector.GetElement(25),
-                (short)vector.GetElement(26),
-                (short)vector.GetElement(27),
-                (short)vector.GetElement(28),
-                (short)vector.GetElement(29),
-                (short)vector.GetElement(30),
-                (short)vector.GetElement(31));
+                AdvSimd.ZeroExtendWideningLower(vector.GetUpper().GetLower()),
+                AdvSimd.ZeroExtendWideningLower(vector.GetUpper().GetUpper()));
+        }
+        else
+        {
+            throw new PlatformNotSupportedException("This operation requires .NET 8, or a CPU that supports AVX (x86) or AdvSIMD (ARM).");
         }
 #endif
     }
