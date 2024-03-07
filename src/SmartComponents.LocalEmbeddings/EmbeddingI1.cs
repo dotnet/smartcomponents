@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using static SmartComponents.LocalEmbeddings.VectorCompat;
 
 namespace SmartComponents.LocalEmbeddings;
 
@@ -43,13 +44,13 @@ public readonly struct EmbeddingI1 : IEmbedding<EmbeddingI1>
     /// <inheritdoc />
     public static EmbeddingI1 FromModelOutput(ReadOnlySpan<float> input, Memory<byte> buffer)
     {
-        var (expectedBufferLength, remainder) = int.DivRem(input.Length, 8);
-
+        var remainder = input.Length % 8;
         if (remainder != 0)
         {
             throw new InvalidOperationException("Input length must be a multiple of 8");
         }
 
+        var expectedBufferLength = input.Length / 8;
         if (buffer.Length != expectedBufferLength)
         {
             throw new InvalidOperationException($"Buffer length was {buffer.Length}, but must be {expectedBufferLength} for an input with {input.Length} dimensions.");
@@ -69,6 +70,8 @@ public readonly struct EmbeddingI1 : IEmbedding<EmbeddingI1>
             // speed of doing it in this naive way
             var sources = input.Slice(j, 8);
             var sum = (byte)0;
+
+#if NET8_0_OR_GREATER
             if (float.IsPositive(sources[0])) { sum |= 128; }
             if (float.IsPositive(sources[1])) { sum |= 64; }
             if (float.IsPositive(sources[2])) { sum |= 32; }
@@ -77,6 +80,16 @@ public readonly struct EmbeddingI1 : IEmbedding<EmbeddingI1>
             if (float.IsPositive(sources[5])) { sum |= 4; }
             if (float.IsPositive(sources[6])) { sum |= 2; }
             if (float.IsPositive(sources[7])) { sum |= 1; }
+#else
+            if (sources[0] >= 0) { sum |= 128; }
+            if (sources[1] >= 0) { sum |= 64; }
+            if (sources[2] >= 0) { sum |= 32; }
+            if (sources[3] >= 0) { sum |= 16; }
+            if (sources[4] >= 0) { sum |= 8; }
+            if (sources[5] >= 0) { sum |= 4; }
+            if (sources[6] >= 0) { sum |= 2; }
+            if (sources[7] >= 0) { sum |= 1; }
+#endif
             result[j / 8] = sum;
         }
     }
@@ -106,9 +119,9 @@ public readonly struct EmbeddingI1 : IEmbedding<EmbeddingI1>
         // Process as many Vector256 blocks as possible
         while (lhsPtr <= lhsPtrEnd - 32)
         {
-            var lhsBlock = Vector256.Load(lhsPtr);
-            var rhsBlock = Vector256.Load(rhsPtr);
-            var xorBlock = Vector256.Xor(lhsBlock, rhsBlock).AsUInt64();
+            var lhsBlock = Vector256Load(lhsPtr);
+            var rhsBlock = Vector256Load(rhsPtr);
+            var xorBlock = Vector256Xor(lhsBlock, rhsBlock).AsUInt64();
 
             // This is 10x faster than any AVX2/SSE3 vectorized approach I could find (e.g.,
             // avx2-lookup from https://stackoverflow.com/a/50082218). However I didn't try
@@ -126,9 +139,9 @@ public readonly struct EmbeddingI1 : IEmbedding<EmbeddingI1>
         // Process as many Vector128 blocks as possible
         while (lhsPtr <= lhsPtrEnd - 16)
         {
-            var lhsBlock = Vector128.Load(lhsPtr);
-            var rhsBlock = Vector128.Load(rhsPtr);
-            var xorBlock = Vector128.Xor(lhsBlock, rhsBlock).AsUInt64();
+            var lhsBlock = Vector128Load(lhsPtr);
+            var rhsBlock = Vector128Load(rhsPtr);
+            var xorBlock = Vector128Xor(lhsBlock, rhsBlock).AsUInt64();
 
             differences +=
                 BitOperations.PopCount(xorBlock.GetElement(0)) +

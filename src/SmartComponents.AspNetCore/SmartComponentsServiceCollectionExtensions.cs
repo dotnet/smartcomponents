@@ -35,26 +35,50 @@ public static class SmartComponentsServiceCollectionExtensions
 
             builder.UseEndpoints(app =>
             {
-                app.MapPost("/_smartcomponents/smartpaste", async ([FromServices] IInferenceBackend inference, HttpContext httpContext, [FromServices] IAntiforgery antiforgery, [FromServices] SmartPasteInference smartPasteInference, [FromForm] string dataJson) =>
+                var smartPasteEndpoint = app.MapPost("/_smartcomponents/smartpaste", async ([FromServices] IInferenceBackend inference, HttpContext httpContext, [FromServices] IAntiforgery antiforgery, [FromServices] SmartPasteInference smartPasteInference) =>
                 {
+#if NET8_0_OR_GREATER
                     // We use DisableAntiforgery and validate manually so that it works whether
                     // or not you have UseAntiforgery middleware in the pipeline. Without doing that,
                     // people will get errors like https://stackoverflow.com/questions/61829324
                     await antiforgery.ValidateRequestAsync(httpContext);
+#endif
 
-                    var result = await smartPasteInference.GetFormCompletionsAsync(inference, dataJson);
-                    return result.BadRequest ? Results.BadRequest() : Results.Content(result.Response);
-                }).DisableAntiforgery();
+                    // Can't use [FromForm] on net6.0
+                    if (!httpContext.Request.Form.TryGetValue("dataJson", out var dataJson))
+                    {
+                        return Results.BadRequest("dataJson is required");
+                    }
 
-                app.MapPost("/_smartcomponents/smarttextarea", async ([FromServices] IInferenceBackend inference, HttpContext httpContext, [FromServices] IAntiforgery antiforgery, [FromServices] SmartTextAreaInference smartTextAreaInference, [FromForm] string config, [FromForm] string textBefore, [FromForm] string textAfter) =>
+                    var result = await smartPasteInference.GetFormCompletionsAsync(inference, dataJson.ToString());
+                    return result.BadRequest ? Results.BadRequest() : Results.Content(result.Response!);
+                });
+
+                var smartTextAreaEndpoint = app.MapPost("/_smartcomponents/smarttextarea", async ([FromServices] IInferenceBackend inference, HttpContext httpContext, [FromServices] IAntiforgery antiforgery, [FromServices] SmartTextAreaInference smartTextAreaInference) =>
                 {
+#if NET8_0_OR_GREATER
                     // See above for why we validate antiforgery manually
                     await antiforgery.ValidateRequestAsync(httpContext);
+#endif
 
-                    var parsedConfig = JsonSerializer.Deserialize<SmartTextAreaConfig>(config)!;
-                    var suggestion = await smartTextAreaInference.GetInsertionSuggestionAsync(inference, parsedConfig, textBefore, textAfter);
+                    // Can't use [FromForm] on net6.0
+                    var form = httpContext.Request.Form;
+                    if (!form.TryGetValue("config", out var config)
+                        || !form.TryGetValue("textBefore", out var textBefore)
+                        || !form.TryGetValue("textAfter", out var textAfter))
+                    {
+                        return Results.BadRequest("config, textBefore, and textAfter are required");
+                    }
+
+                    var parsedConfig = JsonSerializer.Deserialize<SmartTextAreaConfig>(config.ToString())!;
+                    var suggestion = await smartTextAreaInference.GetInsertionSuggestionAsync(inference, parsedConfig, textBefore.ToString(), textAfter.ToString());
                     return Results.Content(suggestion);
-                }).DisableAntiforgery();
+                });
+
+#if NET8_0_OR_GREATER
+                smartPasteEndpoint.DisableAntiforgery();
+                smartTextAreaEndpoint.DisableAntiforgery();
+#endif
             });
         };
     }

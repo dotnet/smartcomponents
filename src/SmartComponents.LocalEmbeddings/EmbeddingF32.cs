@@ -79,7 +79,7 @@ public readonly struct EmbeddingF32 : IEmbedding<EmbeddingF32>
     }
 
     // From https://stackoverflow.com/a/54512940
-    static class Utils
+    internal static class Utils
     {
         public static Memory<TTo> Cast<TFrom, TTo>(Memory<TFrom> from)
             where TFrom : unmanaged

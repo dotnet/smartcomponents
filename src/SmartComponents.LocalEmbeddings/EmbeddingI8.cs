@@ -3,12 +3,17 @@
 
 using System;
 using System.Numerics.Tensors;
-using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.Arm;
 using System.Runtime.Intrinsics.X86;
+#if NET8_0_OR_GREATER
+using System.Runtime.CompilerServices;
+#else
+using System.Runtime.InteropServices;
+#endif
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using static SmartComponents.LocalEmbeddings.VectorCompat;
 
 namespace SmartComponents.LocalEmbeddings;
 
@@ -49,7 +54,13 @@ public readonly struct EmbeddingI8 : IEmbedding<EmbeddingI8>
     {
         _buffer = buffer;
         _magnitude = BitConverter.ToSingle(buffer.Span);
+
+#if NET8_0_OR_GREATER
+        // No allocation
         _values = Unsafe.BitCast<ReadOnlyMemory<byte>, ReadOnlyMemory<sbyte>>(buffer.Slice(4));
+#else
+        _values = EmbeddingF32.Utils.Cast<byte, sbyte>(MemoryMarshal.AsMemory(buffer.Slice(4)));
+#endif
     }
 
     /// <inheritdoc />
@@ -76,8 +87,8 @@ public readonly struct EmbeddingI8 : IEmbedding<EmbeddingI8>
             {
                 for (var pos = 0; pos < length; pos += blockLength)
                 {
-                    var block = Vector256.Load(inputPtr + pos) * scaleFactor;
-                    var blockInt = Vector256.ConvertToInt32(block);
+                    var block = Vector256Multiply(Vector256Load(inputPtr + pos), scaleFactor);
+                    var blockInt = Vector256ConvertToInt32(block);
                     Vector64<sbyte> packedSByte;
 
                     if (Sse2.IsSupported)
@@ -96,22 +107,22 @@ public readonly struct EmbeddingI8 : IEmbedding<EmbeddingI8>
                     {
                         var blockIntByte = blockInt.AsSByte();
                         packedSByte = Vector64.Create(
-                            blockIntByte[0],
-                            blockIntByte[4],
-                            blockIntByte[8],
-                            blockIntByte[12],
-                            blockIntByte[16],
-                            blockIntByte[20],
-                            blockIntByte[24],
-                            blockIntByte[28]);
+                            blockIntByte.GetElement(0),
+                            blockIntByte.GetElement(4),
+                            blockIntByte.GetElement(8),
+                            blockIntByte.GetElement(12),
+                            blockIntByte.GetElement(16),
+                            blockIntByte.GetElement(20),
+                            blockIntByte.GetElement(24),
+                            blockIntByte.GetElement(28));
                     }
 
-                    Vector64.Store(packedSByte.AsByte(), bufferPtr + pos);
-                    magnitudeSquareds += blockInt * blockInt;
+                    Vector64Store(packedSByte.AsByte(), bufferPtr + pos);
+                    magnitudeSquareds = Vector256Add(magnitudeSquareds, Vector256Multiply(blockInt, blockInt));
                 }
             }
 
-            var magnitudeSquared = Vector256.Sum(magnitudeSquareds);
+            var magnitudeSquared = Vector256Sum(magnitudeSquareds);
             BitConverter.TryWriteBytes(buffer.Span, MathF.Sqrt(magnitudeSquared));
             return new EmbeddingI8(buffer);
         }
@@ -147,40 +158,42 @@ public readonly struct EmbeddingI8 : IEmbedding<EmbeddingI8>
         {
             for (var pos = 0; pos < length; pos += Vec256ByteLength)
             {
-                var thisVecSByte = Vector256.Load(thisPtr + pos);
-                var otherVecSByte = Vector256.Load(otherPtr + pos);
+                var thisVecSByte = Vector256Load(thisPtr + pos);
+                var otherVecSByte = Vector256Load(otherPtr + pos);
 
                 // Multiply the lower halves
-                var thisVecShort = Vector256.WidenLower(thisVecSByte);
-                var otherVecShort = Vector256.WidenLower(otherVecSByte);
+                var thisVecShort = Vector256WidenLower(thisVecSByte);
+                var otherVecShort = Vector256WidenLower(otherVecSByte);
                 if (Avx2.IsSupported)
                 {
-                    sumsOfProducts += Avx2.MultiplyAddAdjacent(thisVecShort, otherVecShort);
+                    sumsOfProducts = Vector256Add(sumsOfProducts, Avx2.MultiplyAddAdjacent(thisVecShort, otherVecShort));
                 }
                 else
                 {
                     // We know the multiply won't overflow because the values are all in the range -128 to 127
-                    var products = Vector256.Multiply(thisVecShort, otherVecShort);
-                    sumsOfProducts += Vector256.WidenLower(products) + Vector256.WidenUpper(products);
+                    var products = Vector256Multiply(thisVecShort, otherVecShort);
+                    sumsOfProducts = Vector256Add(sumsOfProducts,
+                        Vector256Add(Vector256WidenLower(products), Vector256WidenUpper(products)));
                 }
 
                 // Multiply the upper halves
-                thisVecShort = Vector256.WidenUpper(thisVecSByte);
-                otherVecShort = Vector256.WidenUpper(otherVecSByte);
+                thisVecShort = Vector256WidenUpper(thisVecSByte);
+                otherVecShort = Vector256WidenUpper(otherVecSByte);
                 if (Avx2.IsSupported)
                 {
-                    sumsOfProducts += Avx2.MultiplyAddAdjacent(thisVecShort, otherVecShort);
+                    sumsOfProducts = Vector256Add(sumsOfProducts, Avx2.MultiplyAddAdjacent(thisVecShort, otherVecShort));
                 }
                 else
                 {
                     // We know the multiply won't overflow because the values are all in the range -128 to 127
-                    var products = Vector256.Multiply(thisVecShort, otherVecShort);
-                    sumsOfProducts += Vector256.WidenLower(products) + Vector256.WidenUpper(products);
+                    var products = Vector256Multiply(thisVecShort, otherVecShort);
+                    sumsOfProducts = Vector256Add(sumsOfProducts,
+                        Vector256Add(Vector256WidenLower(products), Vector256WidenUpper(products)));
                 }
             }
 
-            var totalsFloats = Vector256.ConvertToSingle(sumsOfProducts);
-            return Vector256.Sum(totalsFloats) / (_magnitude * other._magnitude);
+            var totalsFloats = Vector256ConvertToSingle(sumsOfProducts);
+            return Vector256Sum(totalsFloats) / (_magnitude * other._magnitude);
         }
     }
 

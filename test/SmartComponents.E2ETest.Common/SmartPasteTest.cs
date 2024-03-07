@@ -141,6 +141,7 @@ public class SmartPasteTest<TStartup> : PlaywrightTestBase<TStartup> where TStar
         await Expect(form.Locator("#philosophy")).ToHaveValueAsync("Nihilism");
     }
 
+#if NET8_0_OR_GREATER
     [Fact]
     public async Task InferenceEndpointValidatesAntiforgery()
     {
@@ -154,6 +155,7 @@ public class SmartPasteTest<TStartup> : PlaywrightTestBase<TStartup> where TStar
         Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
         Assert.Contains("AntiforgeryValidationException", await response.Content.ReadAsStringAsync());
     }
+#endif
 
     protected Task SetClipboardContentsAsync(string text)
         => Page.Locator("html").EvaluateAsync("(ignored, value) => navigator.clipboard.writeText(value)", text);

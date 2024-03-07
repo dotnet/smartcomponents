@@ -164,6 +164,7 @@ public class SmartTextAreaInlineTest<TStartup> : PlaywrightTestBase<TStartup> wh
         await AssertIsShowingSuggestionAsync(50, "I hope you're staying cool out there! ");
     }
 
+#if NET8_0_OR_GREATER
     [Fact]
     public async Task InferenceEndpointValidatesAntiforgery()
     {
@@ -181,6 +182,7 @@ public class SmartTextAreaInlineTest<TStartup> : PlaywrightTestBase<TStartup> wh
         Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
         Assert.Contains("AntiforgeryValidationException", await response.Content.ReadAsStringAsync());
     }
+#endif
 
     protected async Task AssertIsShowingSuggestionAsync(int position, string suggestion, float? timeout = null)
     {

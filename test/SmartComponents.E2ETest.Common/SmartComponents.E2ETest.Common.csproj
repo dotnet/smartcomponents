@@ -1,20 +1,23 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsTestProject>false</IsTestProject>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing">
+            <VersionOverride Condition="'$(TargetFramework)' != 'net6.0'">8.0.1</VersionOverride>
+        </PackageReference>
         <PackageReference Include="Microsoft.Playwright" />
         <PackageReference Include="xunit" />
-		<PackageReference Include="coverlet.collector">
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-			<PrivateAssets>all</PrivateAssets>
-		</PackageReference>
+		    <PackageReference Include="coverlet.collector">
+			      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			      <PrivateAssets>all</PrivateAssets>
+		    </PackageReference>
     </ItemGroup>
 
 </Project>

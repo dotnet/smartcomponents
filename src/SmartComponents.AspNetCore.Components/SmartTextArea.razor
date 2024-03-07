@@ -1,14 +1,14 @@
-@namespace SmartComponents
+﻿@namespace SmartComponents
 @using Microsoft.AspNetCore.Components.Forms
 @using SmartComponents.Infrastructure
 @using System.Text.Json
-@inject AntiforgeryStateProvider AntiforgeryState
+@inject IServiceProvider Services
 @inherits InputTextArea
 <textarea
     aria-autocomplete="both"
     @attributes="@AdditionalAttributes"
     data-smart-textarea
-    name="@NameAttributeValue"
+    name="@GetNameAttributeValue()"
     class="@CssClass"
     @bind="@CurrentValueAsString"
     @ref="@Element"></textarea>
@@ -18,7 +18,7 @@
     data-antiforgery-name="@antiforgeryToken?.FormFieldName"
     data-antiforgery-value="@antiforgeryToken?.Value"></smart-textarea>
 @code {
-    AntiforgeryRequestToken? antiforgeryToken;
+    ConditionalAntiforgery antiforgeryToken = default!;
 
     [Parameter, EditorRequired]
     public string? UserRole { get; set; }
@@ -31,7 +31,7 @@
 
     protected override void OnInitialized()
     {
-        antiforgeryToken = AntiforgeryState.GetAntiforgeryToken();
+        antiforgeryToken = new ConditionalAntiforgery(Services);
     }
 
     protected override void OnParametersSet()
@@ -42,6 +42,15 @@
         {
             throw new InvalidOperationException($"{nameof(SmartTextArea)} requires a non-null, non-empty {nameof(UserRole)} parameter.");
         }
+    }
+
+    private string? GetNameAttributeValue()
+    {
+#if NET8_0_OR_GREATER
+        return NameAttributeValue;
+#else
+        return null;
+#endif
     }
 
     // We can't data-protect this because we need to support running on WebAssembly. However it's

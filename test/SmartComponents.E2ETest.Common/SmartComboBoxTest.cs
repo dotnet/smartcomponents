@@ -55,7 +55,7 @@ public class SmartComboBoxTest<TStartup> : PlaywrightTestBase<TStartup> where TS
         var suggestionItems = suggestions.Locator(".smartcombobox-suggestion[role=option]");
         Assert.Equal(10, await suggestionItems.CountAsync());
         var suggestionTexts = await suggestionItems.AllTextContentsAsync();
-        Assert.Equal(["Transportation: Air", "Transportation: Rail", "Transportation: Road"], suggestionTexts.Take(3).Order());
+        Assert.Equal(["Transportation: Air", "Transportation: Rail", "Transportation: Road"], suggestionTexts.Take(3).OrderBy(x => x));
         await Expect(suggestionItems.First).ToHaveTextAsync("Transportation: Road");
 
         // Suggestion list is hidden if you focus out of the input
@@ -169,6 +169,7 @@ public class SmartComboBoxTest<TStartup> : PlaywrightTestBase<TStartup> where TS
         await Expect(input).ToHaveAttributeAsync("aria-expanded", "false");
     }
 
+#if NET8_0_OR_GREATER
     [Fact]
     public async Task InferenceEndpointValidatesAntiforgery()
     {
@@ -186,6 +187,7 @@ public class SmartComboBoxTest<TStartup> : PlaywrightTestBase<TStartup> where TS
         Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
         Assert.Contains("AntiforgeryValidationException", await response.Content.ReadAsStringAsync());
     }
+#endif
 
     private static async Task AssertNthSuggestionIsActive(ILocator input, ILocator suggestions, int expectedSuggestionIndex)
     {

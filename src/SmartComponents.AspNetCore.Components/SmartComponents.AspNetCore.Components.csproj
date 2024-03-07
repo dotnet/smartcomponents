@@ -1,16 +1,19 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+<Project Sdk="Microsoft.NET.Sdk.Razor">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <IsPackable>true</IsPackable>
+        <LangVersion>latest</LangVersion>
         <DefineConstants>$(DefineConstants);SMART_COMPONENTS_COMPONENTS</DefineConstants>
     </PropertyGroup>
 
     <ItemGroup>
         <SupportedPlatform Include="browser" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.Web" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web">
+            <VersionOverride Condition="'$(TargetFramework)' != 'net6.0'">8.0.0</VersionOverride>
+        </PackageReference>
         <ProjectReference Include="..\SmartComponents.StaticAssets\SmartComponents.StaticAssets.csproj" PrivateAssets="All" />
     </ItemGroup>
 
