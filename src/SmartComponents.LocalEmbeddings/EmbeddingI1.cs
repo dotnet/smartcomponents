@@ -43,13 +43,13 @@ public readonly struct EmbeddingI1 : IEmbedding<EmbeddingI1>
     /// <inheritdoc />
     public static EmbeddingI1 FromModelOutput(ReadOnlySpan<float> input, Memory<byte> buffer)
     {
-        var (expectedBufferLength, remainder) = int.DivRem(input.Length, 8);
-
+        var remainder = input.Length % 8;
         if (remainder != 0)
         {
             throw new InvalidOperationException("Input length must be a multiple of 8");
         }
 
+        var expectedBufferLength = input.Length / 8;
         if (buffer.Length != expectedBufferLength)
         {
             throw new InvalidOperationException($"Buffer length was {buffer.Length}, but must be {expectedBufferLength} for an input with {input.Length} dimensions.");
