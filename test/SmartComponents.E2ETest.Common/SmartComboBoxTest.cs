@@ -169,6 +169,7 @@ public class SmartComboBoxTest<TStartup> : PlaywrightTestBase<TStartup> where TS
         await Expect(input).ToHaveAttributeAsync("aria-expanded", "false");
     }
 
+#if NET8_0_OR_GREATER
     [Fact]
     public async Task InferenceEndpointValidatesAntiforgery()
     {
@@ -186,6 +187,7 @@ public class SmartComboBoxTest<TStartup> : PlaywrightTestBase<TStartup> where TS
         Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
         Assert.Contains("AntiforgeryValidationException", await response.Content.ReadAsStringAsync());
     }
+#endif
 
     private static async Task AssertNthSuggestionIsActive(ILocator input, ILocator suggestions, int expectedSuggestionIndex)
     {

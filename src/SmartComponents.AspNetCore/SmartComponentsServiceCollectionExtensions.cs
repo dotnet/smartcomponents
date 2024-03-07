@@ -37,10 +37,12 @@ public static class SmartComponentsServiceCollectionExtensions
             {
                 var smartPasteEndpoint = app.MapPost("/_smartcomponents/smartpaste", async ([FromServices] IInferenceBackend inference, HttpContext httpContext, [FromServices] IAntiforgery antiforgery, [FromServices] SmartPasteInference smartPasteInference) =>
                 {
+#if NET8_0_OR_GREATER
                     // We use DisableAntiforgery and validate manually so that it works whether
                     // or not you have UseAntiforgery middleware in the pipeline. Without doing that,
                     // people will get errors like https://stackoverflow.com/questions/61829324
                     await antiforgery.ValidateRequestAsync(httpContext);
+#endif
 
                     // Can't use [FromForm] on net6.0
                     if (!httpContext.Request.Form.TryGetValue("dataJson", out var dataJson))
@@ -54,8 +56,10 @@ public static class SmartComponentsServiceCollectionExtensions
 
                 var smartTextAreaEndpoint = app.MapPost("/_smartcomponents/smarttextarea", async ([FromServices] IInferenceBackend inference, HttpContext httpContext, [FromServices] IAntiforgery antiforgery, [FromServices] SmartTextAreaInference smartTextAreaInference) =>
                 {
+#if NET8_0_OR_GREATER
                     // See above for why we validate antiforgery manually
                     await antiforgery.ValidateRequestAsync(httpContext);
+#endif
 
                     // Can't use [FromForm] on net6.0
                     var form = httpContext.Request.Form;
