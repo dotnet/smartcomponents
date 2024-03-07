@@ -5,9 +5,7 @@ using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-#if NET8_0_OR_GREATER
 using System.Runtime.Intrinsics;
-#endif
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -120,10 +118,9 @@ public readonly struct EmbeddingI1 : IEmbedding<EmbeddingI1>
         // Process as many Vector256 blocks as possible
         while (lhsPtr <= lhsPtrEnd - 32)
         {
-#if NET8_0_OR_GREATER
-            var lhsBlock = Vector256.Load(lhsPtr);
-            var rhsBlock = Vector256.Load(rhsPtr);
-            var xorBlock = Vector256.Xor(lhsBlock, rhsBlock).AsUInt64();
+            var lhsBlock = Vector256Load(lhsPtr);
+            var rhsBlock = Vector256Load(rhsPtr);
+            var xorBlock = Vector256Xor(lhsBlock, rhsBlock).AsUInt64();
 
             // This is 10x faster than any AVX2/SSE3 vectorized approach I could find (e.g.,
             // avx2-lookup from https://stackoverflow.com/a/50082218). However I didn't try
@@ -136,18 +133,14 @@ public readonly struct EmbeddingI1 : IEmbedding<EmbeddingI1>
 
             lhsPtr += 32;
             rhsPtr += 32;
-#else
-            throw new NotImplementedException();
-#endif
         }
 
         // Process as many Vector128 blocks as possible
         while (lhsPtr <= lhsPtrEnd - 16)
         {
-#if NET8_0_OR_GREATER
-            var lhsBlock = Vector128.Load(lhsPtr);
-            var rhsBlock = Vector128.Load(rhsPtr);
-            var xorBlock = Vector128.Xor(lhsBlock, rhsBlock).AsUInt64();
+            var lhsBlock = Vector128Load(lhsPtr);
+            var rhsBlock = Vector128Load(rhsPtr);
+            var xorBlock = Vector128Xor(lhsBlock, rhsBlock).AsUInt64();
 
             differences +=
                 BitOperations.PopCount(xorBlock.GetElement(0)) +
@@ -155,9 +148,6 @@ public readonly struct EmbeddingI1 : IEmbedding<EmbeddingI1>
 
             lhsPtr += 16;
             rhsPtr += 16;
-#else
-            throw new NotImplementedException();
-#endif
         }
 
         // Process the remaining bytes
@@ -185,5 +175,43 @@ public readonly struct EmbeddingI1 : IEmbedding<EmbeddingI1>
 
         public override void Write(Utf8JsonWriter writer, EmbeddingI1 value, JsonSerializerOptions options)
             => writer.WriteBase64StringValue(value.Buffer.Span);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static unsafe Vector128<byte> Vector128Load(byte* ptr)
+    {
+#if NET8_0_OR_GREATER
+        return Vector128.Load(ptr);
+#else
+        return Vector128.Create(((long*)ptr)[0], ((long*)ptr)[1]).AsByte();
+#endif
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static unsafe Vector256<byte> Vector256Load(byte* ptr)
+    {
+#if NET8_0_OR_GREATER
+        return Vector256.Load(ptr);
+#else
+        return Vector256.Create(((long*)ptr)[0], ((long*)ptr)[1], ((long*)ptr)[2], ((long*)ptr)[3]).AsByte();
+#endif
+    }
+
+    private static unsafe Vector128<byte> Vector128Xor(Vector128<byte> lhs, Vector128<byte> rhs)
+    {
+#if NET8_0_OR_GREATER
+        return Vector128.Xor(lhs, rhs);
+#else
+        return Vector.Xor(lhs.AsVector(), rhs.AsVector()).AsVector128();
+#endif
+    }
+
+    private static unsafe Vector256<byte> Vector256Xor(Vector256<byte> lhs, Vector256<byte> rhs)
+    {
+#if NET8_0_OR_GREATER
+        return Vector256.Xor(lhs, rhs);
+#else
+        return Vector.Xor(lhs.AsVector(), rhs.AsVector()).AsVector256();
+#endif
     }
 }
