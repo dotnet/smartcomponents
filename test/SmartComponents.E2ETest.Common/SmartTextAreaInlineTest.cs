@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Net;
 using Microsoft.Playwright;
 using static SmartComponents.E2ETest.Common.Infrastructure.TextAreaAssertions;
 
@@ -161,6 +162,24 @@ public class SmartTextAreaInlineTest<TStartup> : PlaywrightTestBase<TStartup> wh
         // after the next suggestion appears.
         await Expect(textArea).ToHaveValueAsync("It's 35 degrees C - that's positively sweltering! I hope you're staying cool out there! \n\nNext, sport.");
         await AssertIsShowingSuggestionAsync(50, "I hope you're staying cool out there! ");
+    }
+
+    [Fact]
+    public async Task InferenceEndpointValidatesAntiforgery()
+    {
+        var url = Server.Address + "/_smartcomponents/smarttextarea";
+        var response = await new HttpClient().SendAsync(new(HttpMethod.Post, url)
+        {
+            Content = new FormUrlEncodedContent([
+                new("config", ""),
+                new("textBefore", ""),
+                new("textAfter", ""),
+            ])
+        });
+
+        // Strange that it's not a 400. Maybe it's for historical reasons.
+        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        Assert.Contains("AntiforgeryValidationException", await response.Content.ReadAsStringAsync());
     }
 
     protected async Task AssertIsShowingSuggestionAsync(int position, string suggestion, float? timeout = null)

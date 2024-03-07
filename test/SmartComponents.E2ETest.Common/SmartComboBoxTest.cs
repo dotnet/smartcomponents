@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Net;
 using Microsoft.Playwright;
 
 namespace SmartComponents.E2ETest.Common;
@@ -166,6 +167,24 @@ public class SmartComboBoxTest<TStartup> : PlaywrightTestBase<TStartup> where TS
         await Expect(input).ToHaveValueAsync(expectedsuggestionText);
         await Expect(suggestions).ToHaveCSSAsync("display", "none");
         await Expect(input).ToHaveAttributeAsync("aria-expanded", "false");
+    }
+
+    [Fact]
+    public async Task InferenceEndpointValidatesAntiforgery()
+    {
+        var url = Server.Address + "/api/accounting-categories";
+        var response = await new HttpClient().SendAsync(new(HttpMethod.Post, url)
+        {
+            Content = new FormUrlEncodedContent([
+                new("inputValue", ""),
+                new("maxResults", "0"),
+                new("similarityThreshold", "0"),
+            ])
+        });
+
+        // Strange that it's not a 400. Maybe it's for historical reasons.
+        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        Assert.Contains("AntiforgeryValidationException", await response.Content.ReadAsStringAsync());
     }
 
     private static async Task AssertNthSuggestionIsActive(ILocator input, ILocator suggestions, int expectedSuggestionIndex)

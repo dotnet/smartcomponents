@@ -1,6 +1,7 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
@@ -18,13 +19,17 @@ public static class SmartComboBoxEndpointRouteBuilderExtensions
 
     private static IEndpointRouteBuilder MapSmartComboBoxCore(this IEndpointRouteBuilder builder, string url, Func<SmartComboBoxRequest, Task<IEnumerable<string>>> suggestions)
     {
-        // Validates antiforgery implicitly because we accept [FromForm] parameters
-        // https://learn.microsoft.com/en-us/aspnet/core/security/anti-request-forgery?view=aspnetcore-8.0#antiforgery-with-minimal-apis
         builder.MapPost(url, async (HttpContext httpContext,
+            [FromServices] IAntiforgery antiforgery,
             [FromForm] string inputValue,
             [FromForm] int maxResults,
             [FromForm] float similarityThreshold) =>
         {
+            // We use DisableAntiforgery and validate manually so that it works whether
+            // or not you have UseAntiforgery middleware in the pipeline. Without doing that,
+            // people will get errors like https://stackoverflow.com/questions/61829324
+            await antiforgery.ValidateRequestAsync(httpContext);
+
             if (string.IsNullOrEmpty(inputValue))
             {
                 return Results.BadRequest("inputValue is required");
@@ -42,7 +47,7 @@ public static class SmartComboBoxEndpointRouteBuilderExtensions
             });
 
             return Results.Ok(suggestionsList);
-        });
+        }).DisableAntiforgery();
 
         return builder;
     }

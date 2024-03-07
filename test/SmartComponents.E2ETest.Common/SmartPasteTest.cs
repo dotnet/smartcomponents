@@ -1,5 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+
+using System.Net;
+using System.Net.Http.Headers;
 
 namespace SmartComponents.E2ETest.Common;
 
@@ -136,6 +139,20 @@ public class SmartPasteTest<TStartup> : PlaywrightTestBase<TStartup> where TStar
         await Expect(form.Locator("[name='inferred-from-nearby-text']")).ToHaveValueAsync("Tonsure");
         await Expect(form.Locator("[name='shoe-size']")).ToHaveValueAsync("55");
         await Expect(form.Locator("#philosophy")).ToHaveValueAsync("Nihilism");
+    }
+
+    [Fact]
+    public async Task InferenceEndpointValidatesAntiforgery()
+    {
+        var url = Server.Address + "/_smartcomponents/smartpaste";
+        var response = await new HttpClient().SendAsync(new (HttpMethod.Post, url)
+        {
+            Content = new FormUrlEncodedContent([new("dataJson", "{}")])
+        });
+
+        // Strange that it's not a 400. Maybe it's for historical reasons.
+        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        Assert.Contains("AntiforgeryValidationException", await response.Content.ReadAsStringAsync());
     }
 
     protected Task SetClipboardContentsAsync(string text)
