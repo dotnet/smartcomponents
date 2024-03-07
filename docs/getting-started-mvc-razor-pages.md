@@ -20,13 +20,13 @@
    builder.Services.AddSmartComponents();
    ```
 
-   b. In your top-level `_ViewImports.cshtml` file, reference the tag helpers:
+   b. In your `_ViewImports.cshtml` file (in the `Pages` or `Views` folder), reference the tag helpers:
 
    ```cshtml
    @addTagHelper *, SmartComponents.AspNetCore
    ```
 
-   c. In your layout file (by default, `Views/Shared/_Layout.cshtml`), just before the closing `</body>` tag, add the following which will load the required JavaScript code:
+   c. In your layout file (by default, `_Layout.cshtml` in `Views/Shared` or `Pages/Shared`), just before the closing `</body>` tag, add the following which will load the required JavaScript code:
 
    ```html
    <smart-components-script />

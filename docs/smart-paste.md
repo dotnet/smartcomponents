@@ -67,3 +67,122 @@ Then, in a page/view `.cshtml` file, inside any `<form>`, add a `<smart-paste-bu
 
 Now when this app is run, you can copy a mailing address to your clipboard from some other application, and then click the "Smart Paste" button to fill out all the corresponding form fields.
 
+## Customizing the text label
+
+To customize the text label, pass arbitrary child content, e.g.:
+
+ * Blazor: `<SmartPasteButton>Smart paste, baby!</SmartPasteButton>`
+ * MVC/Razor Pages: `<smart-paste-button>Smart paste, baby!</smart-paste-button>`
+
+You can use this to specify localized text, or any other button content such as a custom icon.
+
+## Styling the button
+
+The smart paste button renders as a simple HTML `<button>` element. You can style it by adding any CSS class names or other HTML `<button>` attributes.
+
+By default, the smart paste button gives itself the CSS class name `smart-paste-button`. During the period when smart paste is in progress (waiting for a server response), the button will apply the `disabled` attribute to itself. So, you can apply styles in CSS as follows:
+
+```css
+/* Applies to all smart paste buttons all the time */
+.smart-paste-button { /* your styles here */ }
+
+/* Applies to smart paste buttons while they are waiting for a server response */
+.smart-paste-button:disabled { /* your styles here */ }
+```
+
+You can override the default CSS class name `smart-paste-button` by setting an explicit `class` attribute on the `<SmartPasteButton>` or `<smart-paste-button>` tag:
+
+### Using scoped CSS
+
+If you are using scoped CSS (i.e., a `.razor.css` or `.cshtml.css` file), remember to use the `::deep` pseudoselector to match the button, since it is being rendered in a child context. For example:
+
+```css
+::deep .smart-paste-button { /* ... */ }
+::deep .smart-paste-button:disabled { /* ... */ }
+```
+
+## The default icon
+
+You can optionally have the button render a default "smart paste" icon inside itself:
+
+ * Blazor: `<SmartPasteButton DefaultIcon />`
+ * MVC/Razor Pages: `<smart-paste-button default-icon />`
+
+This will render as a inline `<svg class='smart-paste-icon'>` element within the button. You can use the `smart-paste-icon` CSS class name to apply additional styling rules to the icon.
+
+If you want to use a custom icon, then instead of setting `DefaultIcon` or `default-icon`, simply supply your icon as child content:
+
+ * Blazor:
+   ```razor
+   <SmartPasteButton>
+       <svg>...</svg> <!-- Can be inline or use a 'src' attribute -->
+       Click me now!
+   </SmartPasteButton>
+   ```
+ * MVC/Razor Pages:
+   ```html
+   <smart-paste-button>
+       <svg>...</svg> <!-- Can be inline or use a 'src' attribute -->
+       Click me now!
+   </smart-paste-button>
+   ```
+
+You can supply any child content that can be rendered inside a `<button>`, as well as any other attributes that make sense on a `<button>`.
+
+## Customizing the AI inference
+
+By default, Smart Paste infers the meanings of your form fields automatically, and has a built-in prompt that instructs the language model. You can customize either of these.
+
+### Annotating your form fields
+
+By default, Smart Paste finds all the fields in your `<form>`, and generates a description for them based on their associated `<label>`, or their `name` attribute, or nearby text content. This whole form descriptor is then supplied to the backend language model.
+
+You can optionally add a `data-smartpaste-description` attribute that sets a field description to supply to the language model. Examples:
+
+```html
+<input data-smartpaste-description="The user's vehicle registration number which must be in the form XYZ-123" />
+
+<textarea data-smartpaste-description="The job description which must start with JOB TITLE in all caps, and then contain one paragraph"></textarea>
+
+<input type="checkbox" data-smartpaste-description="True if the product description indicates this is for children, otherwise False" />
+```
+
+Language models outputs vary, and prompt engineering is a skill in its own right. You may have to experiment to get the best results in your scenario.
+
+### Customizing the prompt
+
+You can customize the prompt by registering your own subclass of `SmartPasteInference` as a DI service. For example, define this class:
+
+```cs
+class MySmartPasteInference : SmartPasteInference
+{
+    public override ChatParameters BuildPrompt(SmartPasteRequestData data)
+    {
+        var prompt = base.BuildPrompt(data);
+        prompt.Messages!.Add(new ChatMessage(ChatMessageRole.System,
+            "All form field values must be in ALL CAPS"));
+
+        prompt.Temperature = 0.5f; // Less deterministic, more creative
+        return prompt;
+    }
+}
+```
+
+... and then in `Program.cs`, *before* the call to `builder.Services.AddSmartComponents`, register it:
+
+```cs
+builder.Services.AddSingleton<SmartPasteInference, MySmartPasteInference>();
+```
+
+Using the debugger and a breakpoint inside your `BuildPrompt` method, you can inspect the default prompt and parameters, and write code that modifies it in any way.
+
+### Customizing the language model backend
+
+If you want to use a backend other than OpenAI or Azure OpenAI, you can implement `IInferenceBackend` and use your custom type in `Program.cs`:
+
+```cs
+builder.Services.AddSmartComponents()
+        .WithInferenceBackend<MyCustomInferenceBackend>();
+
+class MyCustomInferenceBackend : IInferenceBackend { ... }
+```
