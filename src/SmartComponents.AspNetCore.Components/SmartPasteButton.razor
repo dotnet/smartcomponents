@@ -1,6 +1,6 @@
-@namespace SmartComponents
+﻿@namespace SmartComponents
 @using Microsoft.AspNetCore.Components.Forms
-@inject AntiforgeryStateProvider AntiforgeryState
+@inject IServiceProvider Services
 
 <button type="button"
         title="Use content on the clipboard to fill out the form"
@@ -24,7 +24,7 @@
 </button>
 
 @code {
-    AntiforgeryRequestToken? antiforgeryToken;
+    ConditionalAntiforgery antiforgeryToken = default!;
 
     [Parameter]
     public bool DefaultIcon { get; set; }
@@ -39,6 +39,6 @@
 
     protected override void OnInitialized()
     {
-        antiforgeryToken = AntiforgeryState.GetAntiforgeryToken();
+        antiforgeryToken = new ConditionalAntiforgery(Services);
     }
 }

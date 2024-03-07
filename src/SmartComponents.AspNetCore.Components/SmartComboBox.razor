@@ -2,13 +2,13 @@
 @using System.Text.Json
 @using Microsoft.AspNetCore.Components.Forms
 @inherits InputText
-@inject AntiforgeryStateProvider AntiforgeryState
+@inject IServiceProvider Services
 <input
     role="combobox"
     aria-expanded="false"
     aria-autocomplete="list"
     @attributes="@AdditionalAttributes"
-    name="@NameAttributeValue"
+    name="@GetNameAttributeValue()"
     class="@CssClass"
     @bind="@CurrentValueAsString"
     @ref="@Element" />
@@ -25,7 +25,7 @@
     // For accessibility guidance, see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/combobox_role
     // The developer should supply either a "title", or an "id" that corresponds to a <label for="that_id">, or both.
 
-    AntiforgeryRequestToken? antiforgeryToken;
+    ConditionalAntiforgery? antiforgeryToken;
 
     [Parameter, EditorRequired]
     public string? Url { get; set; }
@@ -42,6 +42,15 @@
 
     protected override void OnInitialized()
     {
-        antiforgeryToken = AntiforgeryState.GetAntiforgeryToken();
+        antiforgeryToken = new ConditionalAntiforgery(Services);
+    }
+
+    private string? GetNameAttributeValue()
+    {
+#if NET8_0_OR_GREATER
+        return NameAttributeValue;
+#else
+        return null;
+#endif
     }
 }
