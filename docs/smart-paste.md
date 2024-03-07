@@ -71,8 +71,14 @@ Now when this app is run, you can copy a mailing address to your clipboard from 
 
 To customize the text label, pass arbitrary child content, e.g.:
 
- * Blazor: `<SmartPasteButton>Smart paste, baby!</SmartPasteButton>`
- * MVC/Razor Pages: `<smart-paste-button>Smart paste, baby!</smart-paste-button>`
+ * Blazor:
+   ```razor
+   <SmartPasteButton>Smart paste, baby!</SmartPasteButton>
+   ```
+ * MVC/Razor Pages:
+   ```cshtml
+   <smart-paste-button>Smart paste, baby!</smart-paste-button>
+   ```
 
 You can use this to specify localized text, or any other button content such as a custom icon.
 
@@ -90,7 +96,7 @@ By default, the smart paste button gives itself the CSS class name `smart-paste-
 .smart-paste-button:disabled { /* your styles here */ }
 ```
 
-You can override the default CSS class name `smart-paste-button` by setting an explicit `class` attribute on the `<SmartPasteButton>` or `<smart-paste-button>` tag:
+You can override the default CSS class name `smart-paste-button` by setting an explicit `class` attribute on the `<SmartPasteButton>` or `<smart-paste-button>` tag.
 
 ### Using scoped CSS
 
@@ -108,7 +114,7 @@ You can optionally have the button render a default "smart paste" icon inside it
  * Blazor: `<SmartPasteButton DefaultIcon />`
  * MVC/Razor Pages: `<smart-paste-button default-icon />`
 
-This will render as a inline `<svg class='smart-paste-icon'>` element within the button. You can use the `smart-paste-icon` CSS class name to apply additional styling rules to the icon.
+This will render as an inline `<svg class='smart-paste-icon'>` element within the button. You can use the `smart-paste-icon` CSS class name to apply additional styling rules to the icon.
 
 If you want to use a custom icon, then instead of setting `DefaultIcon` or `default-icon`, simply supply your icon as child content:
 
@@ -182,7 +188,7 @@ If you want to use a backend other than OpenAI or Azure OpenAI, you can implemen
 
 ```cs
 builder.Services.AddSmartComponents()
-        .WithInferenceBackend<MyCustomInferenceBackend>();
+    .WithInferenceBackend<MyCustomInferenceBackend>();
 
 class MyCustomInferenceBackend : IInferenceBackend { ... }
 ```
