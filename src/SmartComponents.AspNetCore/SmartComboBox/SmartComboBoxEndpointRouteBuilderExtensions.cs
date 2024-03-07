@@ -20,19 +20,20 @@ public static class SmartComboBoxEndpointRouteBuilderExtensions
     private static IEndpointRouteBuilder MapSmartComboBoxCore(this IEndpointRouteBuilder builder, string url, Func<SmartComboBoxRequest, Task<IEnumerable<string>>> suggestions)
     {
         var endpoint = builder.MapPost(url, async (HttpContext httpContext,
-            [FromServices] IAntiforgery antiforgery,
-            [FromForm] string inputValue,
-            [FromForm] int maxResults,
-            [FromForm] float similarityThreshold) =>
+            [FromServices] IAntiforgery antiforgery) =>
         {
             // We use DisableAntiforgery and validate manually so that it works whether
             // or not you have UseAntiforgery middleware in the pipeline. Without doing that,
             // people will get errors like https://stackoverflow.com/questions/61829324
             await antiforgery.ValidateRequestAsync(httpContext);
 
-            if (string.IsNullOrEmpty(inputValue))
+            // Can't use [FromForm] on net6.0
+            var form = httpContext.Request.Form;
+            if (!(form.TryGetValue("inputValue", out var inputValue) && !string.IsNullOrEmpty(inputValue))
+                || !(form.TryGetValue("maxResults", out var maxResultsString) && int.TryParse(maxResultsString, out var maxResults))
+                || !(form.TryGetValue("similarityThreshold", out var similarityThresholdString) && float.TryParse(similarityThresholdString, out var similarityThreshold)))
             {
-                return Results.BadRequest("inputValue is required");
+                return Results.BadRequest("inputValue, maxResults, and similarityThreshold are required");
             }
 
             var suggestionsList = await suggestions(new SmartComboBoxRequest
@@ -40,7 +41,7 @@ public static class SmartComboBoxEndpointRouteBuilderExtensions
                 HttpContext = httpContext,
                 Query = new SimilarityQuery
                 {
-                    SearchText = inputValue,
+                    SearchText = inputValue.ToString(),
                     MaxResults = maxResults,
                     MinSimilarity = similarityThreshold,
                 }

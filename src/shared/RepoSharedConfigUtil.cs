@@ -5,7 +5,7 @@ using System.Reflection;
 
 public static class RepoSharedConfigUtil
 {
-    public static void AddRepoSharedConfig(this IHostApplicationBuilder builder)
+    public static void AddRepoSharedConfig(this IConfigurationBuilder configuration)
     {
         // This is only used within this repo to simplify sharing config
         // across multiple projects. For real usage, just add the required
@@ -14,7 +14,7 @@ public static class RepoSharedConfigUtil
         var envVarPath = Environment.GetEnvironmentVariable("SMARTCOMPONENTS_REPO_CONFIG_FILE_PATH");
         if (!string.IsNullOrEmpty(envVarPath))
         {
-            builder.Configuration.AddJsonFile(envVarPath);
+            configuration.AddJsonFile(envVarPath);
             return;
         }
 
@@ -24,7 +24,7 @@ public static class RepoSharedConfigUtil
             var path = Path.Combine(dir, "RepoSharedConfig.json");
             if (File.Exists(path))
             {
-                builder.Configuration.AddJsonFile(path);
+                configuration.AddJsonFile(path);
                 return;
             }
 

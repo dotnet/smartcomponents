@@ -14,7 +14,7 @@ public class Program
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        builder.AddRepoSharedConfig();
+        builder.Configuration.AddRepoSharedConfig();
 
         // Add services to the container.
         builder.Services.AddRazorComponents()
