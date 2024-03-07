@@ -128,9 +128,7 @@ public readonly struct EmbeddingI8 : IEmbedding<EmbeddingI8>
         }
     }
 
-#if NET8_0_OR_GREATER
     private const int Vec256ByteLength = 32; // Vector256<sbyte>.Count;
-#endif
 
     /// <summary>
     /// Computes the similarity between this embedding and another. For <see cref="EmbeddingI8"/>,
@@ -140,7 +138,6 @@ public readonly struct EmbeddingI8 : IEmbedding<EmbeddingI8>
     /// <returns>A similarity score, approximately in the range 0 to 1. Higher values indicate higher similarity.</returns>
     public unsafe float Similarity(EmbeddingI8 other)
     {
-#if NET8_0_OR_GREATER
         var length = _values.Length;
         if (other._values.Length != length)
         {
@@ -161,44 +158,43 @@ public readonly struct EmbeddingI8 : IEmbedding<EmbeddingI8>
         {
             for (var pos = 0; pos < length; pos += Vec256ByteLength)
             {
-                var thisVecSByte = Vector256.Load(thisPtr + pos);
-                var otherVecSByte = Vector256.Load(otherPtr + pos);
+                var thisVecSByte = Vector256Load(thisPtr + pos);
+                var otherVecSByte = Vector256Load(otherPtr + pos);
 
                 // Multiply the lower halves
-                var thisVecShort = Vector256.WidenLower(thisVecSByte);
-                var otherVecShort = Vector256.WidenLower(otherVecSByte);
+                var thisVecShort = Vector256WidenLower(thisVecSByte);
+                var otherVecShort = Vector256WidenLower(otherVecSByte);
                 if (Avx2.IsSupported)
                 {
-                    sumsOfProducts += Avx2.MultiplyAddAdjacent(thisVecShort, otherVecShort);
+                    sumsOfProducts = Vector256Add(sumsOfProducts, Avx2.MultiplyAddAdjacent(thisVecShort, otherVecShort));
                 }
                 else
                 {
                     // We know the multiply won't overflow because the values are all in the range -128 to 127
-                    var products = Vector256.Multiply(thisVecShort, otherVecShort);
-                    sumsOfProducts += Vector256.WidenLower(products) + Vector256.WidenUpper(products);
+                    var products = Vector256Multiply(thisVecShort, otherVecShort);
+                    sumsOfProducts = Vector256Add(sumsOfProducts,
+                        Vector256Add(Vector256WidenLower(products), Vector256WidenUpper(products)));
                 }
 
                 // Multiply the upper halves
-                thisVecShort = Vector256.WidenUpper(thisVecSByte);
-                otherVecShort = Vector256.WidenUpper(otherVecSByte);
+                thisVecShort = Vector256WidenUpper(thisVecSByte);
+                otherVecShort = Vector256WidenUpper(otherVecSByte);
                 if (Avx2.IsSupported)
                 {
-                    sumsOfProducts += Avx2.MultiplyAddAdjacent(thisVecShort, otherVecShort);
+                    sumsOfProducts = Vector256Add(sumsOfProducts, Avx2.MultiplyAddAdjacent(thisVecShort, otherVecShort));
                 }
                 else
                 {
                     // We know the multiply won't overflow because the values are all in the range -128 to 127
-                    var products = Vector256.Multiply(thisVecShort, otherVecShort);
-                    sumsOfProducts += Vector256.WidenLower(products) + Vector256.WidenUpper(products);
+                    var products = Vector256Multiply(thisVecShort, otherVecShort);
+                    sumsOfProducts = Vector256Add(sumsOfProducts,
+                        Vector256Add(Vector256WidenLower(products), Vector256WidenUpper(products)));
                 }
             }
 
-            var totalsFloats = Vector256.ConvertToSingle(sumsOfProducts);
-            return Vector256.Sum(totalsFloats) / (_magnitude * other._magnitude);
+            var totalsFloats = Vector256ConvertToSingle(sumsOfProducts);
+            return Vector256Sum(totalsFloats) / (_magnitude * other._magnitude);
         }
-#else
-        throw new NotImplementedException();
-#endif
     }
 
     /// <inheritdoc />
