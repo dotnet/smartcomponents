@@ -1,15 +1,15 @@
 # Smart Paste
 
-Smart Paste is an intelligent app feature that fills out forms automatically using data from the user's clipboard. You can use this with any existing form in your web app. Examples:
+Smart Paste is an intelligent app feature that fills out forms automatically using data from the user's clipboard. You can use this with any existing form in your web app.
+
+### Example use cases
 
  * **Mailing address:** A user could copy a whole mailing address from an email or Word document, and then click "Smart Paste" in your application to populate all the address-related fields in a form (name, line 1, line 2, city, state, etc.).
    * Benefit: This reduces the workload on your user, because they don't have to type out each field manually, or separately copy-and-paste each field.
  * **Bug tracking**: A user could copy a short natural-language description of a problem (perhaps sent to them via IM/Teams), and then click "Smart Paste" inside your "Create New Issue" page. This would populate fields like "Title", "Severity", "Repro steps", etc., based on the clipboard text.
    * Benefit: It will automatically rephrase the source text as needed. For example, it would convert phrases like "I just clicked X on screen Y" to repro steps like "1. Go to screen Y, 2. Click X.".
 
-These are just examples. Smart Paste is designed to work with any form. You don't have to configure or annotate your forms, since the system will infer the meanings of the fields from your HTML. You can optionally provide annotations if it helps to produce better results.
-
-The user's clipboard text does not have to contain information about every form field. The language model will choose to populate only the fields whose values can be inferred from the clipboard text.
+Smart Paste is designed to work with any form. You don't have to configure or annotate your forms, since the system will infer the meanings of the fields from your HTML. You can optionally provide annotations if it helps to produce better results.
 
 ## Prerequisites
 
@@ -48,12 +48,6 @@ Now when this app is run, you can copy a mailing address to your clipboard from 
 Note: this example is only intended to show `SmartPasteButton`. This form won't do anything useful if submitted - see [Blazor docs for more about form submissions](https://learn.microsoft.com/en-us/aspnet/core/blazor/forms).
 
 ## Adding SmartPaste in MVC / Razor Pages
-
-In your top-level `_ViewImports.cshtml` file, reference the tag helpers:
-
-```cshtml
-@addTagHelper *, SmartComponents.AspNetCore
-```
 
 In any page/view `.cshtml` file, inside any `<form>`, add a `<smart-paste-button>` tag. Example:
 

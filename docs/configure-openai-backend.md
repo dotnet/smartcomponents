@@ -14,11 +14,11 @@ Do the following in your **server** project:
 
     ```json
     "SmartComponents": {
-    "ApiKey": "your key here",
-    "DeploymentName": "gpt-3.5-turbo",
+      "ApiKey": "your key here",
+      "DeploymentName": "gpt-3.5-turbo",
 
-    // Required for Azure OpenAI only. If you're using OpenAI, remove the following line.
-    "Endpoint": "https://YOUR_ACCOUNT.openai.azure.com/"
+      // Required for Azure OpenAI only. If you're using OpenAI, remove the following line.
+      "Endpoint": "https://YOUR_ACCOUNT.openai.azure.com/"
     }
     ```
 
