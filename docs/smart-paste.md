@@ -4,10 +4,17 @@ Smart Paste is an intelligent app feature that fills out forms automatically usi
 
 ### Example use cases
 
- * **Mailing address:** A user could copy a whole mailing address from an email or Word document, and then click "Smart Paste" in your application to populate all the address-related fields in a form (name, line 1, line 2, city, state, etc.).
-   * Benefit: This reduces the workload on your user, because they don't have to type out each field manually, or separately copy-and-paste each field.
- * **Bug tracking**: A user could copy a short natural-language description of a problem (perhaps sent to them via IM/Teams), and then click "Smart Paste" inside your "Create New Issue" page. This would populate fields like "Title", "Severity", "Repro steps", etc., based on the clipboard text.
-   * Benefit: It will automatically rephrase the source text as needed. For example, it would convert phrases like "I just clicked X on screen Y" to repro steps like "1. Go to screen Y, 2. Click X.".
+ * **Mailing address form**
+ 
+   A user could copy a whole mailing address from an email or Word document, and then click "Smart Paste" in your application to populate all the address-related fields in a form (name, line 1, line 2, city, state, etc.).
+ 
+   This reduces the workload on your user, because they don't have to type out each field manually, or separately copy-and-paste each field.
+
+ * **Bug tracking form**
+ 
+   A user could copy a short natural-language description of a problem (perhaps sent to them via IM/Teams), and then click "Smart Paste" inside your "Create New Issue" page. This would populate fields like "Title", "Severity", "Repro steps", etc., based on the clipboard text.
+
+   The language model will automatically rephrase the source text as needed. For example, it would convert phrases like "I just clicked X on screen Y" to repro steps like "1. Go to screen Y, 2. Click X.".
 
 Smart Paste is designed to work with any form. You don't have to configure or annotate your forms, since the system will infer the meanings of the fields from your HTML. You can optionally provide annotations if it helps to produce better results.
 

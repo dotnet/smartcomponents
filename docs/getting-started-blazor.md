@@ -34,6 +34,6 @@
 
    You can now add the following inside your Blazor pages/components:
 
-   * [SmartPaste](adding-smartpaste.md)
+   * [SmartPaste](smart-paste.md)
    * SmartTextArea
    * SmartComboBox

@@ -26,7 +26,7 @@
    @addTagHelper *, SmartComponents.AspNetCore
    ```
 
-   c. In your layout file (by default, `Views/Shared/_Layout.cshtml`), just before the closing `</body>` tag, add the following which will add the required JavaScript:
+   c. In your layout file (by default, `Views/Shared/_Layout.cshtml`), just before the closing `</body>` tag, add the following which will load the required JavaScript code:
 
    ```html
    <smart-components-script />
@@ -42,6 +42,6 @@
 
    You can now add the following inside your Blazor pages/components:
 
-   * [SmartPaste](adding-smartpaste.md)
+   * [SmartPaste](smart-paste.md)
    * SmartTextArea
    * SmartComboBox
