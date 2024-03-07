@@ -148,7 +148,7 @@ internal static class VectorCompat
 #endif
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static unsafe void Vector64Store<T>(Vector64<T> vector, T* destination) where T: unmanaged
     {
 #if NET8_0_OR_GREATER
