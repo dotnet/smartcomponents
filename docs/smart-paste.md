@@ -18,18 +18,11 @@ Smart Paste is an intelligent app feature that fills out forms automatically usi
 
 Smart Paste is designed to work with any form. You don't have to configure or annotate your forms, since the system will infer the meanings of the fields from your HTML. You can optionally provide annotations if it helps to produce better results.
 
-## Prerequisites
-
-First, make sure you've followed the Smart Components installation steps, depending on which UI framework you're using:
-
- * [Getting started with Smart Components in Blazor](getting-started-blazor.md)
- * [Getting started with Smart Components in MVC / Razor Pages](getting-started-mvc-razor-pages.md)
-
-This includes [configuring an OpenAI backend](configure-openai-backend.md), which is a prerequisite for Smart Paste.
-
 ## Adding SmartPaste in Blazor
 
-In a `.razor` file, inside any `<form>` or `<EditForm>`, add the `<SmartPasteButton>` component. Example:
+First, make sure you've followed the [Smart Component installation steps for Blazor](getting-started-blazor.md). This includes [configuring an OpenAI backend](configure-openai-backend.md), which is a prerequisite for Smart Paste.
+
+Then, in a `.razor` file, inside any `<form>` or `<EditForm>`, add the `<SmartPasteButton>` component. Example:
 
 ```razor
 @page "/"
@@ -56,7 +49,9 @@ Note: this example is only intended to show `SmartPasteButton`. This form won't 
 
 ## Adding SmartPaste in MVC / Razor Pages
 
-In any page/view `.cshtml` file, inside any `<form>`, add a `<smart-paste-button>` tag. Example:
+First, make sure you've followed the [Smart Component installation steps for MVC/Razor Pages](getting-started-mvc-razor-pages.md). This includes [configuring an OpenAI backend](configure-openai-backend.md), which is a prerequisite for Smart Paste.
+
+Then, in a page/view `.cshtml` file, inside any `<form>`, add a `<smart-paste-button>` tag. Example:
 
 ```cshtml
 <form>
