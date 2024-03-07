@@ -58,7 +58,10 @@ internal static class VectorCompat
 #if NET8_0_OR_GREATER
         return Vector256.Xor(lhs, rhs);
 #else
-        return Vector.Xor(lhs.AsVector(), rhs.AsVector()).AsVector256();
+        // Assume the target platform at least supports 128-bit vectors
+        return Vector256.Create(
+            Vector128Xor(lhs.GetLower(), rhs.GetLower()),
+            Vector128Xor(lhs.GetUpper(), rhs.GetUpper()));
 #endif
     }
 
@@ -68,7 +71,21 @@ internal static class VectorCompat
 #if NET8_0_OR_GREATER
         return vector * value;
 #else
-        return Vector.Multiply(vector.AsVector(), value).AsVector256();
+        // Assume the target platform at least supports 128-bit vectors
+        var lower = Vector.Multiply(vector.GetLower().AsVector(), value).AsVector128();
+        var upper = Vector.Multiply(vector.GetUpper().AsVector(), value).AsVector128();
+        return Vector256.Create(lower.AsByte(), upper.AsByte()).As<byte, T>();
+#endif
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static unsafe Vector128<int> Vector128Add(Vector128<int> lhs, Vector128<int> rhs)
+    {
+#if NET8_0_OR_GREATER
+        return lhs + rhs;
+#else
+        // Assume the target platform at least supports 128-bit vectors
+        return Vector.Add(lhs.AsVector(), rhs.AsVector()).AsVector128();
 #endif
     }
 
@@ -78,7 +95,20 @@ internal static class VectorCompat
 #if NET8_0_OR_GREATER
         return lhs + rhs;
 #else
-        return Vector.Add(lhs.AsVector(), rhs.AsVector()).AsVector256();
+        return Vector256.Create(
+            Vector128Add(lhs.GetLower(), rhs.GetLower()),
+            Vector128Add(lhs.GetUpper(), rhs.GetUpper()));
+#endif
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static unsafe Vector128<T> Vector128Multiply<T>(Vector128<T> lhs, Vector128<T> rhs) where T : unmanaged
+    {
+#if NET8_0_OR_GREATER
+        return lhs * rhs;
+#else
+        // Assume the target platform at least supports 128-bit vectors
+        return Vector.Multiply(lhs.AsVector(), rhs.AsVector()).AsVector128();
 #endif
     }
 
@@ -88,17 +118,33 @@ internal static class VectorCompat
 #if NET8_0_OR_GREATER
         return lhs * rhs;
 #else
-        return Vector.Multiply(lhs.AsVector(), rhs.AsVector()).AsVector256();
+        return Vector256.Create(
+            Vector128Multiply(lhs.GetLower(), rhs.GetLower()).AsByte(),
+            Vector128Multiply(lhs.GetUpper(), rhs.GetUpper()).AsByte()).As<byte, T>();
 #endif
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static unsafe T Vector256Sum<T>(Vector256<T> vector) where T : unmanaged
+    public static unsafe T Vector128Sum<T>(Vector128<T> vector) where T : unmanaged
+    {
+#if NET8_0_OR_GREATER
+        return Vector128.Sum(vector);
+#else
+        // Assume the target platform at least supports 128-bit vectors
+        return Vector.Sum(vector.AsVector());
+#endif
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static unsafe T Vector256Sum<T>(Vector256<T> vector) where T: unmanaged
     {
 #if NET8_0_OR_GREATER
         return Vector256.Sum(vector);
 #else
-        return Vector.Sum(vector.AsVector());
+        // Assume the target platform at least supports 128-bit vectors
+        return Vector.Sum(Vector.Add(
+            vector.GetLower().AsVector(),
+            vector.GetUpper().AsVector()));
 #endif
     }
 
