@@ -19,7 +19,7 @@ public static class SmartComboBoxEndpointRouteBuilderExtensions
 
     private static IEndpointRouteBuilder MapSmartComboBoxCore(this IEndpointRouteBuilder builder, string url, Func<SmartComboBoxRequest, Task<IEnumerable<string>>> suggestions)
     {
-        builder.MapPost(url, async (HttpContext httpContext,
+        var endpoint = builder.MapPost(url, async (HttpContext httpContext,
             [FromServices] IAntiforgery antiforgery,
             [FromForm] string inputValue,
             [FromForm] int maxResults,
@@ -47,7 +47,11 @@ public static class SmartComboBoxEndpointRouteBuilderExtensions
             });
 
             return Results.Ok(suggestionsList);
-        }).DisableAntiforgery();
+        });
+
+#if NET8_0_OR_GREATER
+        endpoint.DisableAntiforgery();
+#endif
 
         return builder;
     }
