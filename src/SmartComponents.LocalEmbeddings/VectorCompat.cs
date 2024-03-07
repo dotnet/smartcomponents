@@ -217,8 +217,8 @@ internal static class VectorCompat
         else if (AdvSimd.IsSupported)
         {
             return Vector256.Create(
-                AdvSimd.ZeroExtendWideningLower(vector.GetLower().GetLower()),
-                AdvSimd.ZeroExtendWideningLower(vector.GetLower().GetUpper()));
+                AdvSimd.AddWideningLower(Vector128<int>.Zero, vector.GetLower().GetLower()),
+                AdvSimd.AddWideningLower(Vector128<int>.Zero, vector.GetLower().GetUpper()));
         }
         else
         {
@@ -240,8 +240,8 @@ internal static class VectorCompat
         else if (AdvSimd.IsSupported)
         {
             return Vector256.Create(
-                AdvSimd.ZeroExtendWideningLower(vector.GetUpper().GetLower()),
-                AdvSimd.ZeroExtendWideningLower(vector.GetUpper().GetUpper()));
+                AdvSimd.AddWideningLower(Vector128<int>.Zero, vector.GetUpper().GetLower()),
+                AdvSimd.AddWideningLower(Vector128<int>.Zero, vector.GetUpper().GetUpper()));
         }
         else
         {
@@ -263,8 +263,8 @@ internal static class VectorCompat
         else if (AdvSimd.IsSupported)
         {
             return Vector256.Create(
-                AdvSimd.ZeroExtendWideningLower(vector.GetLower().GetLower()),
-                AdvSimd.ZeroExtendWideningLower(vector.GetLower().GetUpper()));
+                AdvSimd.AddWideningLower(Vector128<short>.Zero, vector.GetLower().GetLower()),
+                AdvSimd.AddWideningLower(Vector128<short>.Zero, vector.GetLower().GetUpper()));
         }
         else
         {
@@ -286,8 +286,8 @@ internal static class VectorCompat
         else if (AdvSimd.IsSupported)
         {
             return Vector256.Create(
-                AdvSimd.ZeroExtendWideningLower(vector.GetUpper().GetLower()),
-                AdvSimd.ZeroExtendWideningLower(vector.GetUpper().GetUpper()));
+                AdvSimd.AddWideningLower(Vector128<short>.Zero, vector.GetUpper().GetLower()),
+                AdvSimd.AddWideningLower(Vector128<short>.Zero, vector.GetUpper().GetUpper()));
         }
         else
         {
