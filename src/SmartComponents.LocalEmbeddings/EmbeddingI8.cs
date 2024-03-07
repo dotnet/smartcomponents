@@ -2,11 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+#if NET8_0_OR_GREATER
 using System.Numerics.Tensors;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.Arm;
 using System.Runtime.Intrinsics.X86;
+#endif
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -49,12 +51,19 @@ public readonly struct EmbeddingI8 : IEmbedding<EmbeddingI8>
     {
         _buffer = buffer;
         _magnitude = BitConverter.ToSingle(buffer.Span);
+
+#if NET8_0_OR_GREATER
         _values = Unsafe.BitCast<ReadOnlyMemory<byte>, ReadOnlyMemory<sbyte>>(buffer.Slice(4));
+#else
+        _values = default;
+        throw new NotImplementedException();
+#endif
     }
 
     /// <inheritdoc />
     public static unsafe EmbeddingI8 FromModelOutput(ReadOnlySpan<float> input, Memory<byte> buffer)
     {
+#if NET8_0_OR_GREATER
         var length = input.Length;
         var blockLength = Vector256<float>.Count;
 
@@ -115,9 +124,14 @@ public readonly struct EmbeddingI8 : IEmbedding<EmbeddingI8>
             BitConverter.TryWriteBytes(buffer.Span, MathF.Sqrt(magnitudeSquared));
             return new EmbeddingI8(buffer);
         }
+#else
+        throw new NotImplementedException();
+#endif
     }
 
+#if NET8_0_OR_GREATER
     private const int Vec256ByteLength = 32; // Vector256<sbyte>.Count;
+#endif
 
     /// <summary>
     /// Computes the similarity between this embedding and another. For <see cref="EmbeddingI8"/>,
@@ -127,6 +141,7 @@ public readonly struct EmbeddingI8 : IEmbedding<EmbeddingI8>
     /// <returns>A similarity score, approximately in the range 0 to 1. Higher values indicate higher similarity.</returns>
     public unsafe float Similarity(EmbeddingI8 other)
     {
+#if NET8_0_OR_GREATER
         var length = _values.Length;
         if (other._values.Length != length)
         {
@@ -182,6 +197,9 @@ public readonly struct EmbeddingI8 : IEmbedding<EmbeddingI8>
             var totalsFloats = Vector256.ConvertToSingle(sumsOfProducts);
             return Vector256.Sum(totalsFloats) / (_magnitude * other._magnitude);
         }
+#else
+        throw new NotImplementedException();
+#endif
     }
 
     /// <inheritdoc />

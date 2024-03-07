@@ -5,11 +5,15 @@
             Can't support netstandard2.0 because FastBertTokenizer currently requires net6.0 or newer.
             See https://github.com/georg-jung/FastBertTokenizer/issues/23
         -->
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
         <LangVersion>latest</LangVersion>
         <IsPackable>true</IsPackable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <Nullable>enable</Nullable>
+
+        <!-- Suppress "Opt in to preview features before using them" because of false positives -->
+        <!-- See note in https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca2252#when-to-suppress-warnings -->
+        <NoWarn>CA2252;$(NoWarn)</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>

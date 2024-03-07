@@ -5,7 +5,9 @@ using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+#if NET8_0_OR_GREATER
 using System.Runtime.Intrinsics;
+#endif
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -69,6 +71,8 @@ public readonly struct EmbeddingI1 : IEmbedding<EmbeddingI1>
             // speed of doing it in this naive way
             var sources = input.Slice(j, 8);
             var sum = (byte)0;
+
+#if NET8_0_OR_GREATER
             if (float.IsPositive(sources[0])) { sum |= 128; }
             if (float.IsPositive(sources[1])) { sum |= 64; }
             if (float.IsPositive(sources[2])) { sum |= 32; }
@@ -77,6 +81,16 @@ public readonly struct EmbeddingI1 : IEmbedding<EmbeddingI1>
             if (float.IsPositive(sources[5])) { sum |= 4; }
             if (float.IsPositive(sources[6])) { sum |= 2; }
             if (float.IsPositive(sources[7])) { sum |= 1; }
+#else
+            if (sources[0] >= 0) { sum |= 128; }
+            if (sources[1] >= 0) { sum |= 64; }
+            if (sources[2] >= 0) { sum |= 32; }
+            if (sources[3] >= 0) { sum |= 16; }
+            if (sources[4] >= 0) { sum |= 8; }
+            if (sources[5] >= 0) { sum |= 4; }
+            if (sources[6] >= 0) { sum |= 2; }
+            if (sources[7] >= 0) { sum |= 1; }
+#endif
             result[j / 8] = sum;
         }
     }
@@ -106,6 +120,7 @@ public readonly struct EmbeddingI1 : IEmbedding<EmbeddingI1>
         // Process as many Vector256 blocks as possible
         while (lhsPtr <= lhsPtrEnd - 32)
         {
+#if NET8_0_OR_GREATER
             var lhsBlock = Vector256.Load(lhsPtr);
             var rhsBlock = Vector256.Load(rhsPtr);
             var xorBlock = Vector256.Xor(lhsBlock, rhsBlock).AsUInt64();
@@ -121,11 +136,15 @@ public readonly struct EmbeddingI1 : IEmbedding<EmbeddingI1>
 
             lhsPtr += 32;
             rhsPtr += 32;
+#else
+            throw new NotImplementedException();
+#endif
         }
 
         // Process as many Vector128 blocks as possible
         while (lhsPtr <= lhsPtrEnd - 16)
         {
+#if NET8_0_OR_GREATER
             var lhsBlock = Vector128.Load(lhsPtr);
             var rhsBlock = Vector128.Load(rhsPtr);
             var xorBlock = Vector128.Xor(lhsBlock, rhsBlock).AsUInt64();
@@ -136,6 +155,9 @@ public readonly struct EmbeddingI1 : IEmbedding<EmbeddingI1>
 
             lhsPtr += 16;
             rhsPtr += 16;
+#else
+            throw new NotImplementedException();
+#endif
         }
 
         // Process the remaining bytes
