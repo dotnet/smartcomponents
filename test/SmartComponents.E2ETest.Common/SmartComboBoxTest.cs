@@ -55,7 +55,7 @@ public class SmartComboBoxTest<TStartup> : PlaywrightTestBase<TStartup> where TS
         var suggestionItems = suggestions.Locator(".smartcombobox-suggestion[role=option]");
         Assert.Equal(10, await suggestionItems.CountAsync());
         var suggestionTexts = await suggestionItems.AllTextContentsAsync();
-        Assert.Equal(["Transportation: Air", "Transportation: Rail", "Transportation: Road"], suggestionTexts.Take(3).Order());
+        Assert.Equal(["Transportation: Air", "Transportation: Rail", "Transportation: Road"], suggestionTexts.Take(3).OrderBy(x => x));
         await Expect(suggestionItems.First).ToHaveTextAsync("Transportation: Road");
 
         // Suggestion list is hidden if you focus out of the input

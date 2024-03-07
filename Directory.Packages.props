@@ -16,7 +16,7 @@
     <PackageVersion Include="System.Runtime.Caching" Version="8.0.0" />
     <PackageVersion Include="System.Text.Json" Version="8.0.1" />
     <!-- Tests -->
-    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.1" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.ObjectPool" Version="8.0.1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
