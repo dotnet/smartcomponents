@@ -18,7 +18,7 @@ Smart Paste is an intelligent app feature that fills out forms automatically usi
 
 Smart Paste is designed to work with any form. You don't have to configure or annotate your forms, since the system will infer the meanings of the fields from your HTML. You can optionally provide annotations if it helps to produce better results.
 
-## Adding SmartPaste in Blazor
+## Adding Smart Paste in Blazor
 
 First, make sure you've followed the [Smart Component installation steps for Blazor](getting-started-blazor.md). This includes [configuring an OpenAI backend](configure-openai-backend.md), which is a prerequisite for Smart Paste.
 
@@ -47,7 +47,7 @@ Now when this app is run, you can copy a mailing address to your clipboard from 
 
 Note: this example is only intended to show `SmartPasteButton`. This form won't do anything useful if submitted - see [Blazor docs for more about form submissions](https://learn.microsoft.com/en-us/aspnet/core/blazor/forms).
 
-## Adding SmartPaste in MVC / Razor Pages
+## Adding Smart Paste in MVC / Razor Pages
 
 First, make sure you've followed the [Smart Component installation steps for MVC/Razor Pages](getting-started-mvc-razor-pages.md). This includes [configuring an OpenAI backend](configure-openai-backend.md), which is a prerequisite for Smart Paste.
 
@@ -84,7 +84,7 @@ You can use this to specify localized text, or any other button content such as 
 
 ## Styling the button
 
-The smart paste button renders as a simple HTML `<button>` element. You can style it by adding any CSS class names or other HTML `<button>` attributes.
+The smart paste button renders as a simple HTML `<button>` element. You can style it by adding any CSS class names or other HTML attributes that apply to `<button>`.
 
 By default, the smart paste button gives itself the CSS class name `smart-paste-button`. During the period when smart paste is in progress (waiting for a server response), the button will apply the `disabled` attribute to itself. So, you can apply styles in CSS as follows:
 
