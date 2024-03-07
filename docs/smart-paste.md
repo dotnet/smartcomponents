@@ -107,7 +107,7 @@ If you are using scoped CSS (i.e., a `.razor.css` or `.cshtml.css` file), rememb
 ::deep .smart-paste-button:disabled { /* ... */ }
 ```
 
-## The default icon
+## Rendering an icon
 
 You can optionally have the button render a default "smart paste" icon inside itself:
 
@@ -141,9 +141,9 @@ By default, Smart Paste infers the meanings of your form fields automatically, a
 
 ### Annotating your form fields
 
-By default, Smart Paste finds all the fields in your `<form>`, and generates a description for them based on their associated `<label>`, or their `name` attribute, or nearby text content. This whole form descriptor is then supplied to the backend language model.
+By default, Smart Paste finds all the fields in your `<form>` (i.e., `<input>`, `<select>`, and `<textarea>` elements), and generates a description for them based on their associated `<label>`, or their `name` attribute, or nearby text content. This whole form descriptor is then supplied to the backend language model and is used to build a prompt.
 
-You can optionally add a `data-smartpaste-description` attribute that sets a field description to supply to the language model. Examples:
+You can optionally override this on specific form fields. To do so, add a `data-smartpaste-description` attribute that sets a field description to supply to the language model. Examples:
 
 ```html
 <input data-smartpaste-description="The user's vehicle registration number which must be in the form XYZ-123" />
