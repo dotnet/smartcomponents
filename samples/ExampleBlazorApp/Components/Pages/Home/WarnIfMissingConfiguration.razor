@@ -1,24 +1,21 @@
-﻿@model Exception?
-@{
-    ViewData["Title"] = "Home Page";
-}
+﻿@inject IConfiguration Config
 
-@if (Model is { } invalidConfigException)
+@if (RepoSharedConfigUtil.GetConfigError(Config) is { } invalidConfigException)
 {
-    <div class="p-4 rounded-3 border border-2 border-danger shadow-lg" style="background: #ffdbdb">
-        <h4>Missing or invalid configuration</h4>
-        <p class="mt-4" style="font-weight: 600">
+    <div class="border-2 border-rose-500 p-5 bg-rose-200 rounded-lg shadow-lg">
+        <h4 class="font-semibold">Missing or invalid configuration</h4>
+        <p class="mt-4 text-sm">
             Reason: <span class="font-semibold">@invalidConfigException.Message</span>
         </p>
-        <p>
+        <p class="mt-4 text-sm">
             To run the samples that use OpenAI inference, you need to configure an API key, either in
             <code>appsettings.Development.json</code> or in <code>RepoSharedConfig.json</code> at the
             root of this repo. For instructions, see
             <a href="https://github.com/dotnet-smartcomponents/smartcomponents/blob/main/docs/configure-openai-backend.md">Configure the OpenAI backend</a>.
         </p>
-        <p>
+        <p class="mt-4 text-sm">
             Without an API key, you can still run <a href="smartcombobox">Smart ComboBox</a>
-            sample since it does not require any external language model backend.
+            and <a href="localembeddings">Local Embeddings</a> samples since they do not require any external language model backend.
         </p>
     </div>
 }
