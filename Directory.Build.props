@@ -2,7 +2,7 @@
     <PropertyGroup>
         <VersionPrefix>0.1.0</VersionPrefix>
         <VersionSuffix Condition="'$(BuildNumber)' == ''">dev</VersionSuffix>
-        <VersionSuffix Condition="'$(BuildNumber)' != ''">preview$([System.String]::Format('{0:00000}', $([MSBuild]::Add($(BuildNumber), 0))))</VersionSuffix>
+        <VersionSuffix Condition="'$(BuildNumber)' != ''">preview$([System.String]::Format('{0:00000}', $([MSBuild]::Add($(BuildNumber), 10000))))</VersionSuffix>
         <PackageVersion>$(VersionPrefix)-$(VersionSuffix)</PackageVersion>
         <PackageOutputPath>$(MSBuildThisFileDirectory)artifacts\</PackageOutputPath>
         <IsPackable>false</IsPackable>
