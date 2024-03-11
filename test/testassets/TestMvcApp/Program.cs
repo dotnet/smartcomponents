@@ -53,7 +53,7 @@ public class Program
 
         app.UseAuthorization();
 
-        using var embedder = new LocalEmbedder();
+        var embedder = new LocalEmbedder();
         var accountingCategories = embedder.EmbedRange(E2ETests.TestData.AccountingCategories);
 
         app.MapSmartComboBox("/api/accounting-categories",
