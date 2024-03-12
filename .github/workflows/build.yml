@@ -44,7 +44,14 @@ jobs:
         name: nuget-packages
         path: artifacts/*.nupkg
         if-no-files-found: error
-# NuGet package publishing works but is disabled until closer to release
-#    - name: Publish to NuGet.org
-#      if: github.ref == 'refs/heads/main' && matrix.os == 'ubuntu-latest'
-#      run:  dotnet nuget push artifacts/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_API_KEY}}
+    - name: Check if publishing
+      if: github.ref == 'refs/heads/main' && matrix.os == 'ubuntu-latest'
+      id: check-if-publishing
+      shell: bash
+      run: |
+        if [ "${{ secrets.NUGET_API_KEY }}" != '' ]; then
+          echo "should_publish_to_nuget=true" >> $GITHUB_OUTPUT;
+        fi
+    - name: Publish to NuGet.org
+      if: ${{ steps.check-if-publishing.outputs.should_publish_to_nuget == 'true' }}
+      run:  dotnet nuget push artifacts/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_API_KEY}}
