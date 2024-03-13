@@ -6,8 +6,10 @@ using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using SmartComponents.AspNetCore;
 using SmartComponents.Inference;
 using SmartComponents.Infrastructure;
 using SmartComponents.StaticAssets.Inference;
@@ -24,6 +26,7 @@ public static class SmartComponentsServiceCollectionExtensions
         services.TryAddScoped<SmartPasteInference>();
 
         services.AddTransient<IStartupFilter, AttachSmartComponentsEndpointsStartupFilter>();
+        services.AddTransient<ITagHelperComponent, SmartComponentsScriptTagHelperComponent>();
         return new DefaultSmartComponentsBuilder(services);
     }
 
