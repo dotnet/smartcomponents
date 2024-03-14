@@ -1,6 +1,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using E2ETests;
+using SmartComponents.Inference;
+using SmartComponents.Inference.OpenAI;
+
 namespace TestBlazorServerNet6App;
 
 public class Program
@@ -10,8 +14,11 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
+        builder.Services.AddScoped<SmartPasteInference, SmartPasteInferenceForTests>();
         builder.Services.AddRazorPages();
         builder.Services.AddServerSideBlazor();
+        builder.Services.AddSmartComponents().WithInferenceBackend<OpenAIInferenceBackend>();
+        builder.Configuration.AddRepoSharedConfig();
 
         var app = builder.Build();
 

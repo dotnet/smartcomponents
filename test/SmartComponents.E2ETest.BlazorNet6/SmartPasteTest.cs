@@ -20,4 +20,21 @@ public class SmartPasteTest : PlaywrightTestBase<TestBlazorServerNet6App.Program
     {
         Assert.Equal("Smart Paste", await Page.TitleAsync());
     }
+
+    [Fact]
+    public async Task CanPopulateTextBoxes()
+    {
+        var form = Page.Locator("#simple-case");
+        await Expect(form.Locator("[name=firstname]")).ToBeEmptyAsync();
+        await Expect(form.Locator("[name=lastname]")).ToBeEmptyAsync();
+
+        await SetClipboardContentsAsync("Rahul Mandal");
+
+        await form.Locator(".smart-paste-button").ClickAsync();
+        await Expect(form.Locator("[name=firstname]")).ToHaveValueAsync("Rahul");
+        await Expect(form.Locator("[name=lastname]")).ToHaveValueAsync("Mandal");
+    }
+
+    protected Task SetClipboardContentsAsync(string text)
+        => Page.Locator("html").EvaluateAsync("(ignored, value) => navigator.clipboard.writeText(value)", text);
 }
