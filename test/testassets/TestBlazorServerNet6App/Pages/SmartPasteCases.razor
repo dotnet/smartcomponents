@@ -1,0 +1,14 @@
+﻿@page "/smartpaste"
+@using SmartComponents
+
+<PageTitle>Smart Paste</PageTitle>
+
+<h1>SmartPaste testcases</h1>
+
+<h2>Simple</h2>
+<form id="simple-case">
+    <input name="firstname" />
+    <input name="lastname" />
+    <input name="unrelated" value="Unrelated value should be left alone" style="width:300px" />
+    <SmartPasteButton />
+</form>

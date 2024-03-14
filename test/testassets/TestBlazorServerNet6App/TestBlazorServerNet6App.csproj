@@ -6,4 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\SmartComponents.AspNetCore\SmartComponents.AspNetCore.csproj" />
+  </ItemGroup>
+
 </Project>
