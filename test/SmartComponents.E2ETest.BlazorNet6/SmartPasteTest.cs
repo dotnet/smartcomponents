@@ -13,6 +13,8 @@ public class SmartPasteTest : PlaywrightTestBase<TestBlazorServerNet6App.Program
     {
         await Page.GotoAsync(Server.Address + "/smartpaste");
         await Page.Context.GrantPermissionsAsync(["clipboard-read", "clipboard-write"]);
+
+        await Expect(Page.Locator("#is-interactive")).ToHaveTextAsync("True", new() { Timeout = 30000 });
     }
 
     [Fact]
