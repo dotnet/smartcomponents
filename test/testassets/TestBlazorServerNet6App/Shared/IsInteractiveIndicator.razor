@@ -1,0 +1,16 @@
+﻿<p>
+    Is interactive:
+    <strong id="is-interactive">@isInteractive</strong>
+</p>
+@code {
+    bool isInteractive;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            isInteractive = true;
+            StateHasChanged();
+        }
+    }
+}

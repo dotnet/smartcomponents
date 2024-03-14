@@ -26,7 +26,7 @@ internal sealed class SmartComponentsScriptTagHelperComponent : TagHelperCompone
                 "/_content/SmartComponents.AspNetCore.Components/SmartComponents.AspNetCore.Components.lib.module.js");
             var srcWithFileVersion = fileVersionProvider.AddFileVersionToPath(pathBase, relativeSrc);
 
-            output.PostContent.AppendHtml("<script src=\"");
+            output.PostContent.AppendHtml("<script type=\"module\" src=\"");
             output.PostContent.Append(srcWithFileVersion);
             output.PostContent.AppendHtml("\"></script>");
         }

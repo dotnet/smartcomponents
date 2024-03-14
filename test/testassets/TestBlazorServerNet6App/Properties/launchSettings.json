@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "TestBlazorServerNet6App": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:7110;http://localhost:5034",
+      "launchUrl": "https://localhost:7110/subdir",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
