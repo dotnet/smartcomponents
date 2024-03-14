@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics;
@@ -27,7 +27,15 @@ public abstract class PlaywrightTestBase<TStartup>
             Headless = !Debugger.IsAttached,
         });
 
+        if (Page is not null)
+        {
+            // Otherwise we have to deal with unsubscribing from Page.PageError
+            throw new InvalidOperationException("Cannot intialize a new page when one is already initialized");
+        }
+
         Page = await Browser.NewPageAsync();
+        Page.PageError += (_, message)
+            => throw new InvalidOperationException("Page error: " + message);
         await OnBrowserReadyAsync();
     }
 
