@@ -215,6 +215,18 @@ function inferFieldDescription(form: HTMLFormElement, element: HTMLElement): str
 async function getSmartPasteResponse(button: HTMLButtonElement, formConfig, clipboardContents): Promise<Response> {
     const formFields = formConfig.map(entry => restrictProperties(entry, ['identifier', 'description', 'allowedValues', 'type']));
 
+    const body = {
+        dataJson: JSON.stringify({
+            formFields,
+            clipboardContents,
+        })
+    };
+
+    const antiforgeryName = button.getAttribute('data-antiforgery-name');
+    if (antiforgeryName) {
+        body[antiforgeryName] = button.getAttribute('data-antiforgery-value');
+    }
+
     // We rely on the URL being pathbase-relative for Blazor, or a ~/... URL that would already
     // be resolved on the server for MVC
     const url = button.getAttribute('data-url');
@@ -223,13 +235,7 @@ async function getSmartPasteResponse(button: HTMLButtonElement, formConfig, clip
         headers: {
             'content-type': 'application/x-www-form-urlencoded',
         },
-        body: new URLSearchParams({
-            [button.getAttribute('data-antiforgery-name')]: button.getAttribute('data-antiforgery-value'),
-            dataJson: JSON.stringify({
-                formFields,
-                clipboardContents,
-            })
-        })
+        body: new URLSearchParams(body)
     });
 }
 

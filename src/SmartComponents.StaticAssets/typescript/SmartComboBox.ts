@@ -70,18 +70,24 @@ class SmartComboBox extends HTMLElement {
     async _requestSuggestions() {
         this.currentAbortController = new AbortController();
 
+        const body = {
+            inputValue: this.inputElem.value,
+            maxResults: this.getAttribute('data-max-suggestions'),
+            similarityThreshold: this.getAttribute('data-similarity-threshold'),
+        };
+
+        const antiforgeryName = this.getAttribute('data-antiforgery-name');
+        if (antiforgeryName) {
+            body[antiforgeryName] = this.getAttribute('data-antiforgery-value');
+        }
+
         let response: Response;
         const requestInit: RequestInit = {
             method: 'post',
             headers: {
                 'content-type': 'application/x-www-form-urlencoded',
             },
-            body: new URLSearchParams({
-                [this.getAttribute('data-antiforgery-name')]: this.getAttribute('data-antiforgery-value'),
-                inputValue: this.inputElem.value,
-                maxResults: this.getAttribute('data-max-suggestions'),
-                similarityThreshold: this.getAttribute('data-similarity-threshold'),
-            }),
+            body: new URLSearchParams(body),
             signal: this.currentAbortController.signal,
         };
 
