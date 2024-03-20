@@ -36,16 +36,21 @@ public static class SmartComponentsServiceCollectionExtensions
         {
             next(builder);
 
+            var validateAntiforgery = DefaultSmartComponentsBuilder.HasEnabledAntiForgeryValidation(builder.ApplicationServices);
+
             builder.UseEndpoints(app =>
             {
                 var smartPasteEndpoint = app.MapPost("/_smartcomponents/smartpaste", async ([FromServices] IInferenceBackend inference, HttpContext httpContext, [FromServices] IAntiforgery antiforgery, [FromServices] SmartPasteInference smartPasteInference) =>
                 {
-#if NET8_0_OR_GREATER
-                    // We use DisableAntiforgery and validate manually so that it works whether
-                    // or not you have UseAntiforgery middleware in the pipeline. Without doing that,
-                    // people will get errors like https://stackoverflow.com/questions/61829324
-                    await antiforgery.ValidateRequestAsync(httpContext);
-#endif
+                    // The rules about whether antiforgery are enabled by default vary across different
+                    // ASP.NET Core versions. To make it consistent, we disable the default enablement on
+                    // .NET 8, and manually validate it if you've opted in.
+                    // Also note that antiforgery handling has issues (https://github.com/dotnet/aspnetcore/issues/54533)
+                    // so until that's resolved we need this to be off by default.
+                    if (validateAntiforgery)
+                    {
+                        await antiforgery.ValidateRequestAsync(httpContext);
+                    }
 
                     // Can't use [FromForm] on net6.0
                     if (!httpContext.Request.Form.TryGetValue("dataJson", out var dataJson))
@@ -59,10 +64,11 @@ public static class SmartComponentsServiceCollectionExtensions
 
                 var smartTextAreaEndpoint = app.MapPost("/_smartcomponents/smarttextarea", async ([FromServices] IInferenceBackend inference, HttpContext httpContext, [FromServices] IAntiforgery antiforgery, [FromServices] SmartTextAreaInference smartTextAreaInference) =>
                 {
-#if NET8_0_OR_GREATER
-                    // See above for why we validate antiforgery manually
-                    await antiforgery.ValidateRequestAsync(httpContext);
-#endif
+                    if (validateAntiforgery)
+                    {
+                        // See above for why we validate antiforgery manually
+                        await antiforgery.ValidateRequestAsync(httpContext);
+                    }
 
                     // Can't use [FromForm] on net6.0
                     var form = httpContext.Request.Form;
@@ -79,6 +85,7 @@ public static class SmartComponentsServiceCollectionExtensions
                 });
 
 #if NET8_0_OR_GREATER
+                // These APIs only exist on .NET 8+. It wasn't enabled by default in prior versions.
                 smartPasteEndpoint.DisableAntiforgery();
                 smartTextAreaEndpoint.DisableAntiforgery();
 #endif

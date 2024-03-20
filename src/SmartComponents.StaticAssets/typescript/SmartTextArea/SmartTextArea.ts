@@ -117,19 +117,24 @@ export class SmartTextArea extends HTMLElement {
             cursorPosition: this.textArea.selectionStart,
         };
 
+        const body = {
+            // TODO: Limit the amount of text we send, e.g., to 100 characters before and after the cursor
+            textBefore: snapshot.textAreaValue.substring(0, snapshot.cursorPosition),
+            textAfter: snapshot.textAreaValue.substring(snapshot.cursorPosition),
+            config: this.getAttribute('data-config'),
+        };
+
+        const antiforgeryName = this.getAttribute('data-antiforgery-name');
+        if (antiforgeryName) {
+            body[antiforgeryName] = this.getAttribute('data-antiforgery-value');
+        }
+
         const requestInit: RequestInit = {
             method: 'post',
             headers: {
                 'content-type': 'application/x-www-form-urlencoded',
             },
-            body: new URLSearchParams({
-                [this.getAttribute('data-antiforgery-name')]: this.getAttribute('data-antiforgery-value'),
-
-                // TODO: Limit the amount of text we send, e.g., to 100 characters before and after the cursor
-                textBefore: snapshot.textAreaValue.substring(0, snapshot.cursorPosition),
-                textAfter: snapshot.textAreaValue.substring(snapshot.cursorPosition),
-                config: this.getAttribute('data-config'),
-            }),
+            body: new URLSearchParams(body),
             signal: snapshot.abortSignal,
         };
 

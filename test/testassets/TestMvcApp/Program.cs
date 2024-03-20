@@ -19,7 +19,8 @@ public class Program
         builder.Services.AddControllersWithViews();
         builder.Services.AddScoped<SmartPasteInference, SmartPasteInferenceForTests>();
         builder.Services.AddSmartComponents()
-            .WithInferenceBackend<OpenAIInferenceBackend>();
+            .WithInferenceBackend<OpenAIInferenceBackend>()
+            .WithAntiforgeryValidation(); // This doesn't benefit most apps, but we'll validate it works in E2E tests
 
         var app = builder.Build();
 
