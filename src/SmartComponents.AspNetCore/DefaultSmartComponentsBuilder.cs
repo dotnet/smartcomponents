@@ -21,4 +21,17 @@ internal sealed class DefaultSmartComponentsBuilder(IServiceCollection services)
 
         return this;
     }
+
+    public ISmartComponentsBuilder WithAntiforgeryValidation()
+    {
+        services.AddSingleton<SmartComponentsAntiforgeryValidation>();
+        return this;
+    }
+
+    internal static bool HasEnabledAntiForgeryValidation(IServiceProvider services)
+    {
+        return services.GetService<SmartComponentsAntiforgeryValidation>() is not null;
+    }
+
+    internal sealed class SmartComponentsAntiforgeryValidation { }
 }
