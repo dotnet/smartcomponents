@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -24,12 +24,7 @@ public class OpenAIInferenceBackend(IConfiguration configuration)
 #endif
 
         var apiConfig = new ApiConfig(configuration);
-        var client = string.IsNullOrEmpty(apiConfig.Endpoint)
-            ? new OpenAIClient(apiConfig.ApiKey)
-            : new OpenAIClient(
-                new Uri(apiConfig.Endpoint),
-                new AzureKeyCredential(apiConfig.ApiKey));
-
+        var client = CreateClient(apiConfig);
         var chatCompletionsOptions = new ChatCompletionsOptions
         {
             DeploymentName = apiConfig.DeploymentName,
@@ -68,5 +63,26 @@ public class OpenAIInferenceBackend(IConfiguration configuration)
 #endif
 
         return response;
+    }
+
+    private static OpenAIClient CreateClient(ApiConfig apiConfig)
+    {
+        if (apiConfig.SelfHosted)
+        {
+            var transport = new SelfHostedLlmTransport(apiConfig.Endpoint!);
+            return new OpenAIClient(apiConfig.ApiKey, new() { Transport = transport });
+        }
+        else if (apiConfig.Endpoint is null)
+        {
+            // OpenAI
+            return new OpenAIClient(apiConfig.ApiKey);
+        }
+        else
+        {
+            // Azure OpenAI
+            return new OpenAIClient(
+                apiConfig.Endpoint,
+                new AzureKeyCredential(apiConfig.ApiKey!));
+        }
     }
 }
