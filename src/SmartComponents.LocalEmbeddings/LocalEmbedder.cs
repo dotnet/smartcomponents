@@ -34,8 +34,7 @@ public sealed partial class LocalEmbedder : IDisposable
 
     private static string GetFullPathToModelFile(string modelName, string fileName)
     {
-        var assembly = Assembly.GetEntryAssembly()!;
-        var baseDir = Path.GetDirectoryName(assembly.Location)!;
+        var baseDir = AppContext.BaseDirectory;
         var fullPath = Path.Combine(baseDir, "LocalEmbeddingsModel", modelName, fileName);
         if (!File.Exists(fullPath))
         {
