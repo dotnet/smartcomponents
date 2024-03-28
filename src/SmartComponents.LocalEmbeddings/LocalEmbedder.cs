@@ -61,26 +61,42 @@ public sealed partial class LocalEmbedder : IDisposable
             // we've finished getting the final result
             var tokens = tokenizer.Encode(inputText, maximumTokens: maximumTokens);
 
-            using var inputIdsOrtValue = OrtValue.CreateTensorValueFromMemory(
-                OrtMemoryInfo.DefaultInstance,
-                MemoryMarshal.AsMemory(tokens.InputIds),
-                [1L, tokens.InputIds.Length]);
-            using var attMaskOrtValue = OrtValue.CreateTensorValueFromMemory(
-                OrtMemoryInfo.DefaultInstance,
-                MemoryMarshal.AsMemory(tokens.AttentionMask),
-                [1, tokens.AttentionMask.Length]);
-            using var typeIdsOrtValue = OrtValue.CreateTensorValueFromMemory(
-                OrtMemoryInfo.DefaultInstance,
-                MemoryMarshal.AsMemory(tokens.TokenTypeIds),
-                [1, tokens.TokenTypeIds.Length]);
+            // Not all models require all these inputs, and it will fail if you supply inputs that aren't required
+            // So we build the list of inputs dynamically. For example, this is required to run
+            // https://huggingface.co/Xenova/distiluse-base-multilingual-cased-v1 since it doesn't use token_type_ids
+            var inputs = new OrtValue[_onnxSession.InputNames.Count];
+            for (var i = 0; i < inputs.Length; i++)
+            {
+                inputs[i] = _onnxSession.InputNames[i] switch
+                {
+                    "input_ids" => OrtValue.CreateTensorValueFromMemory(
+                        OrtMemoryInfo.DefaultInstance,
+                        MemoryMarshal.AsMemory(tokens.InputIds),
+                        [1L, tokens.InputIds.Length]),
+                    "attention_mask" => OrtValue.CreateTensorValueFromMemory(
+                        OrtMemoryInfo.DefaultInstance,
+                        MemoryMarshal.AsMemory(tokens.AttentionMask),
+                        [1, tokens.AttentionMask.Length]),
+                    "token_type_ids" => OrtValue.CreateTensorValueFromMemory(
+                        OrtMemoryInfo.DefaultInstance,
+                        MemoryMarshal.AsMemory(tokens.TokenTypeIds),
+                        [1, tokens.TokenTypeIds.Length]),
+                    _ => throw new InvalidOperationException($"Unknown input name: {_onnxSession.InputNames[i]}")
+                };
+            }
 
             // InferenceSession.Run is thread-safe as per https://github.com/microsoft/onnxruntime/issues/114
             // so there's no need to maintain some kind of pool of sessions
             using var outputs = _onnxSession.Run(
                 _runOptions,
-                ["input_ids", "attention_mask", "token_type_ids"],
-                [inputIdsOrtValue, attMaskOrtValue, typeIdsOrtValue],
+                _onnxSession.InputNames,
+                inputs,
                 _onnxSession.OutputNames);
+
+            for (var i = 0; i < inputs.Length; i++)
+            {
+                inputs[i].Dispose();
+            }
 
             return PoolSum<TEmbedding>(
                 outputs[0].GetTensorDataAsSpan<float>(),
