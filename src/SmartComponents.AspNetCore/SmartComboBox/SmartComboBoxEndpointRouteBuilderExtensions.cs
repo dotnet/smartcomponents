@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Globalization;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -33,8 +34,8 @@ public static class SmartComboBoxEndpointRouteBuilderExtensions
             // Can't use [FromForm] on net6.0
             var form = httpContext.Request.Form;
             if (!(form.TryGetValue("inputValue", out var inputValue) && !string.IsNullOrEmpty(inputValue))
-                || !(form.TryGetValue("maxResults", out var maxResultsString) && int.TryParse(maxResultsString, out var maxResults))
-                || !(form.TryGetValue("similarityThreshold", out var similarityThresholdString) && float.TryParse(similarityThresholdString, out var similarityThreshold)))
+                || !(form.TryGetValue("maxResults", out var maxResultsString) && int.TryParse(maxResultsString, NumberStyles.Integer, CultureInfo.InvariantCulture, out var maxResults))
+                || !(form.TryGetValue("similarityThreshold", out var similarityThresholdString) && float.TryParse(similarityThresholdString, NumberStyles.Float, CultureInfo.InvariantCulture, out var similarityThreshold)))
             {
                 return Results.BadRequest("inputValue, maxResults, and similarityThreshold are required");
             }
