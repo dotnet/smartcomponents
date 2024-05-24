@@ -1,11 +1,11 @@
-# Getting started with Smart Components in Blazor
+# Getting started with .NET Smart Components in Blazor
 
 1. **Create a new Blazor project or use an existing one (.NET 6 or later).**
 
    * Command line: Run `dotnet new blazor`
    * Visual Studio: Select *File*->*New*->*Project...* then choose *Blazor Web App*
 
-   **Note**: Smart Components work equally in any render mode (e.g., Static SSR, Server, or WebAssembly) but you do need to have an ASP.NET Core server, so you cannot use a Blazor WebAssembly Standalone App hosted on a static file server. This is purely because you need a server to hold your API keys securely.
+   **Note**: .NET Smart Components work equally in any render mode (e.g., Static SSR, Server, or WebAssembly) but you do need to have an ASP.NET Core server, so you cannot use a Blazor WebAssembly Standalone App hosted on a static file server. This is purely because you need a server to hold your API keys securely.
 
 1. **Install packages**
 

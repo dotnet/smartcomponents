@@ -1,4 +1,4 @@
-# Getting started with Smart Components in MVC / Razor Pages
+# Getting started with .NET Smart Components in MVC / Razor Pages
 
 1. **Create a new ASP.NET Core Web App project or use an existing one (.NET 6 or later).**
 
@@ -33,7 +33,7 @@
    
    If you will only use `smart-combobox`, you don't need any language model backend and can skip this step.
 
-1. **Add smart components to your pages**
+1. **Add .NET Smart Components to your pages**
 
    You can now add the following inside your views/pages:
 
