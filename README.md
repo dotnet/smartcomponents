@@ -1,19 +1,19 @@
-# Smart Components
+# .NET Smart Components
 
-Smart Components lets you **add genuinely useful AI-powered features to your .NET apps quickly, easily, and without risking wasted effort.**
+.NET Smart Components shows you **how to add genuinely useful AI-powered features to your .NET apps quickly, easily, and without risking wasted effort.**
 
-You don't have to spend weeks of dev time redesigning your UX or researching machine learning and prompt engineering. Smart Components are prebuilt end-to-end AI features that you can drop into your existing UIs to upgrade them, truly making your app more productive for your end users.
+You don't have to spend weeks of dev time redesigning your UX or researching machine learning and prompt engineering. .NET Smart Components are prebuilt end-to-end AI features that you can drop into your existing UIs to upgrade them, truly making your app more productive for your end users.
 
-This is an experiment from the .NET team, and is initially available for **ASP.NET Core 6.0 and later** with either:
+The .NET Smart Components are provided as sample implementations for ASP.NET Core apps targeting .NET 6 or later:
 
- * **Blazor** (see: [Getting started with Smart Controls and Blazor](docs/getting-started-blazor.md))
- * **MVC / Razor Pages** (see: [Getting started with Smart Controls and MVC/Razor Pages](docs/getting-started-mvc-razor-pages.md))
+* **Blazor** (see: [Getting started with Smart Controls and Blazor](docs/getting-started-blazor.md))
+* **MVC / Razor Pages** (see: [Getting started with Smart Controls and MVC/Razor Pages](docs/getting-started-mvc-razor-pages.md))
 
 We may add support for other UI tech (e.g., native apps) later, depending on feedback.
 
 ## What's included
 
-The set of components and features may expand over time. Currently, Smart Components includes:
+The set of components and features may expand over time. Currently, .NET Smart Components includes:
 
 ### Smart Paste
 
@@ -45,7 +45,7 @@ Computes the level of semantic similarity between two natural language strings, 
 
 Example: evaluating the semantic similarity between two strings
 
-```cs
+```csharp
 var article1 = embedder.Embed("Vacation allowance policy");
 var article2 = embedder.Embed("Returning a company vehicle");
 var article3 = embedder.Embed("How to get your boss fired");
@@ -58,7 +58,7 @@ Console.WriteLine(searchTerm.Similarity(article3)); // Outputs: 0.38
 
 Example: finding closest matches
 
-```cs
+```csharp
 // Find closest matches to "ball game"
 var candidates = embedder.EmbedRange(["Soccer", "Tennis", "Swimming", "Horse riding", "Golf", "Gymnastics"]);
 
@@ -78,34 +78,30 @@ Learn more: [Local Embeddings docs](docs/local-embeddings.md)
 
 1. Clone this repo
 
-   ```
-   git clone https://github.com/dotnet-smartcomponents/smartcomponents.git
-   cd smartcomponents
-   ```
+    ```console
+    git clone https://github.com/dotnet-smartcomponents/smartcomponents.git
+    cd smartcomponents
+    ```
 
 1. If you want to run the Smart Paste or Smart TextArea samples, edit the `RepoSharedConfig.json` file at the root of the solution to add your API key. See [How to configure an OpenAI backend](docs/configure-openai-backend.md).
 
-   You can skip this if you only want to run the Smart ComboBox or Local Embeddings samples, since they run entirely locally.
+    You can skip this if you only want to run the Smart ComboBox or Local Embeddings samples, since they run entirely locally.
 
 1. Run it
 
-   ```
-   cd samples/ExampleBlazorApp
-   dotnet run
-   ```
+    ```console
+    cd samples/ExampleBlazorApp
+    dotnet run
+    ```
 
-Once you're ready to add Smart Components to your own app, see:
+Once you're ready to add .NET Smart Components to your own app, see:
 
- * [Getting started with Smart Controls and Blazor](docs/getting-started-blazor.md)
- * [Getting started with Smart Controls and MVC/Razor Pages](docs/getting-started-mvc-razor-pages.md)
+* [Getting started with Smart Controls and Blazor](docs/getting-started-blazor.md)
+* [Getting started with Smart Controls and MVC/Razor Pages](docs/getting-started-mvc-razor-pages.md)
 
-## Feedback and support
+## Feedback
 
-The purpose of this experiment is to assess whether/how the .NET community would want to use prebuilt UI components for AI features.
-
-**Please give us your feedback, even if it's just to say "*Yes I want this*" or "*I won't use this because...*"**. To give feedback, [post an issue here](https://github.com/dotnet-smartcomponents/smartcomponents/issues).
-
-Smart Components isn't yet an officially supported part of .NET. Whether or not it graduates to full support depends on community feedback and usage levels.
+To give feedback on these samples, [post an issue here](https://github.com/dotnet/smartcomponents/issues).
 
 ## Contributing
 
