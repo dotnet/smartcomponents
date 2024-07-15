@@ -40,6 +40,11 @@ public static class SmartComboBoxEndpointRouteBuilderExtensions
                 return Results.BadRequest("inputValue, maxResults, and similarityThreshold are required");
             }
 
+            if (maxResults < 1 || maxResults > 100)
+            {
+                return Results.BadRequest("maxResults must be less than or equal to 100");
+            }
+
             var suggestionsList = await suggestions(new SmartComboBoxRequest
             {
                 HttpContext = httpContext,
