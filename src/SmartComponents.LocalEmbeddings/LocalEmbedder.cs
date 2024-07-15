@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics.Tensors;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using FastBertTokenizer;
 using Microsoft.Extensions.ObjectPool;

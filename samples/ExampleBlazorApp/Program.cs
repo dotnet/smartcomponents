@@ -12,7 +12,8 @@ builder.Configuration.AddRepoSharedConfig();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddSmartComponents()
-    .WithInferenceBackend<OpenAIInferenceBackend>();
+    .WithInferenceBackend<OpenAIInferenceBackend>()
+    .WithAntiforgeryValidation();
 
 builder.Services.AddSingleton<LocalEmbedder>();
 
