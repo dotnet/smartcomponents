@@ -6,8 +6,8 @@ You don't have to spend weeks of dev time redesigning your UX or researching mac
 
 The .NET Smart Components are provided as sample implementations for ASP.NET Core apps targeting .NET 6 or later:
 
-* **Blazor** (see: [Getting started with .NET Smart Components and Blazor](docs/getting-started-blazor.md))
-* **MVC / Razor Pages** (see: [Getting started with .NET Smart Components and MVC/Razor Pages](docs/getting-started-mvc-razor-pages.md))
+* **Blazor** (see [Getting started with .NET Smart Components and Blazor](docs/getting-started-blazor.md))
+* **MVC / Razor Pages** (see [Getting started with .NET Smart Components and MVC/Razor Pages](docs/getting-started-mvc-razor-pages.md))
 
 We may add support for other UI tech (e.g., native apps) later, depending on feedback.
 
@@ -79,7 +79,7 @@ Learn more: [Local Embeddings docs](docs/local-embeddings.md)
 1. Clone this repo
 
     ```console
-    git clone https://github.com/dotnet-smartcomponents/smartcomponents.git
+    git clone https://github.com/dotnet/smartcomponents.git
     cd smartcomponents
     ```
 
