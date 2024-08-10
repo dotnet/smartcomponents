@@ -17,7 +17,7 @@
 
    In your server's `Program.cs`, under the comment `// Add services to the container`, add:
 
-   ```csharp
+   ```cs
    builder.Services.AddSmartComponents();
    ```
 
