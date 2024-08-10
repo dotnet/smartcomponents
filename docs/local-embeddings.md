@@ -2,17 +2,13 @@
 
 *Embeddings* are used for semantic similarity search. Natural-language strings are converted into numerical vectors called *embeddings*. The more conceptually related are two strings, the closer their vectors.
 
-While you can use an external AI service to compute embeddings, in many cases you can simply compute them locally on your server (no need for a GPU - the CPU will work fine). `SmartComponents.LocalEmbeddings` is a package to simplify doing this.
+While you can use an external AI service to compute embeddings, in many cases you can simply compute them locally on your server (no need for a GPU - the CPU will work fine). `SmartComponents.LocalEmbeddings` is a library to simplify doing this.
 
 With `SmartComponents.LocalEmbeddings`, you can compute embeddings in under a millisecond, and perform semantic search over hundreds of thousands of candidates in single-digit milliseconds. However, there are limits. To understand the performance characteristics and when you might benefit from moving to an external vector database, see *Performance* below.
 
 ## Getting started
 
-Reference the package `SmartComponents.LocalEmbeddings`:
-
- * Command line: `dotnet add package --prerelease SmartComponents.LocalEmbeddings`
- * Visual Studio: Right-click your project name, choose *Manage NuGet packages...*, and then search for and install `SmartComponents.LocalEmbeddings`.
-   * Note: Check the *Include prerelease* option if needed.
+Add the `SmartComponents.LocalEmbeddings` project from this repo to your solution and reference it from your app.
 
 You can now compute embeddings of strings:
 
@@ -225,7 +221,7 @@ In many cases you'll want to search over a large number of entities, e.g., tens 
 
 `LocalEmbedder` works by using the [ONNX runtime](https://onnxruntime.ai/docs/get-started/with-csharp.html), which can execute many different embeddings models on CPU or GPU (and often, CPU works faster for such small models).
 
-The `SmartComponents.LocalEmbeddings` NuGet package does not actually contain any ML model, but it is configured to download a model when you first build your application. You can configure which model is downloaded.
+The `SmartComponents.LocalEmbeddings` library does not actually contain any ML model, but it is configured to download a model when you first build your application. You can configure which model is downloaded.
 
 The default model that gets downloaded on build is [bge-micro-v2](https://huggingface.co/TaylorAI/bge-micro-v2), an MIT-licensed BERT embedding model, which has been quantized down to just 22.9 MiB, runs efficiently on CPU, and [scores well on benchmarks](https://huggingface.co/spaces/mteb/leaderboard) - outperforming many gigabyte-sized models.
 
@@ -260,16 +256,16 @@ The overall goal for `SmartComponents.LocalEmbeddings` is to make semantic searc
 
 ## Usage with Semantic Kernel
 
-If you want to use this ONNX-based local embeddings generator with [Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/overview/), the only package you need to reference is `SmartComponents.LocalEmbeddings.SemanticKernel`.
+If you want to use this ONNX-based local embeddings generator with [Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/overview/), then you can use the the `SmartComponents.LocalEmbeddings.SemanticKernel` library.
 
-Once you've referenced that package, you can use `AddLocalTextEmbeddingGeneration` to add a local embeddings generator to your `Kernel`:
+Add the `SmartComponents.LocalEmbeddings.SemanticKernel` project to your solution and reference it from your app. Then use `AddLocalTextEmbeddingGeneration` to add a local embeddings generator to your `Kernel`:
 
 ```cs
 var builder = Kernel.CreateBuilder();
 builder.AddLocalTextEmbeddingGeneration();
 ```
 
-... and then you can generate embeddings in the usual way for Semantic Kernel:
+You can then generate embeddings in the usual way for Semantic Kernel:
 
 ```cs
 var kernel = builder.Build();

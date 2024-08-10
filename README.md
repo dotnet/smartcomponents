@@ -76,18 +76,18 @@ Learn more: [Local Embeddings docs](docs/local-embeddings.md)
 
 1. If you don't already have it, install a current [.NET SDK for Windows, Linux, or Mac](https://dotnet.microsoft.com/download).
 
-1. Clone this repo
+1. Clone this repo.
 
     ```console
     git clone https://github.com/dotnet/smartcomponents.git
     cd smartcomponents
     ```
 
-1. If you want to run the Smart Paste or Smart TextArea samples, edit the `RepoSharedConfig.json` file at the root of the solution to add your API key. See [How to configure an OpenAI backend](docs/configure-openai-backend.md).
+1. If you want to run the Smart Paste or Smart TextArea samples, you'll need to first [configure an OpenAI backend](docs/configure-openai-backend.md).
 
     You can skip this if you only want to run the Smart ComboBox or Local Embeddings samples, since they run entirely locally.
 
-1. Run it
+1. Run it.
 
     ```console
     cd samples/ExampleBlazorApp

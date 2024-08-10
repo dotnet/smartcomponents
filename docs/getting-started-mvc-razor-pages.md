@@ -5,15 +5,12 @@
    * Command line: Run `dotnet new mvc` or `dotnet new razor`
    * Visual Studio: Select *File*->*New*->*Project...* then choose *ASP.NET Core Web App (Model-View-Controller or Razor pages)*
 
-1. **Install packages**
+1. **Reference the .NET Smart Components from your app**
 
-   * Install the NuGet package `SmartComponents.AspNetCore`.
+   * If you haven't already, clone this repo locally.
+   * Add the `SmartComponents.AspNetCore` project from this repo to your solution and reference it from your app.
 
-     * Command line: `dotnet add package --prerelease SmartComponents.AspNetCore`
-     * Visual Studio: Right-click your project name, choose *Manage NuGet packages...*, and then search for and install `SmartComponents.AspNetCore`. Check the *Include prerelease* option if needed.
-       * Note: Check the *Include prerelease* option if needed.
-
-1. **Register SmartComponents in your application**
+1. **Configure the .NET Smart Components in your app**
 
    a. In `Program.cs`, under the comment `// Add services to the container`, add:
 

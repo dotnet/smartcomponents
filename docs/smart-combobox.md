@@ -71,11 +71,7 @@ Semantic matching is achieved using *embeddings*, a way of converting natural-la
 
 #### Reference and register the embedder service
 
-In your **server** project, add a reference to the package `SmartComponents.LocalEmbeddings`:
-
- * Command line: `dotnet add package --prerelease SmartComponents.LocalEmbeddings`
- * Visual Studio: Right-click your project name, choose *Manage NuGet packages...*, and then search for and install `SmartComponents.LocalEmbeddings`.
-   * Note: Check the *Include prerelease* option if needed.
+Add the `SmartComponents.LocalEmbeddings` project from this repo to your solution and then reference it from your server project.
 
 Next, in `Program.cs` under the comment `// Add services to the container`, register it:
 
