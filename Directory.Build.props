@@ -2,9 +2,9 @@
     <PropertyGroup>
         <Authors>Microsoft</Authors>
         <Company>Microsoft</Company>
-        <Description>Experimental, end-to-end AI features for .NET apps. Docs and info at https://github.com/dotnet-smartcomponents/smartcomponents</Description>
+        <Description>Experimental, end-to-end AI features for .NET apps. Docs and info at https://github.com/dotnet/smartcomponents</Description>
         <PackageTags>ai;aspnetcore;blazor;mvc;razor;autocomplete;paste;typeahead;smartcomponents;embedding;</PackageTags>
-        <PackageProjectUrl>https://github.com/dotnet-smartcomponents/smartcomponents</PackageProjectUrl>
+        <PackageProjectUrl>https://github.com/dotnet/smartcomponents</PackageProjectUrl>
 
         <VersionPrefix>0.1.0</VersionPrefix>
         <VersionSuffix Condition="'$(BuildNumber)' == ''">dev</VersionSuffix>
