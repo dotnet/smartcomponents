@@ -10,6 +10,12 @@ With `SmartComponents.LocalEmbeddings`, you can compute embeddings in under a mi
 
 Add the `SmartComponents.LocalEmbeddings` project from this repo to your solution and reference it from your app.
 
+To acquire the local model needed for calculating local embeddings as part of your build, import *build/SmartComponents.LocalEmbeddings.targets* from the `SmartComponents.LocalEmbeddings` project into your app project:
+
+```xml
+<Import Project="<REPO PATH>\src\SmartComponents.LocalEmbeddings\build\SmartComponents.LocalEmbeddings.targets" />
+```
+
 You can now compute embeddings of strings:
 
 ```cs
