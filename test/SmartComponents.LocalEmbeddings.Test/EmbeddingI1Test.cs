@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Text.Json;
@@ -17,7 +17,7 @@ public class EmbeddingI1Test
 
         // Check it's the same length (1 byte per 8 values)
         Assert.Equal(floats.Values.Length / 8, bitRepresentation.Buffer.Length);
-        Assert.Equal(bitRepresentation.Buffer.Length, EmbeddingI1.GetBufferByteLength(embedder.Dimensions));
+        Assert.Equal(bitRepresentation.Buffer.Length, EmbeddingI1.GetBufferByteLength(floats.Values.Length));
 
         // Check the bits match the thresholded floats
         for (var i = 0; i < floats.Values.Length; i++)

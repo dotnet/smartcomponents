@@ -2,9 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Numerics.Tensors;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Embeddings;
+using Microsoft.SemanticKernel.Memory;
 
 namespace SmartComponents.LocalEmbeddings.SemanticKernel.Test;
 
@@ -13,11 +12,7 @@ public class EmbeddingsTest
     [Fact]
     public async Task CanComputeEmbeddings()
     {
-        var builder = Kernel.CreateBuilder();
-        builder.AddLocalTextEmbeddingGeneration();
-        var kernel = builder.Build();
-
-        var embeddingGenerator = kernel.Services.GetRequiredService<ITextEmbeddingGenerationService>();
+        ITextEmbeddingGenerationService embeddingGenerator = new LocalEmbedder();
 
         var cat = await embeddingGenerator.GenerateEmbeddingAsync("cat");
         string[] sentences = [
@@ -53,11 +48,8 @@ public class EmbeddingsTest
     [Fact]
     public async Task IsCaseInsensitiveByDefault()
     {
-        var builder = Kernel.CreateBuilder();
-        builder.AddLocalTextEmbeddingGeneration();
-        var kernel = builder.Build();
+        ITextEmbeddingGenerationService embeddingGenerator = new LocalEmbedder();
 
-        var embeddingGenerator = kernel.Services.GetRequiredService<ITextEmbeddingGenerationService>();
         var catLower = await embeddingGenerator.GenerateEmbeddingAsync("cat");
         var catUpper = await embeddingGenerator.GenerateEmbeddingAsync("CAT");
         var similarity = TensorPrimitives.CosineSimilarity(catLower.Span, catUpper.Span);
@@ -67,14 +59,37 @@ public class EmbeddingsTest
     [Fact]
     public async Task CanBeConfiguredAsCaseSensitive()
     {
-        var builder = Kernel.CreateBuilder();
-        builder.AddLocalTextEmbeddingGeneration(caseSensitive: true);
-        var kernel = builder.Build();
+        ITextEmbeddingGenerationService embeddingGenerator = new LocalEmbedder(caseSensitive: true);
 
-        var embeddingGenerator = kernel.Services.GetRequiredService<ITextEmbeddingGenerationService>();
         var catLower = await embeddingGenerator.GenerateEmbeddingAsync("cat");
         var catUpper = await embeddingGenerator.GenerateEmbeddingAsync("CAT");
         var similarity = TensorPrimitives.CosineSimilarity(catLower.Span, catUpper.Span);
         Assert.NotEqual(1, MathF.Round(similarity, 3));
+    }
+
+    [Fact]
+    public async Task CanBeUsedWithSemanticTextMemory()
+    {
+        // Construct an in-memory SK SemanticTextMemory that uses LocalEmbedder
+        var storage = new VolatileMemoryStore();
+        using var embedder = new LocalEmbedder();
+        var semanticTextMemory = new SemanticTextMemory(storage, embedder);
+
+        // Populate the memory with some information
+        await semanticTextMemory.SaveInformationAsync("animals", "Dog", "id_1");
+        await semanticTextMemory.SaveInformationAsync("animals", "Cat", "id_2");
+        await semanticTextMemory.SaveInformationAsync("animals", "Biscuit", "id_3");
+
+        // Do a nearest-neighbour search
+        MemoryQueryResult? first = null;
+        await foreach (var item in semanticTextMemory.SearchAsync("animals", "Kitten"))
+        {
+            first = item;
+            break;
+        }
+
+        // See that "Cat" was the closest to "Kitten"
+        Assert.Equal("id_2", first?.Metadata.Id);
+        Assert.Equal("Cat", first?.Metadata.Text);
     }
 }

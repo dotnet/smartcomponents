@@ -6,6 +6,18 @@ While you can use an external AI service to compute embeddings, in many cases yo
 
 With `SmartComponents.LocalEmbeddings`, you can compute embeddings in under a millisecond, and perform semantic search over hundreds of thousands of candidates in single-digit milliseconds. However, there are limits. To understand the performance characteristics and when you might benefit from moving to an external vector database, see *Performance* below.
 
+## Relationship to Semantic Kernel
+
+Originally, `SmartComponents.LocalEmbeddings` was a standalone library, but more recently has been changed to be a wrapper around Semantic Kernel's own ability to compute embeddings locally using ONNX runtime.
+
+As such, `SmartComponents.LocalEmbeddings` is now equivalent to using Semantic Kernel's `BertOnnxTextEmbeddingGenerationService`, with the following additional features:
+
+ * **Acquiring the embeddings model automatically at build time**. If you use SK directly, you need to take care of downloading a suitable `.onnx` file for the embeddings model and making it available at runtime. `LocalEmbeddings` handles this for you - see below for details of how to customize it.
+ * **Helper methods for finding the closest match from a set of candidates**. If you use SK directly, you can use `TensorPrimitives.CosineSimilarity` and similar methods to compute similarity between two embeddings, or `SemanticTextMemory.SearchAsync` to find the closest match from a precomputed set of embeddings. In comparison, `LocalEmbeddings` provides `LocalEmbedder.FindClosest` (described below) as an alternative way to search through a set of candidates. Both approaches will perform the same, but are convenient in different circumstances. If you're using SK, it's best to stick with the SK APIs, but if you're not using SK, the `LocalEmbedder.FindClosest` helper may be easier to use.
+ * **Alternative representations for embeddings**. With Semantic Kernel, the convention is to represents embeddings as `Span<float>` or `ReadOnlyMemory<float>`, which are equivalent in space/accuracy to `EmbeddingF32`. Beyond this, `SmartComponents.LocalEmbeddings` offers other representations `EmbeddingI8` and `EmbeddingI1` (described below) which give you different space/accuracy tradeoffs. For example, `EmbeddingI1` takes up only 1/32 of the memory of `EmbeddingF32` or `Span<float>` and can be use in nearest-neighbour searches considerably faster, at the cost of reduced accuracy. This is described in detail below.
+
+**Recommendation**: `SmartComponents.LocalEmbeddings` is now a set of samples of ways you can build further capabilities and conveniences on top of Semantic Kernel's `BertOnnxTextEmbeddingGenerationService`. If you find these useful, you can use them in your own applications. But if SK's APIs are sufficient for your use cases, you should simply use them directly without using `SmartComponents.LocalEmbeddings`.
+
 ## Getting started
 
 Add the `SmartComponents.LocalEmbeddings` project from this repo to your solution and reference it from your app.
@@ -262,20 +274,14 @@ The overall goal for `SmartComponents.LocalEmbeddings` is to make semantic searc
 
 ## Usage with Semantic Kernel
 
-If you want to use this ONNX-based local embeddings generator with [Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/overview/), then you can use the the `SmartComponents.LocalEmbeddings.SemanticKernel` library.
+As mentioned in the introduction to this document, `SmartComponents.LocalEmbeddings` is simply a wrapper around Semantic Kernel's `BertOnnxTextEmbeddingGenerationService`, showing ways to add further conveniences and capabilities.
 
-Add the `SmartComponents.LocalEmbeddings.SemanticKernel` project to your solution and reference it from your app. Then use `AddLocalTextEmbeddingGeneration` to add a local embeddings generator to your `Kernel`:
-
-```cs
-var builder = Kernel.CreateBuilder();
-builder.AddLocalTextEmbeddingGeneration();
-```
-
-You can then generate embeddings in the usual way for Semantic Kernel:
+The `LocalEmbedder` type implements SK's `ITextEmbeddingGenerationService` interface, so it can be used directly with any Semantic Kernel APIs that needs to generate embeddings. For example, when constructing a `SemanticTextMemory`, you can pass an instance of `LocalEmbedder` as the `embeddingGenerator` constructor argument:
 
 ```cs
-var kernel = builder.Build();
-var embeddingGenerator = kernel.Services.GetRequiredService<ITextEmbeddingGenerationService>();
+var storage = new VolatileMemoryStore(); // Requires a reference to Microsoft.SemanticKernel.Plugins.Memory
+using var embedder = new LocalEmbedder();
+var semanticTextMemory = new SemanticTextMemory(storage, embedder);
 
-var embedding = await embeddingGenerator.GenerateEmbeddingAsync("Some text here");
+// ... and now use semanticTextMemory to store and search for items
 ```

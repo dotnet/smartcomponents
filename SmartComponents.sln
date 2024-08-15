@@ -43,15 +43,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartComponents.LocalEmbedd
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmark", "benchmark", "{04F66920-45C0-4410-89ED-F2B5E6223958}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartComponents.LocalEmbeddings.Benchmark", "benchmark\SmartComponents.LocalEmbeddings.Benchmark\SmartComponents.LocalEmbeddings.Benchmark.csproj", "{CB0537FA-53A2-4470-A5CA-423C7D09EFC5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartComponents.LocalEmbeddings.Benchmark", "benchmark\SmartComponents.LocalEmbeddings.Benchmark\SmartComponents.LocalEmbeddings.Benchmark.csproj", "{CB0537FA-53A2-4470-A5CA-423C7D09EFC5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestBlazorServerNet6App", "test\testassets\TestBlazorServerNet6App\TestBlazorServerNet6App.csproj", "{F8C57083-620C-4D8F-8366-60E06593F720}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBlazorServerNet6App", "test\testassets\TestBlazorServerNet6App\TestBlazorServerNet6App.csproj", "{F8C57083-620C-4D8F-8366-60E06593F720}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartComponents.E2ETest.BlazorNet6", "test\SmartComponents.E2ETest.BlazorNet6\SmartComponents.E2ETest.BlazorNet6.csproj", "{7A919A92-A121-420B-9E18-47A60DCDAA69}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartComponents.E2ETest.BlazorNet6", "test\SmartComponents.E2ETest.BlazorNet6\SmartComponents.E2ETest.BlazorNet6.csproj", "{7A919A92-A121-420B-9E18-47A60DCDAA69}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartComponents.LocalEmbeddings.SemanticKernel", "src\SmartComponents.LocalEmbeddings.SemanticKernel\SmartComponents.LocalEmbeddings.SemanticKernel.csproj", "{A31FD69E-2744-4800-AA7E-D734E8737715}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartComponents.LocalEmbeddings.SemanticKernel.Test", "test\SmartComponents.LocalEmbeddings.SemanticKernel.Test\SmartComponents.LocalEmbeddings.SemanticKernel.Test.csproj", "{23031658-179A-4425-82F2-29290DE4F3B2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartComponents.LocalEmbeddings.SemanticKernel.Test", "test\SmartComponents.LocalEmbeddings.SemanticKernel.Test\SmartComponents.LocalEmbeddings.SemanticKernel.Test.csproj", "{23031658-179A-4425-82F2-29290DE4F3B2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -131,10 +129,6 @@ Global
 		{7A919A92-A121-420B-9E18-47A60DCDAA69}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A919A92-A121-420B-9E18-47A60DCDAA69}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A919A92-A121-420B-9E18-47A60DCDAA69}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A31FD69E-2744-4800-AA7E-D734E8737715}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A31FD69E-2744-4800-AA7E-D734E8737715}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A31FD69E-2744-4800-AA7E-D734E8737715}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A31FD69E-2744-4800-AA7E-D734E8737715}.Release|Any CPU.Build.0 = Release|Any CPU
 		{23031658-179A-4425-82F2-29290DE4F3B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{23031658-179A-4425-82F2-29290DE4F3B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{23031658-179A-4425-82F2-29290DE4F3B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -163,7 +157,6 @@ Global
 		{CB0537FA-53A2-4470-A5CA-423C7D09EFC5} = {04F66920-45C0-4410-89ED-F2B5E6223958}
 		{F8C57083-620C-4D8F-8366-60E06593F720} = {7A830C0D-7E18-4674-A729-726085D9C0D1}
 		{7A919A92-A121-420B-9E18-47A60DCDAA69} = {03710CDB-ACD6-4712-95C8-B780EEEFAA29}
-		{A31FD69E-2744-4800-AA7E-D734E8737715} = {B1370349-29FA-49A1-A229-A31F7516A1FF}
 		{23031658-179A-4425-82F2-29290DE4F3B2} = {03710CDB-ACD6-4712-95C8-B780EEEFAA29}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

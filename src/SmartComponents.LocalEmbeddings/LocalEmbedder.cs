@@ -2,33 +2,39 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Numerics.Tensors;
-using System.Runtime.InteropServices;
-using FastBertTokenizer;
-using Microsoft.Extensions.ObjectPool;
-using Microsoft.ML.OnnxRuntime;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.Connectors.Onnx;
+using Microsoft.SemanticKernel.Embeddings;
 
 namespace SmartComponents.LocalEmbeddings;
 
-public sealed partial class LocalEmbedder : IDisposable
+public sealed partial class LocalEmbedder : IDisposable, ITextEmbeddingGenerationService
 {
-    private static readonly ArrayPool<float> _outputBufferPool = ArrayPool<float>.Create();
+    private readonly BertOnnxTextEmbeddingGenerationService _embeddingGenerator;
 
-    private readonly ObjectPool<BertTokenizer> _tokenizersPool;
-    private readonly InferenceSession _onnxSession;
-    private readonly RunOptions _runOptions = new();
+    public IReadOnlyDictionary<string, object?> Attributes => _embeddingGenerator.Attributes;
 
-    public int Dimensions { get; }
-
-    public LocalEmbedder(string modelName = "default", bool caseSensitive = false)
+    public LocalEmbedder(string modelName = "default", bool caseSensitive = false, int maximumTokens = 512)
+        : this(modelName, new BertOnnxOptions { CaseSensitive = caseSensitive, MaximumTokens = maximumTokens })
     {
-        _onnxSession = new InferenceSession(GetFullPathToModelFile(modelName, "model.onnx"));
-        _tokenizersPool = new DefaultObjectPool<BertTokenizer>(new BertTokenizerPoolPolicy(modelName, caseSensitive), maximumRetained: 32);
-        Dimensions = _onnxSession.OutputMetadata.First().Value.Dimensions.Last(); // 384 for the supported models
+    }
+
+    public LocalEmbedder(BertOnnxOptions options)
+        : this("default", options)
+    {
+    }
+
+    public LocalEmbedder(string modelName, BertOnnxOptions options)
+    {
+        _embeddingGenerator = BertOnnxTextEmbeddingGenerationService.Create(
+            GetFullPathToModelFile(modelName, "model.onnx"),
+            vocabPath: GetFullPathToModelFile(modelName, "vocab.txt"),
+            options);
     }
 
     private static string GetFullPathToModelFile(string modelName, string fileName)
@@ -43,126 +49,52 @@ public sealed partial class LocalEmbedder : IDisposable
         return fullPath;
     }
 
-    const int DefaultMaximumTokens = 512;
+    public EmbeddingF32 Embed(string inputText)
+        => Embed<EmbeddingF32>(inputText, null);
 
-    public EmbeddingF32 Embed(string inputText, int maximumTokens = DefaultMaximumTokens)
-        => Embed<EmbeddingF32>(inputText, null, maximumTokens);
+    public Task<EmbeddingF32> EmbedAsync(string inputText)
+        => EmbedAsync<EmbeddingF32>(inputText, null);
 
-    public TEmbedding Embed<TEmbedding>(string inputText, Memory<byte>? outputBuffer = default, int maximumTokens = DefaultMaximumTokens)
+    // This synchronous overload is for back-compat with older versions of LocalEmbeddings. It actually performs the same
+    // at present since the underlying BertOnnxTextEmbeddingGenerationService completes synchronously in all cases (though
+    // that's not guaranteed to remain the same forever).
+    public TEmbedding Embed<TEmbedding>(string inputText, Memory<byte>? outputBuffer = default)
+        where TEmbedding : IEmbedding<TEmbedding>
+        => EmbedAsync<TEmbedding>(inputText, outputBuffer).Result;
+
+    public async Task<TEmbedding> EmbedAsync<TEmbedding>(string inputText, Memory<byte>? outputBuffer = default)
         where TEmbedding : IEmbedding<TEmbedding>
     {
-        var tokenizer = _tokenizersPool.Get();
-        try
-        {
-            // While you might think you could return the tokenizer to the pool immediately after getting the tokens,
-            // you actually can't because it reuses the same memory for the tokens each time. So we have to keep it until
-            // we've finished getting the final result
-            var tokens = tokenizer.Encode(inputText, maximumTokens: maximumTokens);
-
-            // Not all models require all these inputs, and it will fail if you supply inputs that aren't required
-            // So we build the list of inputs dynamically. For example, this is required to run
-            // https://huggingface.co/Xenova/distiluse-base-multilingual-cased-v1 since it doesn't use token_type_ids
-            var inputs = new OrtValue[_onnxSession.InputNames.Count];
-            for (var i = 0; i < inputs.Length; i++)
-            {
-                inputs[i] = _onnxSession.InputNames[i] switch
-                {
-                    "input_ids" => OrtValue.CreateTensorValueFromMemory(
-                        OrtMemoryInfo.DefaultInstance,
-                        MemoryMarshal.AsMemory(tokens.InputIds),
-                        [1L, tokens.InputIds.Length]),
-                    "attention_mask" => OrtValue.CreateTensorValueFromMemory(
-                        OrtMemoryInfo.DefaultInstance,
-                        MemoryMarshal.AsMemory(tokens.AttentionMask),
-                        [1, tokens.AttentionMask.Length]),
-                    "token_type_ids" => OrtValue.CreateTensorValueFromMemory(
-                        OrtMemoryInfo.DefaultInstance,
-                        MemoryMarshal.AsMemory(tokens.TokenTypeIds),
-                        [1, tokens.TokenTypeIds.Length]),
-                    _ => throw new InvalidOperationException($"Unknown input name: {_onnxSession.InputNames[i]}")
-                };
-            }
-
-            // InferenceSession.Run is thread-safe as per https://github.com/microsoft/onnxruntime/issues/114
-            // so there's no need to maintain some kind of pool of sessions
-            using var outputs = _onnxSession.Run(
-                _runOptions,
-                _onnxSession.InputNames,
-                inputs,
-                _onnxSession.OutputNames);
-
-            for (var i = 0; i < inputs.Length; i++)
-            {
-                inputs[i].Dispose();
-            }
-
-            return PoolSum<TEmbedding>(
-                outputs[0].GetTensorDataAsSpan<float>(),
-                Dimensions,
-                outputBuffer ?? new byte[TEmbedding.GetBufferByteLength(Dimensions)]);
-        }
-        finally
-        {
-            _tokenizersPool.Return(tokenizer);
-        }
-    }
-
-    private static TEmbedding PoolSum<TEmbedding>(ReadOnlySpan<float> input, int outputDimensions, Memory<byte> resultBuffer)
-        where TEmbedding : IEmbedding<TEmbedding>
-    {
-        if (input.Length % outputDimensions != 0)
-        {
-            throw new ArgumentException($"Input length ({input.Length}) must be a multiple of output dimensions ({outputDimensions}), but is not", nameof(input));
-        }
-
-        var floatBuffer = _outputBufferPool.Rent(outputDimensions);
-        try
-        {
-            var floatBufferSpan = floatBuffer.AsSpan(0, outputDimensions);
-            for (var pos = 0; pos < input.Length; pos += outputDimensions)
-            {
-                var tokenEmbedding = input.Slice(pos, outputDimensions);
-                TensorPrimitives.Add(floatBufferSpan, tokenEmbedding, floatBufferSpan);
-            }
-
-            return TEmbedding.FromModelOutput(floatBufferSpan, resultBuffer);
-        }
-        finally
-        {
-            _outputBufferPool.Return(floatBuffer, clearArray: true);
-        }
-    }
-
-    public void Dispose()
-    {
-        _runOptions?.Dispose();
-        _onnxSession?.Dispose();
+        var embedding = (await _embeddingGenerator.GenerateEmbeddingsAsync([inputText])).Single();
+        return TEmbedding.FromModelOutput(embedding.Span, outputBuffer ?? new byte[TEmbedding.GetBufferByteLength(embedding.Span.Length)]);
     }
 
     // Note that all the following materialize the result as a list, even though the return type is IEnumerable<T>.
     // We don't want to recompute the embeddings every time the list is enumerated.
 
     public IList<(string Item, EmbeddingF32 Embedding)> EmbedRange(
-        IEnumerable<string> items,
-        int maximumTokens = DefaultMaximumTokens)
-        => items.Select(item => (item, Embed<EmbeddingF32>(item, maximumTokens: maximumTokens))).ToList();
+        IEnumerable<string> items)
+        => items.Select(item => (item, Embed<EmbeddingF32>(item))).ToList();
 
     public IEnumerable<(string Item, TEmbedding Embedding)> EmbedRange<TEmbedding>(
-        IEnumerable<string> items,
-        int maximumTokens = DefaultMaximumTokens)
+        IEnumerable<string> items)
         where TEmbedding : IEmbedding<TEmbedding>
-        => items.Select(item => (item, Embed<TEmbedding>(item, maximumTokens: maximumTokens))).ToList();
+        => items.Select(item => (item, Embed<TEmbedding>(item))).ToList();
 
     public IEnumerable<(TItem Item, EmbeddingF32 Embedding)> EmbedRange<TItem>(
         IEnumerable<TItem> items,
-        Func<TItem, string> textRepresentation,
-        int maximumTokens = DefaultMaximumTokens)
-        => items.Select(item => (item, Embed<EmbeddingF32>(textRepresentation(item), maximumTokens: maximumTokens))).ToList();
+        Func<TItem, string> textRepresentation)
+        => items.Select(item => (item, Embed<EmbeddingF32>(textRepresentation(item)))).ToList();
 
     public IEnumerable<(TItem Item, TEmbedding Embedding)> EmbedRange<TItem, TEmbedding>(
         IEnumerable<TItem> items,
-        Func<TItem, string> textRepresentation,
-        int maximumTokens = DefaultMaximumTokens)
+        Func<TItem, string> textRepresentation)
         where TEmbedding : IEmbedding<TEmbedding>
-        => items.Select(item => (item, Embed<TEmbedding>(textRepresentation(item), maximumTokens: maximumTokens))).ToList();
+        => items.Select(item => (item, Embed<TEmbedding>(textRepresentation(item)))).ToList();
+
+    public void Dispose()
+        => _embeddingGenerator.Dispose();
+
+    public Task<IList<ReadOnlyMemory<float>>> GenerateEmbeddingsAsync(IList<string> data, Kernel? kernel = null, CancellationToken cancellationToken = default)
+        => _embeddingGenerator.GenerateEmbeddingsAsync(data, kernel, cancellationToken);
 }
