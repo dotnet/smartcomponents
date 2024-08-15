@@ -13,7 +13,7 @@ public class EmbeddingF32Test
     public void CanLoadModel()
     {
         using var embedder = new LocalEmbedder();
-        Assert.Equal(384, embedder.Dimensions);
+        Assert.Equal(384, embedder.Embed("test").Values.Length);
     }
 
     [Fact]
@@ -24,9 +24,8 @@ public class EmbeddingF32Test
         {
             var actualEmbedding = embedder.Embed(text);
             AssertCosineEqual(expectedEmbedding, actualEmbedding.Values);
-            Assert.Equal(actualEmbedding.Values.Length, embedder.Dimensions);
             Assert.Equal(actualEmbedding.Values.Length * 4, actualEmbedding.Buffer.Length); // 4 bytes per value
-            Assert.Equal(actualEmbedding.Buffer.Length, EmbeddingF32.GetBufferByteLength(embedder.Dimensions));
+            Assert.Equal(actualEmbedding.Buffer.Length, EmbeddingF32.GetBufferByteLength(actualEmbedding.Values.Length));
         }
     }
 
