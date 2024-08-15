@@ -1,6 +1,8 @@
 # Configure the OpenAI backend
 
-Do the following in your **server** project:
+The .NET Smart components can be used with a variety of AI backends that comply with the [OpenAI API schema](https://github.com/openai/openai-openapi).
+
+To configure your **server project** to use an OpenAI compliant backend:
 
 * Add the `SmartComponents.Inference.OpenAI` project from this repo to your solution and reference it from your server project.
 * In `Program.cs`, update your call to `AddSmartComponents` as follows:
@@ -10,7 +12,11 @@ Do the following in your **server** project:
         .WithInferenceBackend<OpenAIInferenceBackend>();
     ```
 
-* Configure API keys by adding a block similar to the following at the top level inside `appsettings.Development.json`:
+## Using Azure OpenAI or OpenAI endpoints
+
+* Configure API keys by adding the following configuration values:
+
+    > WARNING: Do not store the API key in **appsettings.json** or similar files that may get added to source control, as this may expose your API key to others. Instead, follow [best practices for safe handling of secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets) during development and in production. Consider configuring the API key using the [Secret Manager](https://learn.microsoft.com/aspnet/core/security/app-secrets#secret-manager) tool during development or use the `SmartComponents__ApiKey` environment variable in a secure environment.
 
     ```json
     "SmartComponents": {
@@ -22,7 +28,7 @@ Do the following in your **server** project:
     }
     ```
 
-    * To use Azure OpenAI, first [deploy an Azure OpenAI Service](https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/create-resource), then values for `ApiKey`, `DeploymentName`, and `Endpoint` will all be provided to you.
+    * To use Azure OpenAI, first [deploy an Azure OpenAI Service resource and model](https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/create-resource), then values for `ApiKey`, `DeploymentName`, and `Endpoint` will all be provided to you.
 
     * Or, to use OpenAI, [create an API key](https://platform.openai.com/api-keys). The value for `DeploymentName` is the model you wish to use (e.g., `gpt-3.5-turbo`, `gpt-4`, etc.). Remove the `Endpoint` line from configuration entirely.
 
