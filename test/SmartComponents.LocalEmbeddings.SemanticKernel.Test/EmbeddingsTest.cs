@@ -3,6 +3,7 @@
 
 using System.Numerics.Tensors;
 using Microsoft.SemanticKernel.Embeddings;
+using Microsoft.SemanticKernel.Memory;
 
 namespace SmartComponents.LocalEmbeddings.SemanticKernel.Test;
 
@@ -64,5 +65,31 @@ public class EmbeddingsTest
         var catUpper = await embeddingGenerator.GenerateEmbeddingAsync("CAT");
         var similarity = TensorPrimitives.CosineSimilarity(catLower.Span, catUpper.Span);
         Assert.NotEqual(1, MathF.Round(similarity, 3));
+    }
+
+    [Fact]
+    public async Task CanBeUsedWithSemanticTextMemory()
+    {
+        // Construct an in-memory SK SemanticTextMemory that uses LocalEmbedder
+        var storage = new VolatileMemoryStore();
+        using var embedder = new LocalEmbedder();
+        var semanticTextMemory = new SemanticTextMemory(storage, embedder);
+
+        // Populate the memory with some information
+        await semanticTextMemory.SaveInformationAsync("animals", "Dog", "id_1");
+        await semanticTextMemory.SaveInformationAsync("animals", "Cat", "id_2");
+        await semanticTextMemory.SaveInformationAsync("animals", "Biscuit", "id_3");
+
+        // Do a nearest-neighbour search
+        MemoryQueryResult? first = null;
+        await foreach (var item in semanticTextMemory.SearchAsync("animals", "Kitten"))
+        {
+            first = item;
+            break;
+        }
+
+        // See that "Cat" was the closest to "Kitten"
+        Assert.Equal("id_2", first?.Metadata.Id);
+        Assert.Equal("Cat", first?.Metadata.Text);
     }
 }
