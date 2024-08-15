@@ -2,7 +2,7 @@
 
 Do the following in your **server** project:
 
-* Install the package `SmartComponents.Inference.OpenAI`
+* Add the `SmartComponents.Inference.OpenAI` project from this repo to your solution and reference it from your server project.
 * In `Program.cs`, update your call to `AddSmartComponents` as follows:
 
     ```cs

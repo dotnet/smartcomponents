@@ -7,17 +7,13 @@
 
    **Note**: .NET Smart Components work equally in any render mode (e.g., Static SSR, Server, or WebAssembly) but you do need to have an ASP.NET Core server, so you cannot use a Blazor WebAssembly Standalone App hosted on a static file server. This is purely because you need a server to hold your API keys securely.
 
-1. **Install packages**
+1. **Reference the .NET Smart Components from your app**
 
-   * In your **server** project, install the NuGet package `SmartComponents.AspNetCore`.
+   * If you haven't already, clone this repo locally.
+   * Add the `SmartComponents.AspNetCore` project from this repo to your solution and reference it from your **server** project.
+   * If you also have a **WebAssembly** client project, add the `SmartComponents.AspNetCore.Components` project from this repo to your solution and reference it from your client project. This is not required if you only have a server project.
 
-     * Command line: `dotnet add package --prerelease SmartComponents.AspNetCore`
-     * Visual Studio: Right-click your project name, choose *Manage NuGet packages...*, and then search for and install `SmartComponents.AspNetCore`.
-       * Note: Check the *Include prerelease* option if needed.
-
-   * If you also have a **WebAssembly** project, install the NuGet package `SmartComponents.AspNetCore.Components` into it. This is not required if you only have a server project.
-
-1. **Register SmartComponents in your application**
+1. **Configure the .NET Smart Components in your app**
 
    In your server's `Program.cs`, under the comment `// Add services to the container`, add:
 
