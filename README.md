@@ -4,7 +4,11 @@
 
 You don't have to spend weeks of dev time redesigning your UX or researching machine learning and prompt engineering. .NET Smart Components are prebuilt end-to-end AI features that you can drop into your existing UIs to upgrade them, truly making your app more productive for your end users.
 
-The .NET Smart Components are provided as sample implementations for ASP.NET Core apps targeting .NET 6 or later:
+The .NET Smart Components are provided as sample implementations that we hope will inspire a rich ecosystem of AI-powered component libraries for .NET developers to use.
+
+The easist way to see the .NET Smart Components in action, is to [run the prebuilt samples](#running-the-samples).
+
+You can try out the .NET Smart Components in your own ASP.NET Core apps targeting .NET 6 or later with either:
 
 * **Blazor** (see [Getting started with .NET Smart Components and Blazor](docs/getting-started-blazor.md))
 * **MVC / Razor Pages** (see [Getting started with .NET Smart Components and MVC/Razor Pages](docs/getting-started-mvc-razor-pages.md))
