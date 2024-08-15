@@ -5,14 +5,19 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.Onnx;
+using Microsoft.SemanticKernel.Embeddings;
 
 namespace SmartComponents.LocalEmbeddings;
 
-public sealed partial class LocalEmbedder : IDisposable
+public sealed partial class LocalEmbedder : IDisposable, ITextEmbeddingGenerationService
 {
     private readonly BertOnnxTextEmbeddingGenerationService _embeddingGenerator;
+
+    public IReadOnlyDictionary<string, object?> Attributes => _embeddingGenerator.Attributes;
 
     public LocalEmbedder(string modelName = "default", bool caseSensitive = false, int maximumTokens = 512)
         : this(modelName, new BertOnnxOptions { CaseSensitive = caseSensitive, MaximumTokens = maximumTokens })
@@ -89,4 +94,7 @@ public sealed partial class LocalEmbedder : IDisposable
 
     public void Dispose()
         => _embeddingGenerator.Dispose();
+
+    public Task<IList<ReadOnlyMemory<float>>> GenerateEmbeddingsAsync(IList<string> data, Kernel? kernel = null, CancellationToken cancellationToken = default)
+        => _embeddingGenerator.GenerateEmbeddingsAsync(data, kernel, cancellationToken);
 }

@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Numerics.Tensors;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Embeddings;
 
 namespace SmartComponents.LocalEmbeddings.SemanticKernel.Test;
@@ -13,11 +11,7 @@ public class EmbeddingsTest
     [Fact]
     public async Task CanComputeEmbeddings()
     {
-        var builder = Kernel.CreateBuilder();
-        builder.AddLocalTextEmbeddingGeneration();
-        var kernel = builder.Build();
-
-        var embeddingGenerator = kernel.Services.GetRequiredService<ITextEmbeddingGenerationService>();
+        ITextEmbeddingGenerationService embeddingGenerator = new LocalEmbedder();
 
         var cat = await embeddingGenerator.GenerateEmbeddingAsync("cat");
         string[] sentences = [
@@ -53,11 +47,8 @@ public class EmbeddingsTest
     [Fact]
     public async Task IsCaseInsensitiveByDefault()
     {
-        var builder = Kernel.CreateBuilder();
-        builder.AddLocalTextEmbeddingGeneration();
-        var kernel = builder.Build();
+        ITextEmbeddingGenerationService embeddingGenerator = new LocalEmbedder();
 
-        var embeddingGenerator = kernel.Services.GetRequiredService<ITextEmbeddingGenerationService>();
         var catLower = await embeddingGenerator.GenerateEmbeddingAsync("cat");
         var catUpper = await embeddingGenerator.GenerateEmbeddingAsync("CAT");
         var similarity = TensorPrimitives.CosineSimilarity(catLower.Span, catUpper.Span);
@@ -67,11 +58,8 @@ public class EmbeddingsTest
     [Fact]
     public async Task CanBeConfiguredAsCaseSensitive()
     {
-        var builder = Kernel.CreateBuilder();
-        builder.AddLocalTextEmbeddingGeneration(caseSensitive: true);
-        var kernel = builder.Build();
+        ITextEmbeddingGenerationService embeddingGenerator = new LocalEmbedder(caseSensitive: true);
 
-        var embeddingGenerator = kernel.Services.GetRequiredService<ITextEmbeddingGenerationService>();
         var catLower = await embeddingGenerator.GenerateEmbeddingAsync("cat");
         var catUpper = await embeddingGenerator.GenerateEmbeddingAsync("CAT");
         var similarity = TensorPrimitives.CosineSimilarity(catLower.Span, catUpper.Span);
