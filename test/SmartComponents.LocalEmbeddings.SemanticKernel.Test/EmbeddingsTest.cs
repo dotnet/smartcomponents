@@ -42,7 +42,7 @@ public class EmbeddingsTest
             "Wolf",
             "Elephants are here",
             "Grimsby Town FC",
-        ], sentencesRankedBySimilarity);
+        ], sentencesRankedBySimilarity.AsSpan());
     }
 
     [Fact]

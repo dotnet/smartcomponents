@@ -12,7 +12,7 @@
     <ItemGroup>
         <SupportedPlatform Include="browser" />
         <PackageReference Include="Microsoft.AspNetCore.Components.Web">
-            <VersionOverride Condition="'$(TargetFramework)' != 'net6.0'">8.0.0</VersionOverride>
+            <VersionOverride Condition="'$(TargetFramework)' != 'net6.0'">8.0.8</VersionOverride>
         </PackageReference>
         <ProjectReference Include="..\SmartComponents.StaticAssets\SmartComponents.StaticAssets.csproj" PrivateAssets="All" />
     </ItemGroup>
