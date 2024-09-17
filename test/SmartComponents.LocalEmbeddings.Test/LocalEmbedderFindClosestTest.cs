@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 namespace SmartComponents.LocalEmbeddings.Test;
@@ -47,7 +47,7 @@ public class LocalEmbedderFindClosestTest
         var closest = LocalEmbedder.FindClosest(embedder.Embed("coffee"), embeddedCandidates, 2, minSimilarity: 0.95f);
         var closestWithScore = LocalEmbedder.FindClosestWithScore(embedder.Embed("coffee"), embeddedCandidates, 2, minSimilarity: 0.95f);
 
-        Assert.Equal(["Coffee"], closest);
+        Assert.Equal(["Coffee"], closest.AsSpan());
         Assert.Collection(closestWithScore,
             result => { Assert.Equal("Coffee", result.Item); Assert.InRange(result.Similarity, 0.95f, 1.01f); });
     }

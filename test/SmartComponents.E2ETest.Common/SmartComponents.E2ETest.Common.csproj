@@ -10,7 +10,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing">
-            <VersionOverride Condition="'$(TargetFramework)' != 'net6.0'">8.0.1</VersionOverride>
+            <VersionOverride Condition="'$(TargetFramework)' != 'net6.0'">8.0.8</VersionOverride>
         </PackageReference>
         <PackageReference Include="Microsoft.Playwright" />
         <PackageReference Include="xunit" />
