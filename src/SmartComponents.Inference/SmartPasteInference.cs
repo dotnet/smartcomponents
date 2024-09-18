@@ -12,7 +12,7 @@ namespace SmartComponents.Inference;
 
 public class SmartPasteInference
 {
-    private readonly static JsonSerializerOptions jsonSerializerOptions
+    private static readonly JsonSerializerOptions jsonSerializerOptions
         = new JsonSerializerOptions(JsonSerializerDefaults.Web);
 
     public class SmartPasteRequestData
