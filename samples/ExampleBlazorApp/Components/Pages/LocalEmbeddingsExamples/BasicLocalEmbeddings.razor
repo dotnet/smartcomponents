@@ -1,12 +1,12 @@
 ﻿@using SmartComponents.LocalEmbeddings
-@inherits StatefulPageBase<BasicLocalEmbeddings.State>
+@rendermode InteractiveServer
 @inject LocalEmbedder Embedder
+@inject IJSRuntime JS
+@implements IAsyncDisposable
 
-<form class="default-form rounded-md bg-gray-200 p-6 shadow-xl mb-10" method="post" @formname="embedding" @onsubmit="@ComputeEmbedding">
-    <AntiforgeryToken />
-    @HiddenPageState
+<form class="default-form rounded-md bg-gray-200 p-6 shadow-xl mb-10" @onsubmit="@ComputeEmbeddingAsync">
     <div class="flex gap-6 items-center">
-        <input autofocus class="flex-grow" name="@(nameof(TextToEmbed))" placeholder="Enter any string here" required />
+        <input autofocus class="flex-grow" @bind-value="@TextToEmbed" placeholder="Enter any string here" required />
         <button class="default-button" type="submit">Embed</button>
     </div>
 </form>
@@ -16,7 +16,7 @@
     <h2 class="font-semibold mb-4">Similarity to "@PageState.LatestText":</h2>
 
     <ul class="pl-3">
-        @foreach (var text in GetRankedTexts())
+        @foreach (var text in _rankedTexts)
         {
             <li>
                 <span class="font-semibold text-blue-600 inline-block w-12 mr-2 text-right">@MathF.Round(text.Similarity * 100)%</span>
@@ -27,33 +27,64 @@
 }
 
 @code {
+    private ValueTask<IJSObjectReference> _moduleTask;
+    private State PageState { get; } = new();
+    private List<(string Text, float Similarity)> _rankedTexts = new();
+
     [SupplyParameterFromForm]
     public string? TextToEmbed { get; set; }
 
-    private void ComputeEmbedding()
+    private async Task ComputeEmbeddingAsync()
     {
         if (string.IsNullOrEmpty(TextToEmbed))
         {
             return;
         }
 
-        var result = Embedder.Embed<EmbeddingI8>(TextToEmbed);
+        var result = await (await _moduleTask).InvokeAsync<IJSObjectReference>("embedText", TextToEmbed);
         PageState.LatestText = TextToEmbed;
         PageState.TextsWithEmbeddings[TextToEmbed] = result;
+        TextToEmbed = null;
+
+        await UpdateRankedTextsAsync();
     }
 
-    private IEnumerable<(string Text, float Similarity)> GetRankedTexts()
+    private async Task UpdateRankedTextsAsync()
     {
+        var module = await _moduleTask;
         var latestEmbedding = PageState.TextsWithEmbeddings[PageState.LatestText!];
-        return PageState.TextsWithEmbeddings
-            .Select(item => (Text: item.Key, Similarity: LocalEmbedder.Similarity(latestEmbedding, item.Value)))
-            .OrderByDescending(x => x.Similarity)
-            .ToArray();
+
+        _rankedTexts = new();
+        foreach (var item in PageState.TextsWithEmbeddings)
+        {
+            var similarity = await module.InvokeAsync<float>("cosineSimilarity", latestEmbedding, item.Value);
+            _rankedTexts.Add((item.Key, similarity));
+        }
+
+        _rankedTexts.Sort((a, b) => a.Similarity < b.Similarity ? 1 : -1);
     }
 
     public class State
     {
         public string? LatestText { get; set; }
-        public Dictionary<string, EmbeddingI8> TextsWithEmbeddings { get; set; } = new();
+        public Dictionary<string, IJSObjectReference> TextsWithEmbeddings { get; set; } = new();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _moduleTask = JS.InvokeAsync<IJSObjectReference>("import", "./embedding.js");
+            await _moduleTask;
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if ((await _moduleTask) is {} module)
+        {
+            await module.DisposeAsync();
+            await Task.WhenAll(PageState.TextsWithEmbeddings.Values.Select(async v => await v.DisposeAsync()));
+        }
     }
 }
