@@ -2,14 +2,25 @@
 
 <PageTitle>Smart ComboBox</PageTitle>
 
-<form class="default-form rounded-md bg-gray-200 p-6 shadow-xl mb-12 grid gap-12 md:grid-cols-3">
+<p class="p-4">
+    <span class="font-semibold">Smart ComboBox</span> is an upgrade for a regular combo box. Except instead of just offering
+    substring matches, it offers <span class="font-semibold">semantic matches</span>.
+</p>
+
+<form class="default-form rounded-md bg-gray-200 p-6 shadow-xl mb-12 grid gap-12 md:grid-cols-2">
     <div class="floating-placeholder" data-permanent="combo-box-example">
         <SmartComboBox Url="api/suggestions/expense-category"
             id="expense-category" @bind-Value="@expenseCategory" placeholder=" " />
         <label for="expense-category">Expense category</label>
     </div>
+    <div class="floating-placeholder" data-permanent="combo-box-example">
+        <SmartComboBox Url="api/suggestions/issue-label"
+                       id="issue-label" @bind-Value="@issueLabel" placeholder=" " />
+        <label for="issue-label">Issue label</label>
+    </div>
 </form>
 
 @code {
     string? expenseCategory;
+    string? issueLabel;
 }
