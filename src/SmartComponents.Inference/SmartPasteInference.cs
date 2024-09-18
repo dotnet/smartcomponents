@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -51,15 +51,12 @@ public class SmartPasteInference
         var systemMessage = @$"
 Current date: {DateTime.Today.ToString("D", CultureInfo.InvariantCulture)}
 
-Each response line matches the following format:
-FIELD identifier^^^value
+Respond with a JSON object with ONLY the following keys. For each key, infer a value from USER_DATA:
 
-Give a response with the following lines only, with values inferred from USER_DATA:
 {ToFieldOutputExamples(data.FormFields!)}
-END_RESPONSE
 
 Do not explain how the values were determined.
-For fields without any corresponding information in USER_DATA, use value value NO_DATA.";
+For fields without any corresponding information in USER_DATA, use the value null.";
 
         var prompt = @$"
 USER_DATA: {data.ClipboardContents}
@@ -76,7 +73,7 @@ USER_DATA: {data.ClipboardContents}
             MaxTokens = 2000,
             FrequencyPenalty = 0.1f,
             PresencePenalty = 0,
-            StopSequences = ["END_RESPONSE"],
+            RespondJson = true,
         };
     }
 
@@ -90,11 +87,21 @@ USER_DATA: {data.ClipboardContents}
     private static string ToFieldOutputExamples(FormField[] fields)
     {
         var sb = new StringBuilder();
+        sb.AppendLine("{");
 
+        var firstField = true;
         foreach (var field in fields)
         {
-            sb.AppendLine();
-            sb.Append($"FIELD {field.Identifier}^^^");
+            if (firstField)
+            {
+                firstField = false;
+            }
+            else
+            {
+                sb.AppendLine(",");
+            }
+
+            sb.Append($"  \"{field.Identifier}\": /* ");
 
             if (!string.IsNullOrEmpty(field.Description))
             {
@@ -123,8 +130,12 @@ USER_DATA: {data.ClipboardContents}
             {
                 sb.Append($" of type {field.Type}");
             }
+
+            sb.Append(" */");
         }
 
+        sb.AppendLine();
+        sb.AppendLine("}");
         return sb.ToString();
     }
 }

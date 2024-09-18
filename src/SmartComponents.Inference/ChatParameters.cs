@@ -14,6 +14,7 @@ public class ChatParameters
     public float? FrequencyPenalty { get; set; }
     public float? PresencePenalty { get; set; }
     public IList<string>? StopSequences { get; set; }
+    public bool RespondJson { get; set; }
 }
 
 public class ChatMessage(ChatMessageRole role, string text)
