@@ -33,6 +33,7 @@ public class OpenAIInferenceBackend(IConfiguration configuration)
             MaxTokens = options.MaxTokens ?? 200,
             FrequencyPenalty = options.FrequencyPenalty ?? 0,
             PresencePenalty = options.PresencePenalty ?? 0,
+            ResponseFormat = options.RespondJson ? ChatCompletionsResponseFormat.JsonObject : ChatCompletionsResponseFormat.Text,
         };
 
         foreach (var message in options.Messages ?? Enumerable.Empty<ChatMessage>())

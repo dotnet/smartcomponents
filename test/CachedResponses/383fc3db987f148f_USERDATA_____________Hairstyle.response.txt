@@ -1,0 +1,7 @@
+{
+  "explicitly-annotated": "Cairns",
+  "labelled-field": "Sad Iron",
+  "inferred-from-nearby-text": "Tonsure",
+  "shoe-size": "55",
+  "philosophy": "Nihilism"
+}

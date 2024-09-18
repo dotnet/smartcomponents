@@ -1,0 +1,9 @@
+{
+  "movie.title": "AI: Artificial Intelligence",
+  "movie.release_year": 2001,
+  "movie.description": "A sci-fi movie about a robot boy who desperately wants to be human. The tragedy at the heart of the film is star Haley Joel Osment’s immortality. He was designed as a child, but outlives everyone he ever loves.",
+  "movie_genre": "Sci-fi",
+  "movie.for_kids": false,
+  "movie.can_stream": true,
+  "movie.starring": "Haley Joel Osment"
+}

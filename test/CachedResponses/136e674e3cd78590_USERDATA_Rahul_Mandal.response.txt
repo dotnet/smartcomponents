@@ -1,3 +1,0 @@
-FIELD firstname^^^Rahul
-FIELD lastname^^^Mandal
-FIELD unrelated^^^NO_DATA

@@ -42,33 +42,21 @@ async function performSmartPaste(button: HTMLButtonElement) {
 }
 
 function populateForm(form: HTMLFormElement, formConfig: FieldConfig[], responseText: string) {
-    const resultData = {};
-    const prefix = 'FIELD ';
-    let prevFieldKey: string | null = null;
-    responseText.split('\n').forEach(line => {
-        if (line.startsWith(prefix)) {
-            const keyValuePair = line.substring(prefix.length).split('^^^');
-            if (keyValuePair.length === 2) {
-                resultData[keyValuePair[0]] = keyValuePair[1];
-                prevFieldKey = keyValuePair[0];
-            }
-        } else if (prevFieldKey) {
-            resultData[prevFieldKey] += '\n' + line;
-        }
-    });
+    let resultData: any;
+    try {
+        resultData = JSON.parse(responseText);
+    } catch {
+        return;
+    }
 
     formConfig.forEach(field => {
+        // For missing fields, it's usually better to leave the existing field data in place, since there
+        // might be useful values in unrelated fields. It would be nice if the inference could conclusively
+        // determine cases when a field should be cleared, but in most cases it can't distinguish "no
+        // information available" from "the value should definitely be blanked out".
         let value = resultData[field.identifier];
-        if (value !== undefined) {
-            value = value.trim();
-            if (value === 'NO_DATA') {
-                // It's usually better to leave the existing field data in place, since there might be useful
-                // values in unrelated fields. It would be nice if the inference could conclusively determine
-                // cases when a field should be cleared, but in most cases it can't distinguish "no information
-                // available" from "the value should definitely be blanked out".
-                return;
-            }
-
+        if (value !== undefined && value !== null) {
+            value = value.toString().trim();
             if (field.element instanceof HTMLInputElement && field.element.type === 'radio') {
                 // Radio is a bit more complex than the others as it's not just a single form element
                 // We have to find the one corresponding to the new value, which in turn depends on
