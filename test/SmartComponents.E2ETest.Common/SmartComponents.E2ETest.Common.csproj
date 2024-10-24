@@ -14,6 +14,7 @@
         </PackageReference>
         <PackageReference Include="Microsoft.Playwright" />
         <PackageReference Include="xunit" />
+        <PackageReference Include="System.Text.Json" />
 		    <PackageReference Include="coverlet.collector">
 			      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			      <PrivateAssets>all</PrivateAssets>
