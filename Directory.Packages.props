@@ -15,7 +15,7 @@
     <PackageVersion Include="Microsoft.SemanticKernel.Plugins.Memory" Version="1.18.0-alpha" />
     <PackageVersion Include="System.Numerics.Tensors" Version="8.0.0" />
     <PackageVersion Include="System.Runtime.Caching" Version="8.0.0" />
-    <PackageVersion Include="System.Text.Json" Version="8.0.4" />
+    <PackageVersion Include="System.Text.Json" Version="8.0.5" />
     <!-- Tests -->
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />

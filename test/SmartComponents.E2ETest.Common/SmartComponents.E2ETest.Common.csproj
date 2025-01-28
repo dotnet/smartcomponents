@@ -12,6 +12,9 @@
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing">
             <VersionOverride Condition="'$(TargetFramework)' != 'net6.0'">8.0.8</VersionOverride>
         </PackageReference>
+      <PackageReference Include="System.Text.Json">
+        <VersionOverride Condition="'$(TargetFramework)' == 'net6.0'">6.0.11</VersionOverride>
+      </PackageReference>
         <PackageReference Include="Microsoft.Playwright" />
         <PackageReference Include="xunit" />
 		    <PackageReference Include="coverlet.collector">
